@@ -1,0 +1,24 @@
+.cjs-pn-tag-active{
+    font-size:13px;
+    border: 1px solid skyblue;
+    /*padding: 4px 10px 4px 10px;*/
+    /*border-radius: 8px 8px 0px 0px;*/
+    background-color: skyblue;
+    /*outline: none;*/
+}
+
+.cjs-pn-tag{
+    font-size:13px;
+    border: 1px solid #ccc;
+    /*padding: 4px 10px 4px 10px;*/
+    /*border-radius: 8px 8px 0px 0px;*/
+    background-color: white;
+}
+
+.cjs-pn-div{
+    font-size:14px;
+    border: 1px solid #ccc;
+    /*background: greenyellow;*/
+    /*border-bottom: 1px solid #ccc;*/
+    /*padding: 8px;*/
+}

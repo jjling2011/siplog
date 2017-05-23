@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=640, maximum-scale=1">
+        <script type="text/javascript" src="js/jquery.min.js"></script> 
+        <link rel="stylesheet" href="css/bootstrap.min.css" >
+        <link rel="stylesheet" href="css/cardjs.css?t=20170518001">
+        <link rel="stylesheet" href="css/msite.css?t=20170518001">
+        <script type="text/javascript" src="js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="js/card.js?t=20170518001"></script>
+        <script type="text/javascript" src="js/msite.js?t=20170518001"></script>
+        <script type="text/javascript" src="js/mustache.js"></script>
+    </head>
+    <body >
+        <div id="page-wrap">
+            <div id="banner" >banner</div>
+            <div id="main-page-container"></div>
+            <div id="foot-note">foot note</div>
+        </div>
+        <template id="main-page">
+            <div id="{{ids.0}}">main page</div>
+        </template>
+        <template id="main-card">
+            <table class="card-wrap">
+                <tr>
+                    <td id="{{ids.0}}" class="card-left"></td>
+                    <td class="card-right"><ul>{{#right}}<li>{{.}}</li>{{/right}}</ul></td>
+                </tr>
+            </table>
+        </template>
+        <script>
+            var m=ms.o.MPanel.cNew("main-page-container").show();
+        </script>
+    </body>
+</html>
