@@ -10,6 +10,16 @@ include '../config/settings.php';
 
 class CommLib {
 
+    public static function rand_str($length = 48) {
+        $result = uniqid(date('YmdHis', time()));
+        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $max = strlen($chars) - 1;
+        for ($i = strlen($result); $i < $length; $i++) {
+            $result .= $chars[rand(0, $max)];
+        }
+        return substr($result, 0, $length);
+    }
+
     public static function get_ip() {
         $ip = false;
         if (!empty(getenv('HTTP_CLIENT_IP'))) {
@@ -38,10 +48,19 @@ class CommLib {
         return ($db);
     }
 
-    public static function query($sql) {
+    public static function query($sql, $type = null, $param = null) {
+        // e.g. CommLib::query('select * from data where ip=? and port=?','s',[&$ip,&$port]);
         $db = CommLib::open_db();
-        $db->query($sql);
-        $db->close();
+        $stmt = $db->prepare($sql);
+        if (is_string($type) && is_array($param) && count($param) > 0) {
+            call_user_func_array(array($stmt, 'bind_param'), array_merge(array($type), $param));
+        }
+        $stat=$stmt->execute();
+        $stmt->store_result();
+        $count = $stmt->num_rows;
+        $stmt->free_result();
+        //error_log($count);
+        return (['status'=>$stat,'count'=>$count]);
     }
 
     public static function utc_to_local($t) {
@@ -59,70 +78,42 @@ class CommLib {
         $ip = CommLib::get_ip();
         $db = CommLib::open_db();
         $sql = 'select timestampdiff(second,stamp,utc_timestamp()) as dt,fail from ip where ip=?';
-        $result = $db->prepare($sql);
-        $result->bind_param('s', $ip);
-        $result->execute();
-        if ($result->num_rows > 0) {
+        $stmt = $db->prepare($sql);
+        $stmt->bind_param('s', $ip);
+        $stmt->execute();
+        $stmt->store_result();
+        if ($stmt->num_rows > 0) {
             $dt = $fail = null;
-            $result->bind_result($dt, $fail);
-            $result->fetch();
-            if ($fail < 10) {
-                CommLib::increase_fail($ip);
+            $stmt->bind_result($dt, $fail);
+            $stmt->fetch();
+            $stmt->free_result();
+            if ($fail < DDOS) {
+                //error_log('check_ddos: increase!');
+                CommLib::query('update ip set fail=fail+1 where ip=?', 's', [&$ip]);
             } else {
-                if ($dt > 15) {
-                    CommLib::clear_fail($ip);
+                if ($dt > 30) {
+                    //error_log('check_ddos: clear');
+                    CommLib::query('update ip set fail=0,stamp=utc_timestamp() where ip=?', 's', [&$ip]);
                 } else {
+                    error_log("check_ddos: true ip=$ip");
                     return(true);
                 }
             }
         } else {
-            CommLib::insert_fail($ip);
+            //error_log('check_ddos: insert');
+            CommLib::query('insert into ip set fail=0,stamp=utc_timestamp(),ip=?', 's', [&$ip]);
         }
-        $result->free();
         return(false);
-    }
-
-    private static function insert_fail($raw_ip) {
-        $ip = substr($raw_ip, 0, 32);
-        $db = CommLib::open_db();
-        $sql = 'insert into ip set fail=0,stamp=utc_timestamp(),ip=?';
-        $stmt = $db->prepare($sql);
-        $stmt->bind_param('s', $ip);
-        $stmt->excute();
-        $stmt->free();
-    }
-
-    private static function clear_fail($raw_ip) {
-        $ip = substr($raw_ip, 0, 32);
-        $db = CommLib::open_db();
-        $sql = 'update ip set fail=0,stamp=utc_timestamp() where ip=?';
-        $stmt = $db->prepare($sql);
-        $stmt->bind_param('s', $ip);
-        $stmt->excute();
-        $stmt->free();
-    }
-
-    private static function increase_fail($raw_ip) {
-        $ip = substr($raw_ip, 0, 32);
-        $db = CommLib::open_db();
-        $sql = 'update ip set fail=fail+1 where ip=?';
-        $stmt = $db->prepare($sql);
-        $stmt->bind_param('s', $ip);
-        $stmt->excute();
-        $stmt->free();
     }
 
 }
 
 class Serv {
 
-    private $fn;
+    protected $fn;
 
-    function __construct($f) {
+    function __construct() {
         $this->fn = [];
-        if (is_array($f)) {
-            $this->fn = $f;
-        }
     }
 
     protected static function ok($data) {
@@ -134,7 +125,7 @@ class Serv {
     protected static function fail($msg) {
         echo(json_encode(array(
             'status' => false,
-            'data' => (string) $msg)));
+            'msg' => (string) $msg)));
     }
 
     public function reply() {
