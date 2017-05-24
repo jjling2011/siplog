@@ -9,17 +9,31 @@
 
 require_once 'comm.php';
 
-class UserMgr extends Serv {
+class UserMgr extends Reply {
 
     // public functions
     function __construct() {
         // 这两个函数可以通过ajax调用。
         parent::__construct();
-        $this->fn=array_merge($this->fn,['add_user','login']);
+        $this->fn = array_merge($this->fn, [
+            'add_user',
+            'login',
+            'get_user_info',
+            'logout'
+            ]);
         // check_login() 只能在php中内部调用。
     }
 
-    public function check_login() {
+    public function get_user_info() {
+        $usr = [
+            'token' => substr(filter_input(INPUT_COOKIE, "token", FILTER_SANITIZE_STRING), 0, 48),
+            'name' => substr(filter_input(INPUT_COOKIE, "user", FILTER_SANITIZE_STRING), 0, 48),
+            'login' => $this->check_login()
+        ];
+        $this->ok($usr);
+    }
+
+    protected function check_login() {
         $token = substr(filter_input(INPUT_COOKIE, "token", FILTER_SANITIZE_STRING), 0, 48);
         $user = substr(filter_input(INPUT_COOKIE, "user", FILTER_SANITIZE_STRING), 0, 48);
         $r = CommLib::query('select user from user where token=? and user=?', 'ss', [&$token, &$user]);
@@ -44,18 +58,33 @@ class UserMgr extends Serv {
         }
         return false;
     }
+    
+    public function logout(){
+        if($this->check_login()){
+            $token = substr(filter_input(INPUT_COOKIE, "token", FILTER_SANITIZE_STRING), 0, 48);
+            $new = CommLib::rand_str(48);
+            $r = CommLib::query('update user set token=?,tk_update=utc_timestamp() where token=?', 'ss', [&$new, &$token]);
+            if($r['status']){
+                $this->ok('成功登出！');
+            }else{
+                $this->fail('登出失败！');
+            }
+        }else{
+            $this->fail('登录后才可以操作！');
+        }
+    }
 
     public function login($raw_user_info) {
-        // $raw_user_info=[ user=>name,psw=>password];
+        // $raw_user_info=[ user=>name,psw=>md5(password)];
         $user_info = json_decode($raw_user_info, true);
         //error_log($raw_user_info);
         //var_dump($user_info);
         if (!(is_array($user_info) && array_key_exists('user', $user_info) && array_key_exists('psw', $user_info))) {
-            $this->fail('missing user_name or user_password!');
+            $this->fail('用户名或密码为空!');
             return false;
         }
         if (!($this->check_user_password($user_info['user'], $user_info['psw']))) {
-            //$this->fail('user_name and user_password do not match!');
+            // 由check_user_password 生成信息。
             return false;
         }
         $ip = CommLib::get_ip();
@@ -64,7 +93,7 @@ class UserMgr extends Serv {
         setcookie('user', $user, time() + COOKIE_EXPIRED);
         setcookie('token', $token, time() + COOKIE_EXPIRED);
         CommLib::query('update user set last=utc_timestamp(),ip=?,token=? where user=?', 'sss', [&$ip, &$token, &$user]);
-        $this->ok($user . ', welcome!');
+        $this->ok($user."，欢迎！");
         return true;
     }
 
@@ -109,7 +138,7 @@ class UserMgr extends Serv {
         $user = filter_var(substr($raw_user, 0, 48), FILTER_SANITIZE_STRIPPED);
         $psw = substr($raw_psw, 0, 48);
         if (!($this->user_exist($user))) {
-            $this->fail('user do not exist!');
+            $this->fail('用户不存在！');
             return false;
         }
         // get salt
@@ -127,11 +156,11 @@ class UserMgr extends Serv {
 //        error_log($db_salt);
 //        error_log($db_psw);
         if ($fail > 10) {
-            $this->fail('Try too many times. Please contact administrator!');
+            $this->fail('尝试次数过多，账号已锁定，请与管理员联系！');
             return false;
         }
         if (strcmp(hash('md5', "$db_salt$psw"), $db_psw) !== 0) {
-            $this->fail('password do not match!');
+            $this->fail('账号密码不符！');
             CommLib::query('update user set fail=fail+1 where user=?', 's', [&$user]);
             return false;
         }

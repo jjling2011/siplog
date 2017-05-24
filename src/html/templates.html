@@ -1,0 +1,27 @@
+<div id="umgr-welcome">
+    <div >{{name}},你好！ <input type="button" id="{{id.0}}" value="退出登录"></div>
+</div>
+<div id="umgr-login">
+    <div style="width: 280px;text-align: center;font-size: medium;">请登录</div>
+    <table class="table table-bordered" style="width:280px; margin-bottom: 0px;">
+        <tr><td>用户名</td><td><input id="{{id.0}}" type="text" value="" class="form-control"></td></tr>
+        <tr><td>密码</td><td><input id="{{id.1}}" type="password" value="" class="form-control"></td></tr>
+    </table>
+    <div style="width: 280px;text-align: left;padding-left: 15px;color:red;" id="{{id.4}}"></div>
+    <div style="width: 280px;text-align: center;">
+        <input id="{{id.2}}" type="button" value="登录" class="btn btn-sm btn-info">
+        &nbsp;
+        <input id="{{id.3}}" type="button" value="取消" class="btn btn-sm btn-info">
+    </div>
+</div>
+<div id="main-page">
+    <div id="{{ids.0}}">main page</div>
+</div>
+<div id="main-card">
+    <table class="card-wrap">
+        <tr>
+            <td id="{{ids.0}}" class="card-left"></td>
+            <td class="card-right"><ul>{{#right}}<li>{{.}}</li>{{/right}}</ul></td>
+        </tr>
+    </table>
+</div>

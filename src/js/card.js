@@ -6,11 +6,22 @@
  */
 
 var cardjs = {
-    cNew: function () {
+    cNew: function (settings) {
         var cjs = {
             //存放通过cardjs生成的对象,在PAGE/PANEL之间相互调用。
-            o: {}
+            o: {},
+            s: {server_page: 'serv.php'}
         };
+
+        // merge settings;
+        if (settings) {
+            for (var key in settings) {
+                // safty check.
+                if ((key in cjs.s) && settings[key].constructor === cjs.s[key].constructor) {
+                    cjs.s[key] = settings[key];
+                }
+            }
+        }
 
         //各通用小函数
         cjs.f = {
@@ -163,7 +174,7 @@ var cardjs = {
                          */
                         loading_tip_delay: 0,
                         // 服务页面url
-                        server_page: 'serv.php',
+                        server_page: cjs.s.server_page,
                         // 这个卡片有几个需要设置 id 的 html 元素
                         id_num: 0,
                         /* 
@@ -571,7 +582,7 @@ var cardjs = {
                 };
 
                 pn.gen_html = function () {
-                    var html = '<div style="margin: 8px;">';
+                    var html = '<div >';
                     var num = pn.pages.length;
                     if (num > 0) {
                         html += '<div>';

@@ -108,7 +108,7 @@ class CommLib {
 
 }
 
-class Serv {
+class Reply {
 
     protected $fn;
 
@@ -143,6 +143,8 @@ class Serv {
         if (in_array($func, $this->fn)) {
             $this->$func($data);
         } else {
+            //error_log("$func & $data");
+            
             self::fail('Operation not supported!');
         }
     }
