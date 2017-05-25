@@ -191,7 +191,7 @@ class UserMgr extends Reply {
         return $data;
     }
 
-    protected function check_login() {
+    public function check_login() {
         $token = CommLib::get_token();
         $r = CommLib::query('select id from user where token=?', 's', [&$token]);
 
@@ -259,7 +259,7 @@ class UserMgr extends Reply {
         return $r['status'];
     }
 
-    private function check_prv($prv_name) {
+    protected function check_prv($prv_name) {
         global $PRVS;
         if (!array_key_exists($prv_name, $PRVS)) {
             return false;

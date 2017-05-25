@@ -19,6 +19,14 @@ ms.f.add_frame = function (frame_id, content, tag, style) {
     return Mustache.render($('#' + frame_id).html(), d);
 };
 
+ms.cache={
+  article:{
+      current_id:null,
+      current_content:null,
+      selected_id:null
+  }  
+};
+
 ms.o.MPanel = {
     cNew: function (container_id) {
         var mp = ms.PANEL.cNew(container_id,
@@ -50,10 +58,43 @@ ms.o.AM_editor = {
             id_header: 'edt',
             add_event: true
         });
+        
+        o.content_type=[[0,'新闻'],[1,'其他']];
 
         o.data_parser = function () {
             o.editor && o.editor.destroy();
             o.editor = null;
+        };
+        
+        o.gen_ev_handler=function(){
+            o.ev_handler=[
+                function(){
+                    var data={
+                      'title':o.objs[0].value,
+                      'content':o.editor.$txt.html(),
+                      'class':o.objs[2].options[o.objs[2].selectedIndex].value,
+                      'id':ms.cache.article.current_id
+                    };
+                    console.log(data);
+                    o.f.fetch('post_article',data,function(r){
+                        console.log(r);
+                    },false,function(r){
+                        console.log(r);
+                    });
+                },
+                function(){
+                    ms.cache.article.current_id=null;
+                    ms.cache.article.current_content=null;
+                    o.objs[0].value='';
+                    o.objs[2].options[0].selected=true;
+                    o.editor.$txt.html('<p><br></p>');
+                }
+            ];
+        };
+        
+        o.add_event=function(){
+            o.f.on('click',3,0);
+            o.f.on('click',4,1);
         };
 
         o.gen_html = function () {
@@ -63,7 +104,9 @@ ms.o.AM_editor = {
         o.after_add_event = function () {
             o.editor && o.editor.destroy();
             o.editor = null;
-            o.editor = new wangEditor(o.ids[2]);
+            o.editor = new wangEditor(o.ids[1]);
+            o.editor.config.uploadImgUrl ="./php/upload.php";
+            o.editor.config.uploadImgFileName='upload';
             o.editor.create();
         };
 

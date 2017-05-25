@@ -111,14 +111,22 @@
         <tr>
             <td style="padding: 5px;text-align: center;width: 50px;">标题</td>
             <td colspan="2" style="padding: 5px 0px 5px 0px;text-align: right;">
-                <div style="float: right;"><input type="text" id="{{ids.0}}" value="无标题" class="form-control" style="width:530px;" ></div>
+                <div style="float: right;"><input type="text" id="{{ids.0}}" value="" class="form-control" style="width:530px;" ></div>
             </td>
         </tr>
-        <tr><td colspan="3"><div id="{{ids.2}}" style="height: 400px;max-height: 600px;"></div></td></tr>
+        <tr><td colspan="3"><div id="{{ids.1}}" style="height: 400px;max-height: 600px;"></div></td></tr>
         <tr>
             <td style="padding: 5px;text-align: center;">分类</td>
-            <td style="padding: 5px;"><input type="text" id="{{ids.1}}" value="无分类" class="form-control" style="width:80px;"></td>
-            <td  style="padding:5px;text-align: right;"><input id="{{ids.3}}" type="button" class="btn btn-primary" value="提交"></td>
+            <td style="padding: 5px;">
+                <select id="{{ids.2}}" class="form-control" style="width:80px;">
+                    {{#content_type}}<option value="{{0}}">{{1}}</option>{{/content_type}}
+                </select>
+            </td>
+            <td  style="padding:5px;text-align: right;">
+                <input id="{{ids.3}}" type="button" class="btn btn-primary" value="发布">
+                &nbsp;
+                <input id="{{ids.4}}" type="button" class="btn btn-primary" value="清除">
+            </td>
         </tr>
     </table>
 </div>

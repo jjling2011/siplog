@@ -17,6 +17,14 @@ class Serv extends UserMgr{
     //put your code here
     public function __construct() {
         parent::__construct();
+        $this->fn = array_merge($this->fn, [
+            'post_article'
+        ]);
+    }
+    
+    public function post_article($raw_data){
+        // todo
+        
     }
 }
 
