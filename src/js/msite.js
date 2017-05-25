@@ -17,10 +17,10 @@ ms.d = {
     right: ['hello', 'content1', 'content2', 'content3']
 };
 
-ms.f.add_frame = function (frame_id, content, tag, width) {
+ms.f.add_frame = function (frame_id, content, tag, style) {
     var d = {
         'tag': tag,
-        'width': width,
+        'style': style || "",
         'content': content
     };
     return Mustache.render($('#' + frame_id).html(), d);
@@ -49,58 +49,109 @@ ms.o.MPanel = {
     }
 };
 
-ms.o.UM_change_psw = {
-    cNew: function (cid) {
+ms.o.UM_logout = {
+    cNew: function (cid, parent) {
         var o = ms.CARD.cNew(cid);
-        
+        o.f.merge({
+            id_num: 3,
+            add_event: true,
+            id_header: 'um_logout'
+        });
+
+        o.child = null;
+
+        o.parent = parent || null;
+
+        o.gen_html = function () {
+            return Mustache.render($('#tp-um-logout').html(), o);
+        };
+
+        o.gen_ev_handler = function () {
+            o.ev_handler = [
+                //change password
+                function () {
+                    o.child = ms.o.UM_change_psw.cNew(o.ids[2], o.parent).show();
+                },
+                // logout
+                function () {
+                    o.f.fetch('logout', null, function (r) {
+                        //console.log(r);
+                        o.parent && o.parent.refresh();
+                    });
+                }
+            ];
+        };
+
+        o.clean_up = function () {
+            if (o.child) {
+                o.child.destroy();
+            }
+        };
+
+        o.add_event = function () {
+            o.f.on('click', 0);
+            o.f.on('click', 1);
+        };
+
+        return o;
+    }
+};
+
+ms.o.UM_change_psw = {
+    cNew: function (cid, parent) {
+        var o = ms.CARD.cNew(cid);
+
         o.f.merge({
             id_num: 6,
             id_header: 'um_chpsw',
-            add_event:true
+            add_event: true
         });
 
+        o.parent = parent || null;
+
         o.gen_html = function () {
-            var content=Mustache.render($('#tp-um-change-password').html(),o);
-            return ms.f.add_frame('tp-frame-tag-card',content,'修改信息',175);
+            var content = Mustache.render($('#tp-um-change-password').html(), o);
+            return ms.f.add_frame('tp-frame-tag-card', content, '修改信息', "margin-right:0px;width:175px;");
             //return Mustache.render($('#tp-frame-tag-card').html(),d);
             //return('debug');
         };
-        
-        o.gen_ev_handler=function(){
-            o.ev_handler=[
-               function(){
-                   //console.log('hello');
-                   var name=""+o.objs[0].value;
-                   var org_psw=""+o.objs[1].value;
-                   var new_psw=""+o.objs[2].value;
-                   var re_psw=""+o.objs[3].value;
-                   
-                   if(new_psw!==re_psw){
-                       o.objs[5].innerHTML='两次输出密码不同！';
-                       return;
-                   }
-                   
-                   if(new_psw.length <= 0 || org_psw.length <= 0 ){
-                       o.objs[5].innerHTML= '内容过短！';
-                       return;
-                   }
-                   console.log(new_psw,org_psw,name);
-                   var data={'name':name,'opsw':md5(org_psw),'npsw':md5(new_psw)};
-                   o.f.fetch('change_user_info',data,function(r){
-                       o.objs[5].innerHTML=ms.f.html_escape(r);
-                   },true);
-               }
+
+        o.gen_ev_handler = function () {
+            o.ev_handler = [
+                function () {
+                    //console.log('hello');
+                    var name = "" + o.objs[0].value;
+                    var org_psw = "" + o.objs[1].value;
+                    var new_psw = "" + o.objs[2].value;
+                    var re_psw = "" + o.objs[3].value;
+
+                    if (new_psw !== re_psw) {
+                        o.objs[5].innerHTML = '两次输出密码不同！';
+                        return;
+                    }
+
+                    if (new_psw.length <= 0 || org_psw.length <= 0) {
+                        o.objs[5].innerHTML = '内容过短！';
+                        return;
+                    }
+                    // console.log(new_psw, org_psw, name);
+                    var data = {'name': name, 'opsw': md5(org_psw), 'npsw': md5(new_psw)};
+                    o.f.fetch('change_user_info', data, function (r) {
+                        o.objs[5].innerHTML = ms.f.html_escape(r);
+                        o.parent && o.parent.refresh();
+                    }, false, function (r) {
+                        o.objs[5].innerHTML = ms.f.html_escape(r);
+                    });
+                }
             ];
         };
-        
-        
-        
-        o.add_event=function(){
+
+        o.add_event = function () {
             //console.log(o.ids[4]);
-            o.f.on('click',4,0);
+            o.f.on('click', 4, 0);
             //o.f.on('click',1,0);
         };
-        
+
         return o;
     }
 };
@@ -113,11 +164,10 @@ ms.o.UM_modify = {
         o.data = null;
 
         o.f.merge({
-            id_num: 8,
+            id_num: 9,
             id_header: "um_mod",
             add_event: false,
             fetch: ['get_all_user_info']
-                    //verbose: true
         });
 
         o.data_parser = function () {
@@ -133,7 +183,13 @@ ms.o.UM_modify = {
                 // select change
                 function () {
                     var id = o.objs[0].value;
-                    o.objs[1].innerHTML = ms.f.html_escape(o.tpd.name_list[id]);
+                    o.objs[1].value = ms.f.html_escape(o.tpd.name_list[id]);
+                    o.objs[8].value = ms.f.html_escape(o.tpd.user_list[id]);
+                    if(o.tpd.ban_list[id]){
+                        o.objs[8].style.backgroundColor='lightgray';
+                    }else{
+                        o.objs[8].style.backgroundColor='transparent';
+                    }
                     var pv = $('[name=' + o.ids[3] + ']');
                     for (var i = 0; i < pv.length; i++) {
                         pv[i].checked = o.tpd.user_prv[id][o.tpd.prv_list[i]];
@@ -157,20 +213,45 @@ ms.o.UM_modify = {
                 },
                 //modify user
                 function () {
-                    var id = o.objs[0].value;
-                    var pv = $('[name=' + o.ids[3] + ']');
-                    var p = [];
+                    var id = o.objs[0].value,
+                            name = o.objs[1].value,
+                            user = o.objs[8].value,
+                            pv = $('[name=' + o.ids[3] + ']'),
+                            p = [];
                     for (var i = 0; i < pv.length; i++) {
                         if (pv[i].checked) {
                             p.push(o.tpd.prv_list[i]);
                         }
-                        ;
                     }
-                    o.f.fetch('modify_user', {'id': id, 'prv_list': p}, function (r) {
+                    o.f.fetch('modify_user', {'id': id, 'name': name, 'user': user, 'prv_list': p},
+                            function (r) {
+                                console.log(r);
+                                o.refresh();
+                            }, false, function (r) {
                         console.log(r);
-                        o.refresh();
                     });
                     //console.log(p);
+                },
+                // add user
+                function () {
+                    var param = {
+                        user: o.objs[8].value,
+                        name: o.objs[1].value,
+                        prv: []
+                    };
+                    var pv = $('[name=' + o.ids[3] + ']');
+                    for (var i = 0; i < pv.length; i++) {
+                        if (pv[i].checked) {
+                            param.prv.push(o.tpd.prv_list[i]);
+                        }
+                    }
+                    //console.log(param);
+                    o.f.fetch('add_user', param, function (r) {
+                        console.log(r);
+                        o.refresh();
+                    }, false, function (r) {
+                        console.log(r);
+                    });
                 }
             ];
         };
@@ -180,6 +261,7 @@ ms.o.UM_modify = {
             o.f.on('click', 5, 1);
             o.f.on('click', 6, 2);
             o.f.on('click', 4, 3);
+            o.f.on('click', 7, 4);
         };
 
         o.gen_html = function () {
@@ -190,7 +272,7 @@ ms.o.UM_modify = {
             //console.log(o.tpd);
             //return 'debug';
             var content = Mustache.render($("#tp-um-modify").html(), o.tpd);
-            return ms.f.add_frame('tp-frame-tag-card', content, '账号管理', 175);
+            return ms.f.add_frame('tp-frame-tag-card', content, '账号管理', "width:175px;");
         };
 
         o.after_add_event = function () {
@@ -225,17 +307,14 @@ ms.o.UM_wrap = {
                         um.uinfo = info;
                         if (info && info.login) {
                             um.objs[current_id++].innerHTML = Mustache.render($('#tp-umgr-welcome').html(), um.uinfo);
-                            um.o[1].push(ms.o.UM_change_psw.cNew(um.ids[current_id++]).show());
                             if (info.prv['USERM']) {
                                 um.o[1].push(ms.o.UM_modify.cNew(um.ids[current_id++]).show());
                             }
+                            //um.o[1].push(ms.o.UM_change_psw.cNew(um.ids[current_id++]).show());
+                            um.o[1].push(ms.o.UM_logout.cNew(um.ids[current_id++], um).show());
                         } else {
-                            //um.objs[0].innerHTML='load usmgr login';
-                            um.o[1].push(ms.o.UM_login.cNew(um.ids[1], um).show());
+                            um.o[1].push(ms.o.UM_login.cNew(um.ids[0], um).show());
                         }
-                    }, false,
-                    function () {
-                        um.objs[0].innerHTML = '读取数据失败。';
                     });
         };
 
@@ -284,7 +363,7 @@ ms.o.UM_login = {
                     um.f.fetch('login', user_info,
                             function () {
                                 //console.log('reload');
-                                um.parent.refresh();
+                                um.parent && um.parent.refresh();
                             },
                             false,
                             function (d) {
@@ -300,7 +379,8 @@ ms.o.UM_login = {
         };
 
         um.gen_html = function () {
-            return(Mustache.render($('#tp-umgr-login').html(), um));
+            var content = Mustache.render($('#tp-umgr-login').html(), um);
+            return(ms.f.add_frame('tp-frame-tag-card', content, "登录", "width:185px;margin:8px;float:none;"));
         };
 
         return um;

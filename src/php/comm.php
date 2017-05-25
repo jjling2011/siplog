@@ -10,6 +10,14 @@ include '../config/settings.php';
 
 class CommLib {
 
+    public static function filter_str($name) {
+        return filter_var(substr($name, 0, 48), FILTER_SANITIZE_STRING);
+    }
+
+    public static function get_token() {
+        return substr(filter_input(INPUT_COOKIE, "token", FILTER_SANITIZE_STRING), 0, 48);
+    }
+
     public static function rand_str($length = 48) {
         $result = uniqid(date('YmdHis', time()));
         $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -55,12 +63,12 @@ class CommLib {
         if (is_string($type) && is_array($param) && count($param) > 0) {
             call_user_func_array(array($stmt, 'bind_param'), array_merge(array($type), $param));
         }
-        $stat=$stmt->execute();
+        $stat = $stmt->execute();
         $stmt->store_result();
         $count = $stmt->num_rows;
         $stmt->free_result();
         //error_log($count);
-        return (['status'=>$stat,'count'=>$count]);
+        return (['status' => $stat, 'count' => $count]);
     }
 
     public static function utc_to_local($t) {
@@ -127,8 +135,8 @@ class Reply {
             'status' => false,
             'msg' => (string) $msg)));
     }
-    
-    public function haste($status){
+
+    public function haste($status) {
         if ($status) {
             self::ok('成功');
         } else {
@@ -152,7 +160,7 @@ class Reply {
             $this->$func($data);
         } else {
             //error_log("$func & $data");
-            
+
             self::fail('Operation not supported!');
         }
     }

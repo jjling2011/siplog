@@ -34,6 +34,9 @@ var cardjs = {
                 return Math.min(Math.max(val, min), max);
             },
             html_escape: function (unsafe) {
+                if(!unsafe || unsafe.length===0){
+                    return '';
+                }
                 return unsafe
                         .replace(/&/g, "&amp;")
                         .replace(/</g, "&lt;")
@@ -298,10 +301,11 @@ var cardjs = {
                             if (rsp && rsp.status && rsp.data) {
                                 func_ok(rsp.data);
                             } else {
-                                console.log('Fetch error: fetch data fail!');
-                                console.log(rsp);
                                 if (func_fail) {
                                     func_fail(rsp.msg);
+                                } else {
+                                    console.log('Fetch error: fetch data fail!');
+                                    console.log(rsp);
                                 }
                             }
                         };

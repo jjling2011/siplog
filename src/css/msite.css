@@ -9,36 +9,41 @@ and open the template in the editor.
 */
 
 body {
-  text-align: center;
- }
- #main-page-container{
-     width:100%;
-     min-height:100px;
-     /*background: #31b0d5;*/
-     /*border: 1px solid black;*/
- }
- #foot-note{
-     width:100%;
-     min-height:80px;
-     text-align: right;
-     /*background: #31b0d5;*/
-     /*border: 1px solid black;*/
-     
- }
- #banner{
-     width: 100%;
-     min-height:80px;
-     text-align: center;
-     vertical-align:middle;
-     /*background: #31b0d5;*/
-     border: 1px solid #ccc;
- }
+    text-align: center;
+}
+#main-page-container{
+    width:100%;
+    min-height:100px;
+    /*background: #31b0d5;*/
+    /*border: 1px solid black;*/
+}
+#foot-note{
+    width:100%;
+    min-height:80px;
+    text-align: right;
+    /*background: #31b0d5;*/
+    /*border: 1px solid black;*/
+
+}
+#banner{
+    width: 100%;
+    min-height:80px;
+    text-align: center;
+    vertical-align:middle;
+    /*background: #31b0d5;*/
+    border: 1px solid #ccc;
+}
 #page-wrap {
-  text-align: left;
-  width: 800px;
-  margin: 0 auto;
+    text-align: left;
+    width: 800px;
+    margin: 0 auto;
 }
 .sm-box{
     width:100px;
     height:25px;
+}
+.frame-tag-card{
+    float: right;
+    margin-right:  8px;
+    margin-bottom: 8px;
 }
