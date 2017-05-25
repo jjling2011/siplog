@@ -10,13 +10,6 @@ var ms = cardjs.cNew({
     server_page: 'php/serv.php'
 });
 
-// 辅助类
-
-
-ms.d = {
-    right: ['hello', 'content1', 'content2', 'content3']
-};
-
 ms.f.add_frame = function (frame_id, content, tag, style) {
     var d = {
         'tag': tag,
@@ -46,6 +39,40 @@ ms.o.MPanel = {
         );
 
         return mp;
+    }
+};
+
+ms.o.AM_editor = {
+    cNew: function (cid) {
+        var o = ms.CARD.cNew(cid);
+        o.f.merge({
+            id_num: 5,
+            id_header: 'edt',
+            add_event: true
+        });
+
+        o.data_parser = function () {
+            o.editor && o.editor.destroy();
+            o.editor = null;
+        };
+
+        o.gen_html = function () {
+            return Mustache.render($('#tp-at-editor').html(), o);
+        };
+
+        o.after_add_event = function () {
+            o.editor && o.editor.destroy();
+            o.editor = null;
+            o.editor = new wangEditor(o.ids[2]);
+            o.editor.create();
+        };
+
+        o.clean_up = function () {
+            o.editor && o.editor.destroy();
+            o.editor = null;
+        };
+
+        return o;
     }
 };
 
@@ -185,10 +212,10 @@ ms.o.UM_modify = {
                     var id = o.objs[0].value;
                     o.objs[1].value = ms.f.html_escape(o.tpd.name_list[id]);
                     o.objs[8].value = ms.f.html_escape(o.tpd.user_list[id]);
-                    if(o.tpd.ban_list[id]){
-                        o.objs[8].style.backgroundColor='lightgray';
-                    }else{
-                        o.objs[8].style.backgroundColor='transparent';
+                    if (o.tpd.ban_list[id]) {
+                        o.objs[8].style.backgroundColor = 'lightgray';
+                    } else {
+                        o.objs[8].style.backgroundColor = 'transparent';
                     }
                     var pv = $('[name=' + o.ids[3] + ']');
                     for (var i = 0; i < pv.length; i++) {
@@ -300,7 +327,7 @@ ms.o.UM_wrap = {
             return Mustache.render($('#tp-umgr-wrap').html(), um);
         };
         um.after_add_event = function () {
-            um.objs[0].innerHTML = '加载数据中  ...';
+            um.o[0].push(ms.o.AM_editor.cNew(um.ids[0]).show());
             um.f.fetch('get_user_info', null,
                     function (info) {
                         var current_id = 1;
