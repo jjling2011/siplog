@@ -1,27 +1,83 @@
-<div id="umgr-welcome">
-    <div >{{name}},你好！ <input type="button" id="{{id.0}}" value="退出登录"></div>
+<div id="tp-umgr-welcome" >
+    <div style="margin: 5px;text-align: right;"> {{name}},你好！</div>
 </div>
-<div id="umgr-login">
-    <div style="width: 280px;text-align: center;font-size: medium;">请登录</div>
-    <table class="table table-bordered" style="width:280px; margin-bottom: 0px;">
-        <tr><td>用户名</td><td><input id="{{id.0}}" type="text" value="" class="form-control"></td></tr>
-        <tr><td>密码</td><td><input id="{{id.1}}" type="password" value="" class="form-control"></td></tr>
-    </table>
-    <div style="width: 280px;text-align: left;padding-left: 15px;color:red;" id="{{id.4}}"></div>
-    <div style="width: 280px;text-align: center;">
-        <input id="{{id.2}}" type="button" value="登录" class="btn btn-sm btn-info">
-        &nbsp;
-        <input id="{{id.3}}" type="button" value="取消" class="btn btn-sm btn-info">
-    </div>
-</div>
-<div id="main-page">
-    <div id="{{ids.0}}">main page</div>
-</div>
-<div id="main-card">
-    <table class="card-wrap">
+<div id="tp-umgr-wrap">
+    <table style="width:100%;">
         <tr>
-            <td id="{{ids.0}}" class="card-left"></td>
-            <td class="card-right"><ul>{{#right}}<li>{{.}}</li>{{/right}}</ul></td>
+            <td style="width:75%;">
+                <div class="tpcs-umgr-wrap-left" id="{{ids.0}}"></div>
+            </td>
+            <td style="width:25%;">
+                <table style="width:100%;">
+                    <tr><td  style="text-align: right;" id="{{ids.1}}"></td></tr>
+                    <tr><td  style="text-align: right;" id="{{ids.2}}"></td></tr>
+                    <tr><td  style="text-align: right;" id="{{ids.3}}"></td></tr>
+                    <tr><td  style="text-align: right;" id="{{ids.4}}"></td></tr>
+                </table>
+            </td>
         </tr>
     </table>
 </div>
+<div id="tp-umgr-login" >
+    <div style="width: 180px;text-align: right;font-size: medium;float: right;padding: 8px;">请登录</div>
+    <table class="table table-bordered" style="width:180px; float: right;margin-bottom: 0px;">
+        <tr><td style="text-align: center">用户名</td><td><input id="{{ids.0}}" type="text" value="" class="form-control" style="width:100px;height:25px;"></td></tr>
+        <tr><td style="text-align: center">密码</td><td><input id="{{ids.1}}" type="password" value="" class="form-control" style="width:100px;height:25px;"></td></tr>
+    </table>
+    <div style="width: 180px;text-align: left;padding-left: 10px;color:red;float: right;" id="{{ids.4}}"></div>
+    <div style="width: 180px;text-align: center;float: right;">
+        <input id="{{ids.2}}" type="button" value="登录" class="btn btn-sm btn-info">
+        &nbsp;
+        <input id="{{ids.3}}" type="button" value="取消" class="btn btn-sm btn-info">
+    </div>
+</div>
+
+<div id="tp-frame-tag-card">
+    <div style="float: right;margin-right:  8px;margin-bottom: 8px;width: {{width}}px;">
+<div style="border: 1px solid #ccc;width:80px;background: #ccc;text-align: center;">{{tag}}</div>
+<div style="border:1px solid #ccc;padding: 7px;">{{{content}}}</div>
+    </div>
+</div>
+
+<div id="tp-um-change-password">
+    <table style="border-collapse: separate;   border-spacing: 4px 5px;">
+        <tr><td style="text-align: center;">名字</td><td><input id="{{ids.0}}" type="text" value="" class="form-control sm-box"></td></tr>
+        <tr><td style="text-align: center;" >原密码</td><td><input id="{{ids.1}}" type="password" value="" class="form-control sm-box"></td></tr>
+        <tr><td style="text-align: center;">新密码</td><td><input id="{{ids.2}}" type="password" value="" class="form-control sm-box"></td></tr>
+        <tr><td style="text-align: center;">重复</td><td><input id="{{ids.3}}" type="password" value="" class="form-control sm-box"></td></tr>
+        <tr><td id="{{ids.5}}" colspan="2" style="text-align: left;color: red;"></td></tr>
+        <tr>
+            <td colspan="2" style="text-align: right;">
+                <input id="{{ids.4}}" type="button" class="btn btn-xs btn-info" value="修改" >
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div id="tp-um-modify" >
+    <table style="border-collapse: separate;border-spacing: 0px 3px">
+        <tr>
+            <td style="width:20%;text-align: left;">
+                <select id="{{ids.0}}">
+                    {{#id_list}}<option value="{{.}}">{{.}}</option>{{/id_list}}
+                </select>
+            </td>
+            <td id="{{ids.1}}"></td>
+        </tr>
+        <tr>
+            <td colspan="2" style="text-align: left" id="{{ids.2}}">
+                {{#prv_list}}
+                <label><input name="{{ids.3}}" type="checkbox" value="{{.}}" >{{.}}</label>&nbsp;
+                {{/prv_list}}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <input id="{{ids.4}}" type="button" value="修改" class="btn btn-xs btn-info"> 
+                <input id="{{ids.5}}" type="button" value="重置" class="btn btn-xs btn-info"> 
+                <input id="{{ids.6}}" type="button" value="停用" class="btn btn-xs btn-info">
+            </td>
+        </tr>
+    </table>
+</div>
+

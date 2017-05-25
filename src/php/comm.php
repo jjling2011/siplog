@@ -127,6 +127,14 @@ class Reply {
             'status' => false,
             'msg' => (string) $msg)));
     }
+    
+    public function haste($status){
+        if ($status) {
+            self::ok('成功');
+        } else {
+            self::fail('失败');
+        }
+    }
 
     public function reply() {
 

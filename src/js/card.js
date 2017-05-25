@@ -164,6 +164,7 @@ var cardjs = {
             cNew: function (container_id) {
                 var card = {
                     self: document.getElementById(container_id),
+
                     // 各个设置项
                     settings: {
                         // 标识实例类型

@@ -19,24 +19,170 @@ class UserMgr extends Reply {
             'add_user',
             'login',
             'get_user_info',
-            'logout'
-            ]);
+            'get_all_user_info',
+            'logout',
+            'reset_user',
+            'modify_user',
+            'change_user_info',
+            'ban_user'
+        ]);
         // check_login() 只能在php中内部调用。
     }
 
+    public function change_user_info($raw_info) {
+        //{login:bool,token:string,prv:string,name:string,id:int}
+        //raw_info: {'name':name,'opsw':md5(org_psw),'npsw':md5(new_psw)}
+        if (!($this->check_login())) {
+            $this->fail('请先登录！');
+            return;
+        }
+        $token = substr(filter_input(INPUT_COOKIE, "token", FILTER_SANITIZE_STRING), 0, 48);
+        $info = json_decode($raw_info, true);
+        $db = CommLib::open_db();
+        $sql = 'select salt,psw,name from user where token=?';
+        $stmt = $db->prepare($sql);
+        $stmt->bind_param('s', $token);
+        $salt = $psw = $name = null;
+        $stmt->bind_result($salt, $psw, $name);
+        $stmt->execute();
+        $stmt->fetch();
+        $stmt->free_result();
+
+        if (strcmp(hash('md5', $salt . $info['opsw']), $psw) !== 0) {
+            $this->fail('原密码错误，修改失败！');
+            return;
+        }
+
+        $nname = filter_var(substr($info['name'], 0, 48), FILTER_SANITIZE_STRING);
+
+        if (strlen($nname) > 0 && strcmp($name, $nname) !== 0) {
+            $name = $nname;
+        }
+
+        $nsalt = CommLib::rand_str(48);
+        $npsw = hash('md5', $nsalt . $info['npsw']);
+        $r = CommLib::query('update user set psw=?,salt=?,name=? where token=?', 'ssss', [&$npsw, &$nsalt, &$name,&$token]);
+        //error_log($r['count']);
+        $this->haste($r['status']);
+    }
+
+    public function modify_user($raw_info) {
+        if (!($this->check_login() && $this->check_prv('USERM'))) {
+            $this->fail('无权进行此操作！');
+            return;
+        }
+        $info = json_decode($raw_info, true);
+        $id = $info['id'] + 0;
+        $prv = $this->prv_name_to_num($info['prv_list']);
+        //error_log("id:$id prv:$prv ");
+        $r = CommLib::query('update user set prv=? where id=?', 'ii', [&$prv, &$id]);
+        $this->haste($r['status']);
+    }
+
+    public function ban_user($raw_id) {
+        $id = 0 + $raw_id;
+        if (!($this->check_login() && $this->check_prv('USERM'))) {
+            $this->fail('无权进行此操作！');
+            return;
+        }
+        $r = CommLib::query('update user set ban=0 where id=?', 'i', [&$id]);
+        $this->haste($r['status']);
+    }
+
+    public function reset_user($raw_id) {
+        $id = 0 + $raw_id;
+        if (!($this->check_login() && $this->check_prv('USERM'))) {
+            $this->fail('无权进行此操作！');
+            return;
+        }
+        $salt = CommLib::rand_str(48);
+        $psw = hash('md5', $salt . hash('md5', INIT_PASSWORD));
+        $r = CommLib::query('update user set salt=?,psw=?,prv=0,ban=0 where id=?', 'ssi', [&$salt, &$psw, &$id]);
+        $this->haste($r['status']);
+    }
+
+    public function get_all_user_info() {
+        global $PRVS;
+        //error_log('hello!');
+        if ($this->check_login() && $this->check_prv('USERM')) {
+            //error_log('reading data');
+            $db = CommLib::open_db();
+            $stmt = $db->prepare('select name,id,prv from user');
+            $name = $prv = $id = null;
+            $data = [
+                'id_list' => [],
+                'prv_list' => [],
+                // {id1:name1,id2:name2}
+                'name_list' => [],
+                // {id:{prv_list},id2:{}...
+                'user_prv' => []
+            ];
+            foreach ($PRVS as $key => $_) {
+                $data['prv_list'][] = $key;
+            }
+            $stmt->execute();
+            $stmt->bind_result($name, $id, $prv);
+            //$stmt->store_result();
+            while ($stmt->fetch()) {
+                array_push($data['id_list'], $id);
+                $data['name_list'][$id] = $name;
+                $data['user_prv'][$id] = $this->prv_num_to_name($prv);
+            }
+            $stmt->free_result();
+            $this->ok($data);
+        } else {
+            $this->fail('无权操作!');
+        }
+    }
+
     public function get_user_info() {
-        $usr = [
-            'token' => substr(filter_input(INPUT_COOKIE, "token", FILTER_SANITIZE_STRING), 0, 48),
-            'name' => substr(filter_input(INPUT_COOKIE, "user", FILTER_SANITIZE_STRING), 0, 48),
-            'login' => $this->check_login()
+        //{login:bool,token:string,prv:string,name:string,id:int}
+        $user = [
+            'login' => $this->check_login(),
+            'token' => substr(filter_input(INPUT_COOKIE, "token", FILTER_SANITIZE_STRING), 0, 48)
         ];
-        $this->ok($usr);
+        if ($user['login']) {
+            $db = CommLib::open_db();
+            $stmt = $db->prepare('select prv,name,id from user where token=?');
+            $stmt->bind_param('s', $user['token']);
+            $prv = $name = $id = null;
+            $stmt->bind_result($prv, $name, $id);
+            $stmt->execute();
+            $stmt->store_result();
+            $stmt->fetch();
+            $stmt->free_result();
+            $user['prv'] = $this->prv_num_to_name($prv);
+            $user['name'] = $name;
+            $user['id'] = $id;
+            $this->ok($user);
+        } else {
+            $this->fail('请先登录！');
+        }
+    }
+
+    private static function prv_name_to_num($prv_names) {
+        global $PRVS;
+        $sum = 0;
+        foreach ($prv_names as $key) {
+            if (array_key_exists($key, $PRVS)) {
+                $sum += pow(2, $PRVS[$key]);
+            }
+        }
+        return $sum;
+    }
+
+    private static function prv_num_to_name($prv_num) {
+        global $PRVS;
+        $data = [];
+        foreach ($PRVS as $key => $value) {
+            $data[$key] = (( ($prv_num >> $value ) % 2) === 1);
+        }
+        return $data;
     }
 
     protected function check_login() {
         $token = substr(filter_input(INPUT_COOKIE, "token", FILTER_SANITIZE_STRING), 0, 48);
-        $user = substr(filter_input(INPUT_COOKIE, "user", FILTER_SANITIZE_STRING), 0, 48);
-        $r = CommLib::query('select user from user where token=? and user=?', 'ss', [&$token, &$user]);
+        $r = CommLib::query('select id from user where token=?', 's', [&$token]);
 
         if ($r['status'] && $r['count'] > 0) {
             $sql = 'select ban,timestampdiff(hour,tk_update,utc_timestamp()) from user where token=?';
@@ -52,24 +198,24 @@ class UserMgr extends Reply {
                 return false;
             }
             if ($dt > 24) {
-                $this->update_cookie($user);
+                $this->update_cookie();
             }
             return true;
         }
         return false;
     }
-    
-    public function logout(){
-        if($this->check_login()){
+
+    public function logout() {
+        if ($this->check_login()) {
             $token = substr(filter_input(INPUT_COOKIE, "token", FILTER_SANITIZE_STRING), 0, 48);
             $new = CommLib::rand_str(48);
             $r = CommLib::query('update user set token=?,tk_update=utc_timestamp() where token=?', 'ss', [&$new, &$token]);
-            if($r['status']){
+            if ($r['status']) {
                 $this->ok('成功登出！');
-            }else{
+            } else {
                 $this->fail('登出失败！');
             }
-        }else{
+        } else {
             $this->fail('登录后才可以操作！');
         }
     }
@@ -90,28 +236,28 @@ class UserMgr extends Reply {
         $ip = CommLib::get_ip();
         $user = $user_info['user'];
         $token = CommLib::rand_str(48);
-        setcookie('user', $user, time() + COOKIE_EXPIRED);
         setcookie('token', $token, time() + COOKIE_EXPIRED);
         CommLib::query('update user set last=utc_timestamp(),ip=?,token=? where user=?', 'sss', [&$ip, &$token, &$user]);
-        $this->ok($user."，欢迎！");
+        $this->ok("欢迎！");
         return true;
     }
 
-    private static function update_cookie($user) {
+    private static function update_cookie() {
         $token = substr(filter_input(INPUT_COOKIE, "token", FILTER_SANITIZE_STRING), 0, 48);
         $new = CommLib::rand_str(48);
         $r = CommLib::query('update user set token=?,tk_update=utc_timestamp() where token=?', 'ss', [&$new, &$token]);
-        //echo "new<br/>$new<br/>old<br/>$token<br/>";
-        //var_dump($r);
         if ($r['status']) {
             setcookie('token', $new, time() + COOKIE_EXPIRED);
-            setcookie('user', $user, time() + COOKIE_EXPIRED);
         }
         return $r['status'];
     }
 
-    private function check_prv($prv) {
+    private function check_prv($prv_name) {
         global $PRVS;
+        if (!array_key_exists($prv_name, $PRVS)) {
+            return false;
+        }
+
         $token = substr(filter_input(INPUT_COOKIE, "token", FILTER_SANITIZE_STRING), 0, 48);
         $sql = 'select prv from user where token=?';
         $db = CommLib::open_db();
@@ -125,7 +271,7 @@ class UserMgr extends Reply {
         if ($db_prv <= 0) {
             return false;
         }
-        return ((($db_prv >> $PRVS[$prv]) % 2) === 1);
+        return ((($db_prv >> $PRVS[$prv_name]) % 2) === 1);
     }
 
     private static function user_exist($name) {
@@ -175,19 +321,18 @@ class UserMgr extends Reply {
             return false;
         }
         if (!( self::check_prv('USERM'))) {
-            $this->fail('Unauthorized operation!');
+            $this->fail('无权操作!');
             return false;
         }
         $user_info = json_decode($raw_user_info, true);
         if (!( array_key_exists('user', $user_info) &&
-                array_key_exists('psw', $user_info) &&
                 array_key_exists('prv', $user_info) )) {
-            $this->fail('want user,psw,prv . but something is missing.');
+            $this->fail('信息不全，需要提供账号及权限！');
             return false;
         }
         $user = filter_var(substr($user_info['user'], 0, 48), FILTER_SANITIZE_STRIPPED);
         $salt = CommLib::rand_str(48);
-        $psw = hash('md5', $salt . substr($user_info['psw'], 0, 48));
+        $psw = hash('md5', $salt . hash('md5', INIT_PASSWORD));
         $token = CommLib::rand_str(48);
         $prv = 0 + $user_info['prv'];
 
