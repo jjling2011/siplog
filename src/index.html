@@ -8,7 +8,7 @@ and open the template in the editor.
     <head>
         <title>msite (developing)</title>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=640, maximum-scale=1">
+        <meta name="viewport" content="width=1366,  maximum-scale=1.5, user-scalable=yes" />
         <script type="text/javascript" src="lib/jquery.min.js"></script> 
         <link rel="stylesheet" href="lib/bootstrap.min.css" >
         <link rel="stylesheet" href="css/wangEditor.min.css">
@@ -24,15 +24,16 @@ and open the template in the editor.
     </head>
     <body >
         <div id="page-wrap">
-            <div id="banner" >banner</div>
+            <div id="banner" ></div>
             <div id="main-page-container"></div>
-            <div id="foot-note">foot note</div>
+            <div id="foot-note"></div>
         </div>
+        <noscript>对不起你的浏览器不支持JavaScript!<br />Sorry, your browser does not support JavaScript!</noscript>
 
         <script>
             var main_page;
             $(document).ready(function () {
-                $("#templates").load("html/templates.html", function () {
+                $("#templates").load("html/template.html", function () {
                     main_page = ms.o.MPanel.cNew("main-page-container").show();
                 });
             });

@@ -33,10 +33,15 @@ function make_dir() {
     return $dir;
 }
 
+function get_actual_link($file){
+    $link="http://$_SERVER[HTTP_HOST]/" . dirname($_SERVER['PHP_SELF']) . "/$file";
+    return str_replace('/php/../', '/', $link);
+}
+
 $file = make_dir() . date('His_', time()) . uniqid() . '.jpg';
-
 move_uploaded_file($tmp_file, $file);
+if(file_exists($file)){
+    die(get_actual_link($file));
+}
 
-$actual_link = "http://$_SERVER[HTTP_HOST]/" . dirname($_SERVER['PHP_SELF']) . "/$file";
-
-die($actual_link);
+die("error|我也不知道哪里出错了，总之你上传的图片用不了。");

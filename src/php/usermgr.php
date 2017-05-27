@@ -16,20 +16,20 @@ class UserMgr extends Reply {
         // 这两个函数可以通过ajax调用。
         parent::__construct();
         $this->fn = array_merge($this->fn, [
-            'add_user',
             'login',
-            'get_user_info',
-            'get_all_user_info',
+            'fetch_user_info',
+            'fetch_all_user_info',
             'logout',
-            'reset_user',
-            'modify_user',
-            'change_user_info',
-            'ban_user'
+            'user_add',
+            'user_ban',
+            'user_reset',
+            'user_management',
+            'user_modify'
         ]);
         // check_login() 只能在php中内部调用。
     }
 
-    public function change_user_info($raw_info) {
+    public function user_modify($raw_info) {
         //{login:bool,token:string,prv:string,name:string,id:int}
         //raw_info: {'name':name,'opsw':md5(org_psw),'npsw':md5(new_psw)}
         if (!($this->check_login())) {
@@ -71,8 +71,9 @@ class UserMgr extends Reply {
         $this->haste($r['status']);
     }
 
-    public function modify_user($raw_info) {
-        if (!($this->check_login() && $this->check_prv('USERM'))) {
+    public function user_management($raw_info) {
+        $user_info = $this->get_user_info();
+        if (!$user_info['login'] || !$user_info['prv']['USERM']) {
             $this->fail('无权进行此操作！');
             return;
         }
@@ -81,22 +82,32 @@ class UserMgr extends Reply {
         $name = CommLib::filter_str($info['name']);
         $user = CommLib::filter_str($info['user']);
         $prv = $this->prv_name_to_num($info['prv_list']);
+        if ($user_info['id'] === $id && !in_array('USERM', $info['prv_list'])) {
+            //error_log(print_r($info,true));
+            $this->fail('不能取消自己的用户管理权限！');
+            return;
+        }
         //error_log("id:$id prv:$prv ");
         $r = CommLib::query('update user set prv=?,name=?,user=? where id=?', 'issi', [&$prv, &$name, &$user, &$id]);
         $this->haste($r['status']);
     }
 
-    public function ban_user($raw_id) {
-        $id = 0 + $raw_id;
-        if (!($this->check_login() && $this->check_prv('USERM'))) {
+    public function user_ban($raw_id) {
+        $user = $this->get_user_info();
+        if (!$user['login'] || !$user['prv']['USERM']) {
             $this->fail('无权进行此操作！');
+            return;
+        }
+        $id = 0 + $raw_id;
+        if ($id === $user['id']) {
+            $this->fail('不能对自己进行此操作！');
             return;
         }
         $r = CommLib::query('update user set ban=1 where id=?', 'i', [&$id]);
         $this->haste($r['status']);
     }
 
-    public function reset_user($raw_id) {
+    public function user_reset($raw_id) {
         $id = 0 + $raw_id;
         if (!($this->check_login() && $this->check_prv('USERM'))) {
             $this->fail('无权进行此操作！');
@@ -108,7 +119,7 @@ class UserMgr extends Reply {
         $this->haste($r['status']);
     }
 
-    public function get_all_user_info() {
+    public function fetch_all_user_info() {
         global $PRVS;
         //error_log('hello!');
         if ($this->check_login() && $this->check_prv('USERM')) {
@@ -124,21 +135,21 @@ class UserMgr extends Reply {
                 'user_list' => [],
                 // {id:{prv_list},id2:{}...
                 'user_prv' => [],
-                'ban_list'=>[]
+                'ban_list' => []
             ];
             //$data['prv_list']= array_keys($PRVS);
 //            foreach ($PRVS as $key => $_) {
 //                $data['prv_list'][] = $key;
 //            }
-            $name = $prv = $id = $user=$ban = null;
+            $name = $prv = $id = $user = $ban = null;
             $stmt->execute();
-            $stmt->bind_result($user, $name, $id, $prv,$ban);
+            $stmt->bind_result($user, $name, $id, $prv, $ban);
             //$stmt->store_result();
             while ($stmt->fetch()) {
                 array_push($data['id_list'], $id);
                 $data['name_list'][$id] = $name;
                 $data['user_list'][$id] = $user;
-                $data['ban_list'][$id]=!($ban===0);
+                $data['ban_list'][$id] = !($ban === 0);
                 $data['user_prv'][$id] = $this->prv_num_to_name($prv);
             }
             $stmt->free_result();
@@ -148,8 +159,12 @@ class UserMgr extends Reply {
         }
     }
 
-    public function get_user_info() {
-        //{login:bool,token:string,prv:string,name:string,id:int}
+    public function fetch_user_info() {
+        $this->ok($this->get_user_info());
+    }
+
+    protected function get_user_info() {
+        //{login:bool,token:string,prv:{userm:true,artm:false},name:string,id:int}
         $user = [
             'login' => $this->check_login(),
             'token' => CommLib::get_token()
@@ -168,7 +183,7 @@ class UserMgr extends Reply {
             $user['name'] = $name;
             $user['id'] = $id;
         }
-        $this->ok($user);
+        return($user);
     }
 
     private static function prv_name_to_num($prv_names) {
@@ -326,7 +341,7 @@ class UserMgr extends Reply {
         return true;
     }
 
-    public function add_user($raw_user_info) {
+    public function user_add($raw_user_info) {
         //$raw_user_info="[user=>name,psw=>hash.md5(password),prv=0]"
 
         if (!(self::check_login() )) {
@@ -381,7 +396,7 @@ if (false && DEBUG_MODE) {
         'prv' => 0
     ]);
 
-    //$um->add_user($user2);
+    //$um->user_add($user2);
     //$um->check_user_password('jhon', hash('md5', 'hello!'));
     //$um->login($user1);
     $um->login($user1);

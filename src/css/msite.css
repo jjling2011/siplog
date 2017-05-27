@@ -27,15 +27,15 @@ body {
 }
 #banner{
     width: 100%;
-    min-height:80px;
+    /*min-height:80px;*/
     text-align: center;
     vertical-align:middle;
     /*background: #31b0d5;*/
-    border: 1px solid #ccc;
+    /*border: 1px solid #ccc;*/
 }
 #page-wrap {
     text-align: left;
-    width: 800px;
+    width: 960px;
     margin: 0 auto;
 }
 .sm-box{
@@ -43,7 +43,8 @@ body {
     height:25px;
 }
 .frame-tag-card{
-    float: right;
+    /*float: right;*/
     margin-right:  8px;
     margin-bottom: 8px;
+    margin-left: 8px;
 }

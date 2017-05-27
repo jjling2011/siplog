@@ -34,7 +34,7 @@ var cardjs = {
                 return Math.min(Math.max(val, min), max);
             },
             html_escape: function (unsafe) {
-                if(!unsafe || unsafe.length===0){
+                if (!unsafe || unsafe.length === 0) {
                     return '';
                 }
                 return unsafe
@@ -276,11 +276,74 @@ var cardjs = {
                                     }.bind(self), card.settings.loading_tip_delay);
                         }
                     },
-                    fetch: function (op, param, func_ok, verbose, func_fail) {
-                        func_fail = func_fail || false;
-                        if (!cjs.f.isString(param)) {
-                            param = JSON.stringify(param);
+                    fetch: function () {
+
+                        /* 
+                         * fetch( op,param,func_ok,func_fail,verbose)
+                         * 
+                         * 这些参数的位置可变
+                         * 
+                         * 第一个出现的函数为 func_ok(json_object) 操作成功时的回调函数。
+                         * 第二个出再的函数为 func_fail(string) 操作失败时的回调函数。
+                         * 
+                         * 非函数参数以下简称参数：
+                         * 第一个出现的参数必须为字符串，内容为 serv.php 中相应的函数名。
+                         * 第二个出现的参数为调用 serv.php 的函数的参数。
+                         * 如果最后一个参数是 Boolean 型，则作为是否显示调试信息开关：verbose。
+                         * 
+                         * 注意！如果只有两个参数，且最后一个为 Boolean 则此参数解释为调试信息开关。
+                         *                    
+                         */
+
+                        function type(obj) {
+                            return Object.prototype.toString.call(obj).slice(8, -1);
                         }
+
+                        var i, params = [], func = [];
+                        for (i = 0; i < arguments.length; i++) {
+                            switch (type(arguments[i])) {
+                                case 'Function':
+                                    func.push(arguments[i]);
+                                    break;
+                                default:
+                                    params.push(arguments[i]);
+                                    break;
+                            }
+                        }
+                        //console.log('param',params,'func',func);
+                        //console.log('fetch arguments:',arguments,'params:',params,'func:',func);
+                        if (params.length < 1 || func.length < 1 || type(params[0]) !== 'String') {
+                            console.log('error: cardjs.CARD.fetch()', 'parameters not match!');
+                            return;
+                        }
+
+                        var op, param = null, verbose = false, func_ok, func_fail;
+
+                        op = params[0];
+                        func_ok = func[0];
+
+                        if (func.length > 1) {
+                            func_fail = func[1];
+                        }
+
+                        if (params.length > 1) {
+                            if (cjs.f.isString(params[1])) {
+                                param = params[1];
+                            } else {
+                                if (type(params[1]) === "Boolean" && params.length === 2) {
+                                    param=null;
+                                }else{
+                                    param = JSON.stringify(params[1]);
+                                }
+                            }
+                        }
+
+                        if (params.length > 1) {
+                            if (type(params[params.length - 1]) === "Boolean") {
+                                verbose = params[params.length - 1];
+                            }
+                        }
+
                         var xhr = new XMLHttpRequest();
                         xhr.open('POST', card.settings.server_page);
                         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -304,8 +367,8 @@ var cardjs = {
                                 if (func_fail) {
                                     func_fail(rsp.msg);
                                 } else {
-                                    console.log('Fetch error: fetch data fail!');
-                                    console.log(rsp);
+                                    console.log('Fetch: func_fail do not exist!');
+                                    console.log('server response:',rsp);
                                 }
                             }
                         };

@@ -10,8 +10,12 @@ include '../config/settings.php';
 
 class CommLib {
 
-    public static function filter_str($name) {
-        return filter_var(substr($name, 0, 48), FILTER_SANITIZE_STRING);
+    public static function filter_str($s,$len=48) {
+        return filter_var(substr($s, 0, $len), FILTER_SANITIZE_STRING);
+    }
+    
+    public static function filter_quote($s,$len=48) {
+        return filter_var(substr($s, 0, $len), FILTER_SANITIZE_MAGIC_QUOTES);
     }
 
     public static function get_token() {

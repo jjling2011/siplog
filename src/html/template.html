@@ -1,0 +1,214 @@
+<script type="text/template" id="tp-um-welcome">
+    <div style="margin: 5px;text-align: right;"> {{name}},你好！</div>
+</script>
+
+<script type="text/template" id="tp-um-wrap">
+    <table style="width:100%;">
+    <tr>
+    <td style="vertical-align: top;">
+    <div id="{{ids.0}}" style="padding: 8px;"></div>
+    </td>
+    <td align="right" style="width:200px;vertical-align: top;">
+    <table style="width:100%;">
+    <tr><td  style="text-align: right;width:100%;" id="{{ids.1}}"></td></tr>
+    <tr><td  style="text-align: right;width:100%;" id="{{ids.2}}"></td></tr>
+    <tr><td  style="text-align: right;width:100%;" id="{{ids.3}}"></td></tr>
+    <tr><td  style="text-align: right;width:100%;" id="{{ids.4}}"></td></tr>
+    </table>
+    </td>
+    </tr>
+    </table>
+</script>
+
+<script type="text/template" id="tp-um-login">
+    <table style="width:100%; border-collapse:separate;border-spacing: 4px 5px;" >
+        <tr>
+            <td style="text-align: center">用户名</td>
+            <td><input id="{{ids.0}}" type="text" value="" class="form-control" style="width:100px;height:25px;"></td>
+        </tr>
+        <tr>
+            <td style="text-align: center">密码</td>
+            <td><input id="{{ids.1}}" type="password" value="" class="form-control" style="width:100px;height:25px;"></td>
+        </tr>
+        <tr><td colspan="2" id="{{ids.4}}" style="text-align: left;color:red;"></td></tr>
+        <tr>
+            <td colspan="2">
+                <input id="{{ids.2}}" type="button" value="登录" class="btn btn-sm btn-info">
+                &nbsp;
+                <input id="{{ids.3}}" type="button" value="取消" class="btn btn-sm btn-info">
+            </td>
+        </tr>
+    </table>
+</script>
+
+<script type="text/template" id="tp-frame-tag-card">
+    <div class="frame-tag-card" style="{{style}}">
+    <div style="border: 1px solid #ccc;width:80px;background: #ccc;text-align: center;">{{tag}}</div>
+    <div style="border:1px solid #ccc;padding: 7px;">{{{content}}}</div>
+    </div>
+</script>
+
+<script type="text/template" id="tp-um-change-password">
+    <table style="border-collapse: separate;   border-spacing: 4px 5px;width:100%;">
+    <tr><td style="text-align: center;width:80px;">名字</td><td><input id="{{ids.0}}" type="text" value="" class="form-control sm-box"></td></tr>
+    <tr><td style="text-align: center;" >原密码</td><td><input id="{{ids.1}}" type="password" value="" class="form-control sm-box"></td></tr>
+    <tr><td style="text-align: center;">新密码</td><td><input id="{{ids.2}}" type="password" value="" class="form-control sm-box"></td></tr>
+    <tr><td style="text-align: center;">重复</td><td><input id="{{ids.3}}" type="password" value="" class="form-control sm-box"></td></tr>
+    <tr><td id="{{ids.5}}" colspan="2" style="text-align: left;color: red;"></td></tr>
+    <tr>
+    <td colspan="2" style="text-align: right;">
+    <input id="{{ids.4}}" type="button" class="btn btn-xs btn-info" value="&nbsp;修改&nbsp;" >
+    </td>
+    </tr>
+    </table>
+</script>
+
+<script type="text/template" id="tp-um-logout">
+    <table style="width:100%;margin-bottom:8px;">
+    <tr><td id="{{ids.2}}" style="text-align: right;"></td></tr>
+    <tr>
+    <td style="text-align: right;padding-right:8px;">
+    <input id="{{ids.0}}" value="更改密码" class="btn btn-xs btn-warning" style="width:80px;">
+    &nbsp;
+    <input id="{{ids.1}}" value="退出" class="btn btn-xs btn-info" style="width:50px;">
+    </td>
+    </tr>
+    </table>
+</script>
+
+<script type="text/template" id="tp-um-modify">
+    <table style="border-collapse: separate;border-spacing: 0px 3px;width:100%;">
+    <tr>
+    <td style="width:50px;text-align: center;">
+    <select id="{{ids.0}}">
+    {{#id_list}}<option value="{{.}}">{{.}}</option>{{/id_list}}
+    </select>
+    </td>
+    <td style="text-align: center;"><input type="text" class="form-control" id="{{ids.1}}" style="height: 25px;padding:3px;"></td>
+    </tr>
+    <tr><td style="text-align: center;">账号</td>
+    <td style="text-align: center;" ><input type="text" class="form-control" id="{{ids.8}}" style="height: 25px;padding:3px;"></td>
+    </tr>
+    <tr>
+    <td colspan="2" style="text-align: left" id="{{ids.2}}">
+    {{#prv_list}}
+    <label><input name="{{ids.3}}" type="checkbox" value="{{.}}" >{{.}}</label>&nbsp;
+    {{/prv_list}}
+    </td>
+    </tr>
+    <tr>
+    <td colspan="2" style="text-align:right;">
+    <input id="{{ids.4}}" type="button" value="修改" class="btn btn-xs btn-info"> 
+    <input id="{{ids.5}}" type="button" value="重置" class="btn btn-xs btn-info"> 
+    <input id="{{ids.6}}" type="button" value="停用" class="btn btn-xs btn-info">
+    <input id="{{ids.7}}" type="button" value="添加" class="btn btn-xs btn-info"> 
+    </td>
+    </tr>
+    </table>
+</script>
+
+<script type="text/template" id="tp-at-editor">
+    <table style="width:100%;">
+    <tr>
+    <td style="padding: 5px;text-align: center;width: 60px;">标题</td>
+    <td style="padding: 5px 0px 5px 0px;text-align: right;">
+    <input type="text" id="{{ids.0}}" value="" class="form-control" >
+    </td>
+    </tr>
+    <tr><td colspan="2"><div id="{{ids.1}}" style="width:742px;height: 400px;max-height: 600px;"></div></td></tr>
+    <tr>
+    <td colspan="2">
+    <table style="width:100%;">
+    <tr>
+    <td  id="{{ids.5}}" style="text-align:left;color: red;padding-left:10px;"></td>
+    <td style="padding: 5px;text-align: center;width:40px;">分类</td>
+    <td style="padding: 5px;width:100px;">
+    <select id="{{ids.2}}" class="form-control" style="width:100%;">
+    {{#article_type}}<option value="{{0}}">{{1}}</option>{{/article_type}}
+    </select>
+    </td>
+    <td style="text-align:center;width:70px;"><input id="{{ids.3}}" type="button" class="btn btn-primary" value="提交"></td>
+    <td style="text-align:center;width:70px;"><input id="{{ids.4}}" type="button" class="btn btn-warning" value="新增"></td>
+    <td style="text-align:center;width:70px;"><input id="{{ids.6}}" type="button" class="btn btn-error" value="删除"></td>
+    </tr>
+    </table>
+    </td>
+    </tr>
+    </table>
+</script>
+
+<script type="text/template" id="tp-at-help">
+    <div style="padding: 0px;margin: 8px;">
+    搜索说明：
+    <ul>
+    <li>@名字</li>
+    <li>#标题</li>
+    <li>=分类(注意分类用数字）</li>
+    <li>内容直接搜索</li>
+    </ul>
+    例子：<br />
+    ( 汽车 or 自行车 ) #便宜 and =0 <br />
+    搜索分类0里面，标题含有【便宜】，正文含有 【汽车】或【自行车】的文章
+    </div>
+</script>
+
+<script type="text/template" id="tp-at-search-box">
+    <table style="width:100%;">
+    <tr>
+    <td align="center">
+    <table style="border: #ccc 1px solid;border-radius: 10px 10px;margin: 6px;border-collapse: separate;border-spacing: 5px;width: 569px;">
+    <tr>
+    <td><input class="form-control" type="text" id="{{ids.0}}" value=""></td>
+    <td style="width:56px;">
+    <input class="btn btn-primary" type="button" id="{{ids.1}}" value="搜索">
+    </td>
+    </tr>
+    </table>
+    </td>
+    </tr>
+    <tr><td id="{{ids.2}}"></td></tr>
+    </table>
+</script>
+
+<script type="text/template" id="tp-at-search-result">
+    <table style="width:100%;">
+    <tr>
+    <td>
+    <div class="btn-group" style="margin-left:8px;margin-bottom:8px;">
+    {{#btn}}<input type="button" id="{{id}}" value="{{value}}" class="btn btn-sm btn-default">{{/btn}}
+    </div>
+    </td>
+    </tr>
+    <tr>
+    <td>
+    <table class="table table-striped">
+    <tr><th style="width:80px;">分类</th><th >标题</th><th style="width:120px;">修改时间</th><th style="width:80px;">修改者</th></tr>  
+    {{#tb}}<tr id="{{oid}}"><td>{{type}}</td><td>{{title}}</td><td>{{time}}</td><td>{{author}}</td></tr>{{/tb}}
+    </table>
+    </td>
+    </tr>
+    </table>
+</script>
+
+<script type="text/template" id="tp-main-page">
+    <table>
+    <tr>
+    <td>
+    <table>
+    <tr><td id="{{ids.0}}" style="padding:8px;">读取数据中 ...</td></tr>
+    <tr><td id="{{ids.1}}" style="padding:8px;">读取数据中 ...</td></tr>
+    </table>
+    </td>
+    <td>
+    右侧栏
+    </td>
+    </tr>
+    </table>
+</script>
+
+<script type="text/template" id="tp-top-10">
+    <table class="table table-striped">
+    <tr><th style="width:380px;">标题</th><th>时间</th></tr>
+    {{#data}}<tr><td>{{title}}</td><td>{{time}}</td></tr>{{/data}}
+    </table>
+</script>
