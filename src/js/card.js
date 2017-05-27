@@ -25,6 +25,18 @@ var cardjs = {
 
         //各通用小函数
         cjs.f = {
+            utf8_to_base64:function(text_utf8){
+                //对应 php decode:
+                // $txt_utf8 = urldecode(base64_decode($txt_b64));
+                return btoa(encodeURIComponent(text_utf8));
+            },
+            base64_to_utf8:function(text_base64){
+                //对应 php encode: 
+                //$txt_b64 =base64_encode(rawurlencode($txt_utf8));
+                // **** 注意是带raw三个字母 **** 
+                // 不要问为什么！记住php是世界上最好的语言就对了！！
+                return (decodeURIComponent(atob(text_base64)));
+            },
             pad: function (n, width, z) {
                 z = z || '0';
                 n = n + '';

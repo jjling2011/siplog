@@ -19,9 +19,9 @@ ms.f.add_frame = function (frame_id, content, tag, style) {
     return Mustache.render($('#' + frame_id).html(), d);
 };
 
-
-
 ms.cache = {
+    //最近文章数据的位置
+    json_path: 'json/top.json',
     //article_type: ['其他', '资讯'],
     // 文章分类
     atypes: ['其他', '资讯'],
@@ -31,7 +31,7 @@ ms.cache = {
         type: null,
         cache_id: null,
         selected_id: null,
-        top10: null
+        top: []
     },
     search: {
         'current_kw': '',
@@ -49,7 +49,7 @@ ms.o.MPanel = {
                 [
                     //['测试', ['Test']],
                     ['主页', ['MPage']],
-                    ['登录', ['UM_wrap']]
+                    ['后台', ['UM_wrap']]
                 ],
                 {
                     // 顶上的标签按钮
@@ -188,7 +188,7 @@ ms.o.AT_search_result = {
                 o.d.tb.push({
                     oid: o.ids[i],
                     title: filterXSS(c.title),
-                    time: ms.f.YMD(c.modify),
+                    time: ms.f.YMD(c.mtime),
                     author: filterXSS(c.name),
                     type: ms.cache.atypes[c.type]
                 });
@@ -224,12 +224,14 @@ ms.o.AT_editor = {
         o.gen_ev_handler = function () {
             o.ev_handler = [
                 function () {
+                    var content = o.editor.$txt.html();
                     var data = {
-                        'title': o.objs[0].value,
-                        'content': o.editor.$txt.html(),
+                        'title': ms.f.utf8_to_base64(o.objs[0].value),
+                        'content': ms.f.utf8_to_base64(content),
                         'type': o.objs[2].options[o.objs[2].selectedIndex].value,
                         'id': ms.cache.article.cache_id
                     };
+                    //console.log(content);
                     if (!confirm('确定提交？')) {
                         return;
                     }
@@ -238,7 +240,7 @@ ms.o.AT_editor = {
                         alert('提交成功!');
                         o.objs[4].click();
                         //console.log(r);
-                    }, false, function (r) {
+                    }, function (r) {
                         o.objs[5].innerHTML = '提交失败！';
                         alert(r + '\n提交失败！');
                     });
@@ -254,6 +256,10 @@ ms.o.AT_editor = {
                     o.objs[5].innerHTML = "新文章";
                 },
                 function () {
+                    if (!ms.cache.article.cache_id > 0) {
+                        o.objs[4].click();
+                        return;
+                    }
                     if (!confirm("确定删除文章？")) {
                         return;
                     }
@@ -303,16 +309,16 @@ ms.o.AT_editor = {
 
             if (sid > 0) {
                 o.editor.$txt.html('读取数据中 ...');
-                //console.log('fetch_article');
                 o.f.fetch('fetch_article', {'id': sid}, function (data) {
                     //$this->ok(array('id'=>$id,'type'=>$type,'title'=>$title,'content'=>$content));
                     ms.cache.article.cache_id = data.id;
-                    ms.cache.article.title = data.title;
-                    ms.cache.article.html = data.content;
+                    ms.cache.article.title = ms.f.base64_to_utf8(data.title);
+                    ms.cache.article.html = ms.f.base64_to_utf8(data.content);
                     ms.cache.article.type = data.type;
+                    //console.log('loadhtml', ms.cache.article.html);
                     o.load_cache();
                 }, false, function (r) {
-                    console.log(r);
+                     o.editor.$txt.html(r);
                 });
             } else {
                 o.objs[4].click();
@@ -360,19 +366,19 @@ ms.o.AT_wrap = {
     cNew: function (cid) {
         var pn = ms.PANEL.cNew(cid,
                 [
-                    ['搜索', ['AT_search_box']],
                     ['编辑', ['AT_editor']],
+                    ['搜索', ['AT_search_box']],
                     ['说明', ['AT_help']]
                 ],
                 {
                     // 顶上的标签按钮
-                    'tag': 'cjs-pn-tag',
+                    'tag': 'cjs-at-tag',
                     // 各个“页”的外框
-                    'page': 'cjs-patw-div',
+                    'page': 'cjs-at-pg-div',
                     // 各个“卡片”的外框
-                    'card': 'cjs-card-div',
+                    //'card': 'cjs-card-div',
                     // 选中时
-                    'active': 'cjs-pn-tag-active'
+                    'active': 'cjs-at-tag-active'
                 }
         );
         return pn;
@@ -733,7 +739,8 @@ ms.o.AT_search_box = {
                                     o.child = ms.o.AT_search_result.cNew(o.ids[2]).show();
                                 }, false,
                                 function (r) {
-                                    console.log(r);
+                                    o.objs[2].innerHTML = "此功能登录后才可使用";
+                                    //console.log(r);
                                 });
                     } else {
                         console.log('using cache!');
@@ -870,6 +877,13 @@ ms.o.UM_login = {
                             function (d) {
                                 um.objs[4].innerHTML = d;
                             });
+                },
+                function (e) {
+                    var k = e || window.event;
+                    if (k.keyCode === 13) {
+                        //console.log('fire');
+                        um.objs[2].click();
+                    }
                 }
             ];
         };
@@ -877,6 +891,7 @@ ms.o.UM_login = {
         um.add_event = function () {
             um.f.on('click', 2, 1);
             um.f.on('click', 3, 0);
+            um.f.on('keyup', 1, 2);
         };
 
         um.gen_html = function () {
@@ -929,10 +944,23 @@ ms.o.MPage = {
         };
 
         m.after_add_event = function () {
-            $.getJSON('json/top10.json', function (data) {
-                ms.cache.article.top10 = data;
-                m.child.push(ms.o.ShowTop10.cNew(m.ids[0], 0).show());
-                m.child.push(ms.o.ShowTop10.cNew(m.ids[1], 1).show());
+            $.getJSON(ms.cache.json_path, function (data) {
+                ms.cache.article.top = [];
+                
+                data.forEach(function (e) {
+
+                    ms.cache.article.top.push({
+                        title: filterXSS(ms.f.base64_to_utf8(e.title)),
+                        mtime: ms.f.YMD(e.mtime),
+                        ctime: ms.f.YMD(e.ctime),
+                        id: e.id,
+                        type: ms.cache.atypes[e.type],
+                        name: filterXSS(e.name),
+                        content: filterXSS(ms.f.base64_to_utf8(e.content))
+                    });
+                });
+                //console.log('mpage', ms.cache.article.top);
+                m.child.push(ms.o.MP_worker.cNew(m.ids[0]).show());
             });
         };
 
@@ -943,6 +971,23 @@ ms.o.MPage = {
             m.child = [];
         };
         return m;
+    }
+};
+
+ms.o.MP_worker = {
+    cNew: function (cid) {
+        var o = ms.CARD.cNew(cid);
+        o.f.merge({
+            id_header: 'm_sha',
+            add_event: true
+        });
+
+        o.gen_html = function () {
+            //console.log('article', ms.cache.article.top);
+            return Mustache.render($('#tp-article-container').html(), ms.cache.article);
+        };
+
+        return o;
     }
 };
 

@@ -33,34 +33,32 @@ class Serv extends UserMgr {
             //$this->fail('无权操作!');
             return;
         }
-        file_put_contents('../json/top10.json', json_encode(array(
-            '0' => $this->get_top_article(0, 10),
-            '1' => $this->get_top_article(1, 10)
-        )));
+        file_put_contents(EXPORT_PATH, json_encode($this->get_top_article(10)));
         //$this->ok('完成!');
     }
 
-    private function get_top_article($raw_type = 0, $raw_num = 5) {
-        $type = $raw_type + 0;
+    private function get_top_article($raw_num = 5) {
         $num = $raw_num + 0;
         if ($num > 20) {
             $num = 20;
         }
-        $sql = 'select title,modify,id,name,content from article where type=' . $type . ' order by modify desc limit ' . $num;
+        $sql = 'select title,mtime,ctime,id,name,content,type from article order by mtime desc limit ' . $num;
         $db = CommLib::open_db();
         $stmt = $db->prepare($sql);
-        $title = $modify = $id = $name = $content = null;
+        $title = $mtime = $id = $ctime = $name = $content = $type = null;
         $stmt->execute();
         $stmt->store_result();
-        $stmt->bind_result($title, $modify, $id, $name, $content);
+        $stmt->bind_result($title, $mtime, $ctime, $id, $name, $content, $type);
         $data = [];
         while ($stmt->fetch()) {
             $data[] = array(
-                'title' => $title,
-                'time' => $modify,
+                'title' => CommLib::utf8_to_base64($title),
+                'mtime' => $mtime,
+                'ctime' => $ctime,
                 'id' => $id,
+                'type' => $type,
                 'name' => $name,
-                'content' => $content
+                'content' => CommLib::utf8_to_base64($content)
             );
         }
         $stmt->free_result();
@@ -77,9 +75,9 @@ class Serv extends UserMgr {
 
         $key_words = explode(' ', $this->patch_key_word(CommLib::filter_str($raw_key_words, 200)));
 
-        $sql_head = 'select id,title,name,modify,type from article ';
+        $sql_head = 'select id,title,name,mtime,type from article ';
         $sql_total_head = 'select count(*) from article ';
-        $sql_tail = 'order by modify desc limit ' . $begin . ',' . $page_size;
+        $sql_tail = 'order by mtime desc limit ' . $begin . ',' . $page_size;
 
         $sql_conditions = '';
         $c = 0;
@@ -216,10 +214,10 @@ class Serv extends UserMgr {
 
         $db = CommLib::open_db();
         $stmt = $db->prepare($sql['query']);
-        //'select id,title,name,modify,type from article '
-        $id = $title = $name = $modify = $type = null;
+        //'select id,title,name,mtime,type from article '
+        $id = $title = $name = $mtime = $type = null;
         $stmt->execute();
-        $stmt->bind_result($id, $title, $name, $modify, $type);
+        $stmt->bind_result($id, $title, $name, $mtime, $type);
         $stmt->store_result();
         $data = array();
         while ($stmt->fetch()) {
@@ -227,7 +225,7 @@ class Serv extends UserMgr {
                 'id' => $id,
                 'title' => $title,
                 'name' => $name,
-                'modify' => $modify,
+                'mtime' => $mtime,
                 'type' => $type + 0
             );
         }
@@ -256,7 +254,12 @@ class Serv extends UserMgr {
         $stmt->store_result();
         $stmt->bind_result($id, $type, $title, $content);
         $stmt->fetch();
-        $this->ok(array('id' => $id, 'type' => $type, 'title' => $title, 'content' => $content));
+        $this->ok(array(
+            'id' => $id,
+            'type' => $type,
+            'title' => CommLib::utf8_to_base64($title),
+            'content' => CommLib::utf8_to_base64($content)
+        ));
     }
 
     public function delete_article($raw_id) {
@@ -277,7 +280,12 @@ class Serv extends UserMgr {
             $this->fail('无权操作！');
             return;
         }
+
         $data = json_decode($raw_data, true);
+
+        $content = CommLib::base64_to_utf8($data['content']);
+        $title = CommLib::base64_to_utf8($data['title']);
+
         /*
          * var data = {
           'title': o.objs[0].value,
@@ -286,13 +294,14 @@ class Serv extends UserMgr {
           'id': ms.cache.article.current_id
           };
          */
+      
         if ($data['id'] + 0 > 0) {
             //modify
             $sql = 'update article set title=?,content=?,type=?,userid=?,name=? where id=?';
             $type = 'ssiiss';
             $r = CommLib::query($sql, $type, [
-                        &$data['title'],
-                        &$data['content'],
+                        &$title,
+                        &$content,
                         &$data['type'],
                         &$user_info['id'],
                         &$user_info['name'],
@@ -304,8 +313,8 @@ class Serv extends UserMgr {
             $sql = 'insert into article set title=?,content=?,type=?,userid=?,name=?';
             $type = 'ssiis';
             $r = CommLib::query($sql, $type, [
-                        &$data['title'],
-                        &$data['content'],
+                        &$title,
+                        &$content,
                         &$data['type'],
                         &$user_info['id'],
                         &$user_info['name']

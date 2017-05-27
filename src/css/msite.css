@@ -27,11 +27,11 @@ body {
 }
 #banner{
     width: 100%;
-    /*min-height:80px;*/
+    min-height:20px;
     text-align: center;
     vertical-align:middle;
     /*background: #31b0d5;*/
-    /*border: 1px solid #ccc;*/
+    /*border: 1px solid #ddd;*/
 }
 #page-wrap {
     text-align: left;
@@ -47,4 +47,24 @@ body {
     margin-right:  8px;
     margin-bottom: 8px;
     margin-left: 8px;
+
 }
+.frame-tag-card-tag{
+    background:#ddd;
+    border: 1px solid #ddd;
+    width: 85px;
+    margin-bottom: -1px;
+    padding: 3px 10px 0px 10px;
+    text-align: center;
+    border-radius: 5px 5px 0px 0px;
+}
+
+.article-content{
+    font-size:15px;
+    max-height: 300px;
+    text-overflow: ellipsis;
+    display:block;
+    overflow:hidden;
+    width:100%;
+}
+

@@ -34,7 +34,8 @@ function make_dir() {
 }
 
 function get_actual_link($file){
-    $link="http://$_SERVER[HTTP_HOST]/" . dirname($_SERVER['PHP_SELF']) . "/$file";
+    $link="http://$_SERVER[HTTP_HOST]" . dirname($_SERVER['PHP_SELF']) . "/$file";
+    //error_log($link);
     return str_replace('/php/../', '/', $link);
 }
 
