@@ -21,7 +21,10 @@ class Serv extends UserMgr {
         $this->fn = array_merge($this->fn, [
             'post_article',
             'fetch_article',
+            'post_msg',
+            'wakeup',
             'delete_article',
+            'update_atypes',
             //'export_article',
             'search'
         ]);
@@ -262,6 +265,118 @@ class Serv extends UserMgr {
         ));
     }
 
+    public function post_msg($raw_data) {
+        $msg = filter_var(substr($raw_data, 0, 199), FILTER_SANITIZE_STRIPPED);
+        $user = $this->get_user_info();
+        if ($user['login']) {
+            $name = $user['name'];
+        } else {
+            $name = '';
+        }
+        $ip = CommLib::get_ip();
+        $r = CommLib::query('insert into msg set msg=?,name=?,ip=?', 'sss', [&$msg, &$name, &$ip]);
+        if ($r['status']) {
+            $this->update_msg();
+        }
+        $this->haste($r['status']);
+    }
+
+    public function wakeup() {
+        if (!file_exists(ARTICLE_PATH)) {
+            $this->export_all_article();
+            return;
+        }
+        $sql = 'select timestampdiff(hour,utime,utc_timestamp()) from sys where id=1';
+        $db = CommLib::open_db();
+        $stmt = $db->prepare($sql);
+        $stmt->execute();
+        $dt = null;
+        $stmt->store_result();
+        $stmt->bind_result($dt);
+        $stmt->fetch();
+        $stmt->free_result();
+        if (abs($dt) < 24) {
+            $this->fail('不需要更新！上次更新时间：' . $dt . ' 小时前。');
+            return;
+        }
+        $this->export_all_article();
+    }
+
+    private function export_all_article() {
+        CommLib::query('update sys set utime=utc_timestamp where id=1');
+        //$this->ok('调用 export_all_article');
+
+        ignore_user_abort(true);
+        set_time_limit(20 * 60);
+
+        ob_start();
+        header('Content-Encoding: none');
+        $this->ok('后台更新数据完成！');
+        header('Content-Length: ' . ob_get_length());
+        header('Connection: close');
+        ob_end_flush();
+        ob_flush();
+        flush();
+
+        if (session_id()) {
+            session_write_close();
+        }
+
+        $sql = 'select id,title,content,type,name,mtime from article '
+                . 'where mtime >= date_sub(utc_timestamp(), interval 1 year)'
+                . ' order by mtime desc';
+        $db = CommLib::open_db();
+        $stmt = $db->prepare($sql);
+        $stmt->execute();
+        $title = $content = $id = $type = $name = $mtime = null;
+        $stmt->bind_result($id, $title, $content, $type, $name, $mtime);
+        $stmt->store_result();
+        $data = [];
+        while ($stmt->fetch()) {
+            $data[] = [
+                'id' => $id,
+                'title' => $title,
+                'content' => $content,
+                'type' => $type,
+                'name' => $name,
+                'mtime' => $mtime
+            ];
+        }
+        $stmt->free_result();
+        file_put_contents(ARTICLE_PATH, json_encode($data));
+//        error_log('begin');
+//        for ($i = 0; $i < 5; $i++) {
+//            sleep($i);
+//            error_log('wait');
+//        }
+//        error_log('end');
+    }
+
+    private function update_msg() {
+        $db = CommLib::open_db();
+        $stmt = $db->prepare('select name,ctime,msg from msg order by ctime desc limit ' . MSG_KEEP);
+        $stmt->execute();
+        $ctime = $msg = $name = null;
+        $stmt->store_result();
+        $data = [];
+        $stmt->bind_result($name, $ctime, $msg);
+        while ($stmt->fetch()) {
+            $data[] = array('name' => $name, 'ctime' => $ctime, 'text' => $msg);
+        }
+
+        file_put_contents(MSG_PATH, json_encode(array_reverse($data)));
+    }
+
+    public function update_atypes($raw_types) {
+        $user_info = $this->get_user_info();
+        if (!($user_info['login'] && $user_info['prv']['ARTM'])) {
+            $this->fail('无权操作！');
+            return;
+        }
+        file_put_contents(ATYPES_PATH, $raw_types);
+        $this->ok('成功！');
+    }
+
     public function delete_article($raw_id) {
         $user_info = $this->get_user_info();
         if (!($user_info['login'] && $user_info['prv']['ARTM'])) {
@@ -294,7 +409,7 @@ class Serv extends UserMgr {
           'id': ms.cache.article.current_id
           };
          */
-      
+
         if ($data['id'] + 0 > 0) {
             //modify
             $sql = 'update article set title=?,content=?,type=?,userid=?,name=? where id=?';

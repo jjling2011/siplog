@@ -4,27 +4,26 @@
  * and open the template in the editor.
  */
 
-/* global cardjs, Mustache */
+/* global CardJS, Mustache */
 
-var ms = cardjs.cNew({
-    server_page: 'php/serv.php'
-});
-
-ms.f.add_frame = function (frame_id, content, tag, style) {
-    var d = {
-        'tag': tag,
-        'style': style || "",
-        'content': content
-    };
-    return Mustache.render($('#' + frame_id).html(), d);
-};
-
-ms.cache = {
+var ms = CardJS.cNew({
+    server_page: 'php/serv.php',
     //最近文章数据的位置
     json_path: 'json/top.json',
     //article_type: ['其他', '资讯'],
     // 文章分类
+    atypes_path: 'json/atypes.json',
+    msg_path: 'json/msg.json',
+    article_path: 'json/article.json',
     atypes: ['其他', '资讯'],
+    msg_keep: 5
+});
+
+ms.cache = {
+    viewer: {
+        list: []
+    },
+    msg: [],
     article: {
         title: null,
         html: null,
@@ -43,13 +42,85 @@ ms.cache = {
     }
 };
 
+ms.f.add_frame = function (frame_id, content, tag, style) {
+    var d = {
+        'tag': tag,
+        'style': style || "",
+        'content': content
+    };
+    return Mustache.render($('#' + frame_id).html(), d);
+};
+
+ms.o.MP_msg = {
+    cNew: function (cid) {
+        var o = ms.CARD.cNew(cid);
+        o.f.merge({
+            id_num: 2,
+            add_event: true
+        });
+
+        o.gen_html = function () {
+            var d = {
+                ids: o.ids,
+                msg: ms.cache.msg
+            };
+            var content = Mustache.render($('#tp-mp-msg').html(), d);
+            return ms.f.add_frame('tp-frame-tag-card', content, "留言板", 'margin:0px;margin-top:5px;');
+        };
+
+        o.gen_ev_handler = function () {
+            o.ev_handler = [
+                //enter
+                function (e) {
+                    var k = e || window.event;
+                    if (k.keyCode !== 13) {
+                        return;
+                    }
+                    o.objs[1].click();
+                },
+                //click
+                function () {
+                    var d = o.objs[0].value;
+                    if (d.length > 0) {
+                        o.f.fetch('post_msg', d, function () {
+                            ms.cache.msg.push({
+                                ctime: new Date().toJSON().slice(0, 10),
+                                name: 'me',
+                                text: filterXSS(d)
+                            });
+                            while (ms.cache.msg.length > ms.s.msg_keep) {
+                                ms.cache.msg.shift();
+                            }
+                            o.show();
+                        }, function (r) {
+                            alert(r);
+                        });
+                    }
+                }
+            ];
+        };
+
+        o.add_event = function () {
+            o.f.on('click', 1);
+            o.f.on('keyup', 0);
+        };
+
+        o.after_add_event = function () {
+            o.objs[0].focus();
+        };
+
+        return o;
+    }
+};
 ms.o.MPanel = {
     cNew: function (container_id) {
         var mp = ms.PANEL.cNew(container_id,
                 [
                     //['测试', ['Test']],
+                    
                     ['主页', ['MPage']],
-                    ['后台', ['UM_wrap']]
+                    ['文章', ['ART_wrap']],
+                    ['管理', ['UM_wrap']]
                 ],
                 {
                     // 顶上的标签按钮
@@ -67,7 +138,7 @@ ms.o.MPanel = {
     }
 };
 
-ms.o.AT_search_result = {
+ms.o.UMA_search_result = {
     cNew: function (cid) {
         var o = ms.CARD.cNew(cid);
         o.f.merge({
@@ -190,7 +261,7 @@ ms.o.AT_search_result = {
                     title: filterXSS(c.title),
                     time: ms.f.YMD(c.mtime),
                     author: filterXSS(c.name),
-                    type: ms.cache.atypes[c.type]
+                    type: ms.s.atypes[c.type]
                 });
             }
             return (Mustache.render($('#tp-at-search-result').html(), o.d));
@@ -201,7 +272,7 @@ ms.o.AT_search_result = {
 
 };
 
-ms.o.AT_editor = {
+ms.o.UMA_editor = {
     cNew: function (cid) {
         var o = ms.CARD.cNew(cid);
         o.f.merge({
@@ -211,7 +282,7 @@ ms.o.AT_editor = {
         });
 
         o.article_type = [];
-        ms.cache.atypes.forEach(function (e, i) {
+        ms.s.atypes.forEach(function (e, i) {
             o.article_type.push([i, e]);
         });
 
@@ -318,7 +389,7 @@ ms.o.AT_editor = {
                     //console.log('loadhtml', ms.cache.article.html);
                     o.load_cache();
                 }, false, function (r) {
-                     o.editor.$txt.html(r);
+                    o.editor.$txt.html(r);
                 });
             } else {
                 o.objs[4].click();
@@ -362,13 +433,93 @@ ms.o.AT_editor = {
     }
 };
 
-ms.o.AT_wrap = {
+ms.o.UMA_types = {
+    cNew: function (cid) {
+        var o = ms.CARD.cNew(cid);
+        o.f.merge({
+            id_header: 'at_types',
+            add_event: true,
+            id_num: 3
+        });
+
+        o.gen_ev_handler = function () {
+
+            o.ev_handler = [
+                //click submit
+                function () {
+                    var types = [];
+                    $('[name="' + o.ids[0] + '"]').each(function () {
+                        if (this.value.length > 0) {
+                            types.push(this.value);
+                        }
+                    });
+                    o.f.fetch('update_atypes', types, function () {
+                        ms.s.atypes = types;
+                        alert('分类信息修改成功！');
+                        o.show();
+                    }, function (r) {
+                        alert(r);
+                    });
+
+                },
+                //key  up enter
+                function (e) {
+                    var k = e || window.event;
+                    if (k.keyCode !== 13) {
+                        return;
+                    }
+                    var types = [];
+                    $('[name="' + o.ids[0] + '"]').each(function () {
+                        if (this.value.length > 0) {
+                            types.push(this.value);
+                        }
+                    });
+                    ms.s.atypes = types;
+                    o.show();
+                }
+            ];
+        };
+
+        o.add_event = function () {
+            o.f.on('click', 2, 0);
+            o.f.on('keyup', 1);
+        };
+
+        o.gen_html = function () {
+            var d = {
+                name: o.ids[0],
+                new_type: o.ids[1],
+                btn_summit: o.ids[2],
+                data: ms.s.atypes,
+                index: function () {
+                    return ++window['INDEX'] || (window['INDEX'] = 0);
+                },
+                resetIndex: function () {
+                    window['INDEX'] = -1;
+                    return;
+                }
+            };
+
+            o.after_add_event = function () {
+                // console.log(focus);
+                o.objs[1].focus();
+            };
+            // create data view
+            return Mustache.render($('#tp-at-atypes').html(), d);
+        };
+
+        return o;
+    }
+};
+
+ms.o.UMA_wrap = {
     cNew: function (cid) {
         var pn = ms.PANEL.cNew(cid,
                 [
-                    ['编辑', ['AT_editor']],
-                    ['搜索', ['AT_search_box']],
-                    ['说明', ['AT_help']]
+                    ['搜索', ['UMA_search_box']],
+                    ['编辑', ['UMA_editor']],
+                    ['分类', ['UMA_types']],
+                    ['说明', ['UMA_help']]
                 ],
                 {
                     // 顶上的标签按钮
@@ -639,7 +790,7 @@ ms.o.UM_wrap = {
                 return;
             }
             var info = ms.cache.user_info;
-            um.o[0].push(ms.o.AT_wrap.cNew(um.ids[0]).show());
+            um.o[0].push(ms.o.UMA_wrap.cNew(um.ids[0]).show());
             var current_id = 1;
             if (info && info.login) {
                 um.objs[current_id++].innerHTML = Mustache.render($('#tp-um-welcome').html(), info);
@@ -685,7 +836,7 @@ ms.o.UM_wrap = {
     }
 };
 
-ms.o.AT_help = {
+ms.o.UMA_help = {
     cNew: function (cid) {
         var o = ms.CARD.cNew(cid);
         o.f.merge({
@@ -701,7 +852,7 @@ ms.o.AT_help = {
     }
 };
 
-ms.o.AT_search_box = {
+ms.o.UMA_search_box = {
     cNew: function (cid) {
         var o = ms.CARD.cNew(cid);
         o.f.merge({
@@ -736,7 +887,7 @@ ms.o.AT_search_box = {
                                     ms.cache.search.content = data.data;
                                     //console.log(data);
 
-                                    o.child = ms.o.AT_search_result.cNew(o.ids[2]).show();
+                                    o.child = ms.o.UMA_search_result.cNew(o.ids[2]).show();
                                 }, false,
                                 function (r) {
                                     o.objs[2].innerHTML = "此功能登录后才可使用";
@@ -745,7 +896,7 @@ ms.o.AT_search_box = {
                     } else {
                         console.log('using cache!');
                         if (!o.child) {
-                            o.child = ms.o.AT_search_result.cNew(o.ids[2]).show();
+                            o.child = ms.o.UMA_search_result.cNew(o.ids[2]).show();
                         }
                     }
 
@@ -765,7 +916,7 @@ ms.o.AT_search_box = {
                     && ms.cache.search.content.length > 0) {
                 o.objs[0].value = ms.cache.search.cache_kw;
                 ms.cache.search.current_kw = ms.cache.search.cache_kw;
-                o.child = ms.o.AT_search_result.cNew(o.ids[2]).show();
+                o.child = ms.o.UMA_search_result.cNew(o.ids[2]).show();
             }
             o.objs[0].focus();
         };
@@ -903,30 +1054,191 @@ ms.o.UM_login = {
     }
 };
 
-ms.o.ShowTop10 = {
-    cNew: function (cid, type) {
+ms.o.ART_list = {
+    cNew: function (cid, out_put) {
         var o = ms.CARD.cNew(cid);
         o.f.merge({
-            id_header: 'st10',
-            id_num: 1,
-            add_event: true
+            id_header: 'arg_list'
         });
 
-        o.data = [];
-        ms.cache.article.top10[type].forEach(function (e) {
-            o.data.push({
-                title: filterXSS(e.title),
-                time: ms.f.YMD(e.time)
-            });
-        });
+        o.out_put = out_put || null;
+
+        o.data_parser = function () {
+            o.settings.id_num = ms.cache.viewer.list.length;
+            o.settings.add_event = false;
+            if (o.settings.id_num > 0) {
+                o.settings.add_event = true;
+            }
+        };
+
+        o.show_article = function (idx) {
+            var data = ms.cache.viewer.data[
+                    ms.cache.viewer.list[idx]
+            ];
+            document.getElementById(o.out_put).innerHTML =
+                    Mustache.render($('#tp-art-viewer').html(), data);
+        };
+
+        o.gen_ev_handler = function () {
+            o.ev_handler = [];
+            for (var i = 0; i < o.ids.length; i++) {
+                o.ev_handler.push((function () {
+                    var idx = i;
+                    return(function () {
+                        //console.log('idx:', idx, ' fire!');
+                        o.show_article(idx);
+                    });
+                })());
+            }
+        };
+        o.add_event = function () {
+            for (var i = 0; i < o.ids.length; i++) {
+                o.f.on('click', i);
+            }
+        };
 
         o.gen_html = function () {
-            return Mustache.render($('#tp-top-10').html(), o);
+            var data = {
+                d: []
+            };
+            //console.log('from list:', ms.cache.viewer.list);
+            ms.cache.viewer.list.forEach(function (e, i) {
+                data.d.push({
+                    id: o.ids[i],
+                    title: ms.cache.viewer.data[e].title
+                });
+            });
+            //console.log(data);
+            return Mustache.render($('#tp-art-list').html(), data);
         };
 
         return o;
     }
 };
+
+ms.o.ART_wrap = {
+    cNew: function (cid) {
+        var o = ms.CARD.cNew(cid);
+        o.f.merge({
+            id_num: 4,
+            id_header: 'atw',
+            add_event: true
+        });
+
+        o.chile = null;
+
+        o.gen_ev_handler = function () {
+            o.ev_handler = [
+                //keyup
+                function (e) {
+                    var k = e || window.event;
+                    if (k.keyCode !== 13) {
+                        return;
+                    }
+                    o.objs[2].click();
+                },
+                //click
+                function () {
+                    //search
+                    //console.log('objs1:',o.objs[1]);
+                    var keywords = o.objs[1].value.split(" ");
+
+
+                    
+                    //console.log(ms.cache.viewer.data);
+                    var i, j, kw = [], td, result = [], count = 0;
+                    keywords.forEach(function (e) {
+                        if (e.length > 0) {
+                            kw.push(e);
+                        }
+                    });
+                    for (i = 0; i < 15 && i < ms.cache.viewer.data.length; i++) {
+                        td = ms.cache.viewer.data[i];
+                        //console.log(td);
+                        if (kw.length > 0) {
+                            count = 0;
+                            for (j = 0; j < kw.length; j++) {
+                                if (td.title.indexOf(kw[j]) >= 0
+                                        || td.content.indexOf(kw[j]) >= 0) {
+
+                                    count++;
+                                }
+                            }
+                            if (count === kw.length) {
+                                result.push(i);
+                            }
+                        } else {
+                            result.push(i);
+                        }
+                    }
+                    ms.cache.viewer.list = result;
+                    //console.log('from art:', result);
+                    if (result.length > 0) {
+                        o.show_article(result[0]);
+                    }
+                    o.child && o.child.destroy();
+                    o.child = ms.o.ART_list.cNew(o.ids[3], o.ids[0]).show();
+                }
+            ];
+        };
+
+
+
+        o.add_event = function () {
+            o.f.on('click', 2, 1);
+            o.f.on('keyup', 1, 0);
+        };
+
+        o.gen_html = function () {
+            return Mustache.render($('#tp-art-wrap').html(), o);
+        };
+
+        o.show_article = function (idx) {
+            var data = ms.cache.viewer.data[idx];
+            o.objs[0].innerHTML = Mustache.render($('#tp-art-viewer').html(), data);
+        };
+
+        o.after_add_event = function () {
+            o.objs[1].focus();
+            $.getJSON(ms.s.article_path, function (data) {
+                //console.log(data);
+                ms.cache.viewer['data'] = [];
+                //ms.cache.viewer['dict']={};
+                data.forEach(function (e) {
+                    ms.cache.viewer.data.push({
+                        id: e.id,
+                        content: filterXSS(e.content),
+                        mtime: ms.f.YMD(e.mtime),
+                        name: filterXSS(e.name),
+                        title: filterXSS(e.title),
+                        type: ms.s.atypes[e.type]
+                    });
+                    //ms.cache.viewer.dict[e.id]=i;
+                });
+                if (ms.cache.viewer.data.length > 0) {
+                    o.show_article(0);
+                }
+            }).fail(function () {
+                alert('加载文章数据失败！');
+            });
+            // debug中暂时不更新
+            console.log('正在后台更新数据');
+            o.f.fetch('wakeup', function (r) {
+                console.log(r);
+            }, function (r) {
+                console.log(r);
+            });
+        };
+
+        o.clean_up = function () {
+            o.child && o.child.destroy();
+        };
+
+
+        return o;
+    }
+};
+
 
 ms.o.MPage = {
     cNew: function (container_id) {
@@ -944,9 +1256,29 @@ ms.o.MPage = {
         };
 
         m.after_add_event = function () {
-            $.getJSON(ms.cache.json_path, function (data) {
+            $.getJSON(ms.s.atypes_path, function (data) {
+                ms.s.atypes = data;
+            }).fail(function () {
+                console.log('分类文件加载失败！');
+            });
+            $.getJSON(ms.s.msg_path, function (data) {
+                ms.cache.msg = [];
+                data.forEach(function (e) {
+                    ms.cache.msg.push({
+                        text: filterXSS(e.text),
+                        ctime: ms.f.YMD(e.time),
+                        name: filterXSS(e.name)
+                    });
+                });
+            }).fail(function () {
+                console.log('留言文件加载失败！');
+            }).always(function () {
+                m.child.push(ms.o.MP_msg.cNew(m.ids[1]).show());
+            });
+
+            $.getJSON(ms.s.json_path, function (data) {
                 ms.cache.article.top = [];
-                
+
                 data.forEach(function (e) {
 
                     ms.cache.article.top.push({
@@ -954,14 +1286,17 @@ ms.o.MPage = {
                         mtime: ms.f.YMD(e.mtime),
                         ctime: ms.f.YMD(e.ctime),
                         id: e.id,
-                        type: ms.cache.atypes[e.type],
+                        type: ms.s.atypes[e.type],
                         name: filterXSS(e.name),
                         content: filterXSS(ms.f.base64_to_utf8(e.content))
                     });
                 });
                 //console.log('mpage', ms.cache.article.top);
                 m.child.push(ms.o.MP_worker.cNew(m.ids[0]).show());
+            }).fail(function () {
+                m.objs[0].innerHTML = "<font color=red>无数据</font>";
             });
+
         };
 
         m.clean_up = function () {

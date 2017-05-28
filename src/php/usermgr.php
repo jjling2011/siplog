@@ -223,7 +223,7 @@ class UserMgr extends Reply {
             if ($ban !== 0) {
                 return false;
             }
-            if ($dt > 24) {
+            if (abs($dt) > 24) {
                 $this->update_cookie();
             }
             return true;

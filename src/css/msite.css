@@ -47,6 +47,7 @@ body {
     margin-right:  8px;
     margin-bottom: 8px;
     margin-left: 8px;
+    text-align: right;
 
 }
 .frame-tag-card-tag{
@@ -66,5 +67,18 @@ body {
     display:block;
     overflow:hidden;
     width:100%;
+    text-align: left;
+}
+
+.msg-content{
+    max-width: 193px;
+    word-wrap: break-word;
+    font-size:14px;
+    max-height: 200px;
+    text-overflow: ellipsis;
+    display:block;
+    overflow:hidden;
+    width:100%;
+    text-align: left;
 }
 

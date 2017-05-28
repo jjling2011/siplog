@@ -5,7 +5,7 @@
  * 2016-11-09
  */
 
-var cardjs = {
+var CardJS = {
     cNew: function (settings) {
         var cjs = {
             //存放通过cardjs生成的对象,在PAGE/PANEL之间相互调用。
@@ -16,10 +16,10 @@ var cardjs = {
         // merge settings;
         if (settings) {
             for (var key in settings) {
-                // safty check.
-                if ((key in cjs.s) && settings[key].constructor === cjs.s[key].constructor) {
+                // safty check is not necessary.
+                //if ((key in cjs.s) && settings[key].constructor === cjs.s[key].constructor) {
                     cjs.s[key] = settings[key];
-                }
+                //}
             }
         }
 
@@ -31,8 +31,8 @@ var cardjs = {
                 return btoa(encodeURIComponent(text_utf8));
             },
             base64_to_utf8:function(text_base64){
-                //对应 php encode: 
-                //$txt_b64 =base64_encode(rawurlencode($txt_utf8));
+                // 对应 php encode: 
+                // $txt_b64 =base64_encode(rawurlencode($txt_utf8));
                 // **** 注意是带raw三个字母 **** 
                 // 不要问为什么！记住php是世界上最好的语言就对了！！
                 return (decodeURIComponent(atob(text_base64)));

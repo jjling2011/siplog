@@ -9,19 +9,20 @@
 include '../config/settings.php';
 
 class CommLib {
-    public static function base64_to_utf8($txt_b64){
+
+    public static function base64_to_utf8($txt_b64) {
         return urldecode(base64_decode($txt_b64));
     }
-    
-    public static function utf8_to_base64($txt_utf8){
+
+    public static function utf8_to_base64($txt_utf8) {
         return base64_encode(rawurlencode($txt_utf8));
     }
 
-    public static function filter_str($s,$len=48) {
+    public static function filter_str($s, $len = 48) {
         return filter_var(substr($s, 0, $len), FILTER_SANITIZE_STRING);
     }
-    
-    public static function filter_quote($s,$len=48) {
+
+    public static function filter_quote($s, $len = 48) {
         return filter_var(substr($s, 0, $len), FILTER_SANITIZE_MAGIC_QUOTES);
     }
 
