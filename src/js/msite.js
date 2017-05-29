@@ -9,28 +9,30 @@
 var ms = CardJS.cNew({
     server_page: 'php/serv.php',
     //最近文章数据的位置
-    json_path: 'json/top.json',
+    top_art_path: 'json/top.json',
     //article_type: ['其他', '资讯'],
     // 文章分类
     atypes_path: 'json/atypes.json',
     msg_path: 'json/msg.json',
     article_path: 'json/article.json',
-    atypes: ['其他', '资讯'],
+    atypes: null,
     msg_keep: 5
 });
 
 ms.cache = {
     viewer: {
-        list: []
+        data: null,
+        result: [],
+        output: null
     },
-    msg: [],
+    msg: null,
     article: {
         title: null,
         html: null,
         type: null,
         cache_id: null,
         selected_id: null,
-        top: []
+        top: null
     },
     search: {
         'current_kw': '',
@@ -117,9 +119,9 @@ ms.o.MPanel = {
         var mp = ms.PANEL.cNew(container_id,
                 [
                     //['测试', ['Test']],
-                    
+
                     ['主页', ['MPage']],
-                    ['文章', ['ART_wrap']],
+                    //['文章', ['ART_wrap']],
                     ['管理', ['UM_wrap']]
                 ],
                 {
@@ -1055,16 +1057,16 @@ ms.o.UM_login = {
 };
 
 ms.o.ART_list = {
-    cNew: function (cid, out_put) {
+    cNew: function (cid) {
         var o = ms.CARD.cNew(cid);
         o.f.merge({
-            id_header: 'arg_list'
+            id_header: 'art_list'
         });
 
-        o.out_put = out_put || null;
+        o.out_put = $('#' + ms.cache.viewer.output) || null;
 
         o.data_parser = function () {
-            o.settings.id_num = ms.cache.viewer.list.length;
+            o.settings.id_num = ms.cache.viewer.result.length;
             o.settings.add_event = false;
             if (o.settings.id_num > 0) {
                 o.settings.add_event = true;
@@ -1072,11 +1074,15 @@ ms.o.ART_list = {
         };
 
         o.show_article = function (idx) {
-            var data = ms.cache.viewer.data[
-                    ms.cache.viewer.list[idx]
-            ];
-            document.getElementById(o.out_put).innerHTML =
-                    Mustache.render($('#tp-art-viewer').html(), data);
+            if (o.out_put) {
+                var data = ms.cache.viewer.data[
+                        ms.cache.viewer.result[idx]
+                ];
+                o.out_put.innerHTML =
+                        Mustache.render($('#tp-art-viewer').html(), data);
+            } else {
+                console.log('没容器可以用来输出选中的文章！');
+            }
         };
 
         o.gen_ev_handler = function () {
@@ -1091,6 +1097,7 @@ ms.o.ART_list = {
                 })());
             }
         };
+        
         o.add_event = function () {
             for (var i = 0; i < o.ids.length; i++) {
                 o.f.on('click', i);
@@ -1102,7 +1109,7 @@ ms.o.ART_list = {
                 d: []
             };
             //console.log('from list:', ms.cache.viewer.list);
-            ms.cache.viewer.list.forEach(function (e, i) {
+            ms.cache.viewer.result.forEach(function (e, i) {
                 data.d.push({
                     id: o.ids[i],
                     title: ms.cache.viewer.data[e].title
@@ -1111,12 +1118,111 @@ ms.o.ART_list = {
             //console.log(data);
             return Mustache.render($('#tp-art-list').html(), data);
         };
-
         return o;
     }
 };
 
-ms.o.ART_wrap = {
+ms.o.ART_search_box = {
+    cNew: function (cid) {
+        var o = ms.CARD.cNew(cid);
+        o.f.merge({
+            id_header: 'art_sbox',
+            id_num: 3,
+            add_event: true
+        });
+
+        o.child = null;
+
+        o.gen_ev_handler = function () {
+            o.ev_handler = [
+
+                //focus in search box
+                function () {
+                    if (!ms.cache.viewer.data) {
+                        console.log('忘了搬服务器的文章,偷偷加载数据中 ...');
+                        $.getJSON(ms.s.article_path, function (data) {
+                            ms.cache.viewer.data = [];
+                            data.forEach(function (e) {
+                                ms.cache.viewer.data.push({
+                                    id: e.id,
+                                    content: filterXSS(e.content),
+                                    mtime: ms.f.YMD(e.mtime),
+                                    name: filterXSS(e.name),
+                                    title: filterXSS(e.title),
+                                    type: ms.s.atypes[e.type]
+                                });
+                            });
+                            console.log('终于搬完了。呼~~');
+                        }).fail(function () {
+                            o.objs[2].innerHTML = '<font color="red">加载文章数据失败！</font>';
+                        });
+                    }
+                },
+                //keyup
+                function (e) {
+                    var k = e || window.event;
+                    if (k.keyCode !== 13) {
+                        return;
+                    }
+                    o.objs[1].click();
+                },
+                // click
+                function () {
+                    if (!ms.cache.viewer.data) {
+                        o.objs[2].innerHTML = '<font color="red">没有数据</font>';
+                        return;
+                    }
+                    //search
+                    var kw = o.objs[0].value.split(' ').filter(function (e) {
+                        return (e.length > 0);
+                    });
+                    var i, j, td, result = [], count = 0;
+                    for (i = 0; i < 15 && i < ms.cache.viewer.data.length; i++) {
+                        td = ms.cache.viewer.data[i];
+                        //console.log(td);
+                        if (kw.length > 0) {
+                            count = 0;
+                            for (j = 0; j < kw.length; j++) {
+                                if (td.title.indexOf(kw[j]) >= 0
+                                        || td.content.indexOf(kw[j]) >= 0) {
+
+                                    count++;
+                                }
+                            }
+                            if (count === kw.length) {
+                                result.push(i);
+                            }
+                        } else {
+                            result.push(i);
+                        }
+                    }
+                    ms.cache.viewer.result = result;
+                    if (result.length > 0) {
+                        o.child && o.child.destroy();
+                        o.child = ms.o.ART_list.cNew(o.ids[2]).show();
+                    } else {
+                        o.objs[2].innerHTML = '<font color="red">搜索不到符合条件的记录</font>';
+                    }
+                }
+            ];
+        };
+        o.clean_up = function () {
+            o.child && o.child.destroy();
+        };
+        o.gen_html = function () {
+            var content = Mustache.render($('#tp-art-search-box').html(), o);
+            return ms.f.add_frame('tp-frame-tag-card', content, '搜索', 'margin:0px;margin-top:5px;');
+        };
+        o.add_event = function () {
+            o.f.on('focus', 0, 0);
+            o.f.on('keyup', 0, 1);
+            o.f.on('click', 1, 2);
+        };
+        return o;
+    }
+};
+
+ms.o.del_ART_wrap = {
     cNew: function (cid) {
         var o = ms.CARD.cNew(cid);
         o.f.merge({
@@ -1143,8 +1249,6 @@ ms.o.ART_wrap = {
                     //console.log('objs1:',o.objs[1]);
                     var keywords = o.objs[1].value.split(" ");
 
-
-                    
                     //console.log(ms.cache.viewer.data);
                     var i, j, kw = [], td, result = [], count = 0;
                     keywords.forEach(function (e) {
@@ -1175,9 +1279,11 @@ ms.o.ART_wrap = {
                     //console.log('from art:', result);
                     if (result.length > 0) {
                         o.show_article(result[0]);
+                        o.child && o.child.destroy();
+                        o.child = ms.o.ART_list.cNew(o.ids[3], o.ids[0]).show();
+                    } else {
+                        o.objs[3].innerHTML = '<font color="red">没有找到相关记录</font>';
                     }
-                    o.child && o.child.destroy();
-                    o.child = ms.o.ART_list.cNew(o.ids[3], o.ids[0]).show();
                 }
             ];
         };
@@ -1199,30 +1305,10 @@ ms.o.ART_wrap = {
         };
 
         o.after_add_event = function () {
-            o.objs[1].focus();
-            $.getJSON(ms.s.article_path, function (data) {
-                //console.log(data);
-                ms.cache.viewer['data'] = [];
-                //ms.cache.viewer['dict']={};
-                data.forEach(function (e) {
-                    ms.cache.viewer.data.push({
-                        id: e.id,
-                        content: filterXSS(e.content),
-                        mtime: ms.f.YMD(e.mtime),
-                        name: filterXSS(e.name),
-                        title: filterXSS(e.title),
-                        type: ms.s.atypes[e.type]
-                    });
-                    //ms.cache.viewer.dict[e.id]=i;
-                });
-                if (ms.cache.viewer.data.length > 0) {
-                    o.show_article(0);
-                }
-            }).fail(function () {
-                alert('加载文章数据失败！');
-            });
-            // debug中暂时不更新
             console.log('正在后台更新数据');
+            o.objs[1].focus();
+
+            // debug中暂时不更新
             o.f.fetch('wakeup', function (r) {
                 console.log(r);
             }, function (r) {
@@ -1244,7 +1330,7 @@ ms.o.MPage = {
     cNew: function (container_id) {
         var m = ms.CARD.cNew(container_id);
         m.f.merge({
-            id_num: 2,
+            id_num: 3,
             id_header: 'main',
             add_event: true
         });
@@ -1256,46 +1342,59 @@ ms.o.MPage = {
         };
 
         m.after_add_event = function () {
-            $.getJSON(ms.s.atypes_path, function (data) {
-                ms.s.atypes = data;
-            }).fail(function () {
-                console.log('分类文件加载失败！');
-            });
-            $.getJSON(ms.s.msg_path, function (data) {
-                ms.cache.msg = [];
-                data.forEach(function (e) {
-                    ms.cache.msg.push({
-                        text: filterXSS(e.text),
-                        ctime: ms.f.YMD(e.time),
-                        name: filterXSS(e.name)
-                    });
+            m.child.push(ms.o.ART_search_box.cNew(m.ids[1]).show());
+            ms.cache.viewer.output = m.ids[0];
+            if (!ms.s.atypes) {
+                $.getJSON(ms.s.atypes_path, function (data) {
+                    ms.s.atypes = data;
+                }).fail(function () {
+                    console.log('分类文件加载失败！');
                 });
-            }).fail(function () {
-                console.log('留言文件加载失败！');
-            }).always(function () {
-                m.child.push(ms.o.MP_msg.cNew(m.ids[1]).show());
-            });
-
-            $.getJSON(ms.s.json_path, function (data) {
-                ms.cache.article.top = [];
-
-                data.forEach(function (e) {
-
-                    ms.cache.article.top.push({
-                        title: filterXSS(ms.f.base64_to_utf8(e.title)),
-                        mtime: ms.f.YMD(e.mtime),
-                        ctime: ms.f.YMD(e.ctime),
-                        id: e.id,
-                        type: ms.s.atypes[e.type],
-                        name: filterXSS(e.name),
-                        content: filterXSS(ms.f.base64_to_utf8(e.content))
+            }
+            if (!ms.cache.mst) {
+                $.getJSON(ms.s.msg_path, function (data) {
+                    ms.cache.msg = [];
+                    data.forEach(function (e) {
+                        ms.cache.msg.push({
+                            text: filterXSS(e.text),
+                            ctime: ms.f.YMD(e.time),
+                            name: filterXSS(e.name)
+                        });
                     });
+                }).fail(function () {
+                    console.log('留言文件加载失败！');
+                }).always(function () {
+                    m.child.push(ms.o.MP_msg.cNew(m.ids[2]).show());
                 });
-                //console.log('mpage', ms.cache.article.top);
+            } else {
+                m.child.push(ms.o.MP_msg.cNew(m.ids[2]).show());
+            }
+
+            if (!ms.cache.article.top) {
+                $.getJSON(ms.s.top_art_path, function (data) {
+                    ms.cache.article.top = [];
+
+                    data.forEach(function (e) {
+
+                        ms.cache.article.top.push({
+                            title: filterXSS(ms.f.base64_to_utf8(e.title)),
+                            mtime: ms.f.YMD(e.mtime),
+                            ctime: ms.f.YMD(e.ctime),
+                            id: e.id,
+                            type: ms.s.atypes[e.type],
+                            name: filterXSS(e.name),
+                            content: filterXSS(ms.f.base64_to_utf8(e.content))
+                        });
+                    });
+                    //console.log('mpage', ms.cache.article.top);
+                    m.child.push(ms.o.MP_worker.cNew(m.ids[0]).show());
+                }).fail(function () {
+                    m.objs[0].innerHTML = "<font color=red>无数据</font>";
+                });
+            } else {
+                //console.log('mp.art.using cache');
                 m.child.push(ms.o.MP_worker.cNew(m.ids[0]).show());
-            }).fail(function () {
-                m.objs[0].innerHTML = "<font color=red>无数据</font>";
-            });
+            }
 
         };
 

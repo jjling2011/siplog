@@ -44,7 +44,7 @@
 <script type="text/template" id="tp-frame-tag-card">
     <div class="frame-tag-card" style="{{style}}">
     <div class="frame-tag-card-tag">{{tag}}</div>
-    <div style="border:1px solid #ddd;padding: 7px;border-radius: 0px 5px 5px 5px;">{{{content}}}</div>
+    <div style="border:1px solid #ddd;padding: 5px;border-radius: 0px 5px 5px 5px;">{{{content}}}</div>
     </div>
 </script>
 
@@ -191,80 +191,43 @@
     </tr>
     </table>
 </script>
+
 <script type="text/template" id="tp-art-list">
-<table style="width:100%;border-collapse: separate;
-    border-spacing: 0px 5px;">
-{{#d}}<tr><td style="text-align: left;padding: 2px 5px 2px 5px;
-	border-left: 1px solid #999;
-    border-right: 1px solid #999;
-	background: antiquewhite;
-    border-radius: 10px;" id="{{id}}">{{title}}</td>{{/d}}
+<table style="width:100%;border-collapse: separate;border-spacing: 0px 5px;">
+{{#d}}<tr>
+<td style="text-align: left;padding: 2px 5px 2px 5px;border-left: 1px solid #999;border-right: 1px solid #999;background: antiquewhite;border-radius: 10px;" id="{{id}}">{{title}}</td></tr>{{/d}}
 </table>
 </script>
 
-<script type="text/template" id="tp-art-viewer">
-<table style="width:100%;padding:10px;">
-    <tr>
-        <td style="width:100%;text-align:center;padding-top:15px;padding:10px;">
-            <table style="width:100%;padding:10px;">
-                <tr>
-                    <td >
-                        <div style="padding-top: 7px;text-align: center;font-size: 20px;text-overflow:ellipsis;">
-                            {{title}}
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="text-align:right;padding-right:25px;padding-bottom:5px;">&nbsp;{{name}}&nbsp;{{mtime}}&nbsp;
-                        <input type="button" class="btn btn-xs" value="{{type}}">
-                    </td>
-                </tr>
-                <tr>
-                    <td style="border-top:1px solid #ddd;padding:8px;">
-                        <div  style="font-size: 15px;width: 100%;text-align: left; " >{{{content}}}</div>
-                    </td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-</table>
-</script>
-
-<script type="text/template" id="tp-art-wrap">
-		<table style="width:100%;">
-            <tr>
-                <td id="{{ids.0}}" >
-                    文章列表
-                </td>
-                <td style="width:220px;text-align:center;vertical-align:top;">
-                    <table style="width:100%;margin-top:5px;">
-                        <tr>
-							<td>
-                                <table style="width:100%;border-collapse:separate;border:1px solid #ddd;border-radius:6px;padding:4px;" > 
-                                    <tr>
-                                        <td><input type="text" id="{{ids.1}}" value="" class="form-control" ></td>
-                                        <td style="width:50px;text-align:right;"><input type="button" class="btn btn-sm" id="{{ids.2}}" value="搜索"></td>
-                                    </tr>
-                                </table>
-                            </td>
-						</tr>
-                        <tr><td id="{{ids.3}}" >result list<td></tr>
-                    </table>
-                </td>
-            </tr>
-        </table>   
+<script type="text/template" id="tp-art-search-box" >
+    <table >
+        <tr>
+            <td>
+                <table > 
+                    <tr>
+                        <td><input type="text" id="{{ids.0}}" value="" class="form-control" ></td>
+                        <td style="width:50px;text-align:right;"><input type="button" class="btn btn-sm" id="{{ids.1}}" value="搜索"></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr><td id="{{ids.2}}" style="width:100px;text-align:center;"><td></tr>
+    </table>
 </script>
 
 <script type="text/template" id="tp-main-page">
     <table style="width:100%;">
-    <tr>
-    <td id="{{ids.0}}" >
-    文章列表
-    </td>
-    <td id="{{ids.1}}" style="width:220px;text-align:center;vertical-align:top;">
-    留言栏
-    </td>
-    </tr>
+        <tr>
+            <td id="{{ids.0}}" >
+                文章列表
+            </td>
+            <td style="width:220px;text-align:center;vertical-align:top;">
+                <table style="width:100%;">
+                    <tr><td id="{{ids.1}}">搜索框</td></tr>
+                    <tr><td id="{{ids.2}}">留言栏</td></tr>
+                </table>
+            </td>
+        </tr>
     </table>
 </script>
 

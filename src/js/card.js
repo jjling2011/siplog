@@ -18,19 +18,19 @@ var CardJS = {
             for (var key in settings) {
                 // safty check is not necessary.
                 //if ((key in cjs.s) && settings[key].constructor === cjs.s[key].constructor) {
-                    cjs.s[key] = settings[key];
+                cjs.s[key] = settings[key];
                 //}
             }
         }
 
         //各通用小函数
         cjs.f = {
-            utf8_to_base64:function(text_utf8){
+            utf8_to_base64: function (text_utf8) {
                 //对应 php decode:
                 // $txt_utf8 = urldecode(base64_decode($txt_b64));
                 return btoa(encodeURIComponent(text_utf8));
             },
-            base64_to_utf8:function(text_base64){
+            base64_to_utf8: function (text_base64) {
                 // 对应 php encode: 
                 // $txt_b64 =base64_encode(rawurlencode($txt_utf8));
                 // **** 注意是带raw三个字母 **** 
@@ -324,7 +324,20 @@ var CardJS = {
                         }
                         //console.log('param',params,'func',func);
                         //console.log('fetch arguments:',arguments,'params:',params,'func:',func);
-                        if (params.length < 1 || func.length < 1 || type(params[0]) !== 'String') {
+                        if (func.length === 0) {
+                            func.push(function (r) {
+                                console.log('Fetch:func_ok not set! ','Using default method log return data here.');
+                                console.log(r);
+                            });
+                        }
+                        if (func.length === 1) {
+                            func.push(function (r) {
+                                console.log('Fetch:func_fail not set!','Using default method log return data here.');
+                                console.log(r);
+                            });
+                        }
+
+                        if (params.length < 1 || type(params[0]) !== 'String') {
                             console.log('error: cardjs.CARD.fetch()', 'parameters not match!');
                             return;
                         }
@@ -332,19 +345,14 @@ var CardJS = {
                         var op, param = null, verbose = false, func_ok, func_fail;
 
                         op = params[0];
-                        func_ok = func[0];
-
-                        if (func.length > 1) {
-                            func_fail = func[1];
-                        }
 
                         if (params.length > 1) {
                             if (cjs.f.isString(params[1])) {
                                 param = params[1];
                             } else {
                                 if (type(params[1]) === "Boolean" && params.length === 2) {
-                                    param=null;
-                                }else{
+                                    param = null;
+                                } else {
                                     param = JSON.stringify(params[1]);
                                 }
                             }
@@ -374,14 +382,11 @@ var CardJS = {
                             }
                             var rsp = JSON.parse(raw_rsp);
                             if (rsp && rsp.status && rsp.data) {
-                                func_ok(rsp.data);
+                                //function ok
+                                func[0](rsp.data);
                             } else {
-                                if (func_fail) {
-                                    func_fail(rsp.msg);
-                                } else {
-                                    console.log('Fetch: func_fail do not exist!');
-                                    console.log('server response:',rsp);
-                                }
+                                // function fial
+                                func[1](rsp.mst);
                             }
                         };
                         xhr.send(encodeURI('op=' + op + '&data=' + param));
