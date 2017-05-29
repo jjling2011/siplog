@@ -16,19 +16,26 @@ if ($r[0]) {
 
 function install() {
     global $param;
-
+    
     unlink('json/top.json');
     unlink('json/atypes.json');
     unlink('json/msg.json');
     unlink('json/article.json');
     unlink('config/settings.php');
 
+    if (!file_exists('config')) {
+        mkdir('config', 0777, true);
+    }
+    if (!file_exists('json')) {
+        mkdir('json', 0777, true);
+    }
+
     copy('res/settings.skeleton.php', 'config/settings.php');
-    copy('res/article.json','json/article.json');
-    copy('res/atypes.json','json/atypes.json');
-    copy('res/top.json','json/top.json');
-    copy('res/msg.json','json/msg.json');
-    
+    copy('res/article.json', 'json/article.json');
+    copy('res/atypes.json', 'json/atypes.json');
+    copy('res/top.json', 'json/top.json');
+    copy('res/msg.json', 'json/msg.json');
+
     set('DB_HOST', $param['host']);
     set('DB_USER', $param['dbuser']);
     set('DB_PASS', $param['dbpass1']);
@@ -38,7 +45,7 @@ function install() {
     $sql = gen_sql();
 
     foreach ($tables as $t) {
-        query("DROP TABLE IF EXISTS `$t`");
+        //query("DROP TABLE IF EXISTS `$t`");
         query($sql[$t]);
     }
 
@@ -48,7 +55,7 @@ function install() {
     $pass = hash('md5', $salt . hash('md5', $param['pass1']));
 
     // insert admin 
-    query("insert into user set user='" . $param['user'] . "',psw='$pass',prv=3,salt='$salt',token='$token',name='" . $param['name']."'");
+    query("insert into user set user='" . $param['user'] . "',psw='$pass',prv=3,salt='$salt',token='$token',name='" . $param['name'] . "'");
 
     file_put_contents('res/lock', date('Y-m-d H:i:s'));
 }
