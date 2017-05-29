@@ -1,0 +1,84 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 2017-5-23, 19:20:42
+    Author     : luke2
+*/
+
+body {
+    text-align: center;
+}
+#main-page-container{
+    width:100%;
+    min-height:100px;
+    /*background: #31b0d5;*/
+    /*border: 1px solid black;*/
+}
+#foot-note{
+    width:100%;
+    min-height:80px;
+    text-align: right;
+    /*background: #31b0d5;*/
+    /*border: 1px solid black;*/
+
+}
+#banner{
+    width: 100%;
+    min-height:20px;
+    text-align: center;
+    vertical-align:middle;
+    /*background: #31b0d5;*/
+    /*border: 1px solid #ddd;*/
+}
+#page-wrap {
+    text-align: left;
+    width: 960px;
+    margin: 0 auto;
+}
+.sm-box{
+    width:100px;
+    height:25px;
+}
+.frame-tag-card{
+    /*float: right;*/
+    margin-right:  8px;
+    margin-bottom: 8px;
+    margin-left: 8px;
+    text-align: right;
+
+}
+.frame-tag-card-tag{
+    background:#ddd;
+    border: 1px solid #ddd;
+    width: 85px;
+    margin-bottom: -1px;
+    padding: 3px 10px 0px 10px;
+    text-align: center;
+    border-radius: 5px 5px 0px 0px;
+}
+
+.article-content{
+    font-size:15px;
+    max-height: 300px;
+    text-overflow: ellipsis;
+    display:block;
+    overflow:hidden;
+    width:100%;
+    text-align: left;
+}
+
+.msg-content{
+    max-width: 193px;
+    word-wrap: break-word;
+    font-size:14px;
+    max-height: 200px;
+    text-overflow: ellipsis;
+    display:block;
+    overflow:hidden;
+    width:100%;
+    text-align: left;
+}
+

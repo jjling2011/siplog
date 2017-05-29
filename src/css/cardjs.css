@@ -1,0 +1,54 @@
+.cjs-pn-tag-active{
+    font-size:22px;
+    text-shadow: #333 0px 0px 1px;
+    border: none;
+    background-color: transparent;
+}
+
+input.cjs-pn-tag:hover{
+    font-size: 22px;
+}
+
+.cjs-pn-tag{
+    font-size:15px;
+    border:none;
+    color: lightgrey;
+    background-color: transparent;
+}
+
+.cjs-at-tag-active{
+    color: black;
+    border-radius: 5px 5px 0px 0px;
+    padding: 3px 15px 4px 15px;
+    margin-bottom: -1px;
+    background: #ddd;
+    border: 1px solid #ddd;
+}
+
+.cjs-at-tag{
+    border:none;
+    font-size: 15px;
+    padding: 3px 15px 4px 15px;
+    color:#ddd;
+    background-color: transparent;
+}
+
+.cjs-at-pg-div{
+    border:1px solid #ddd;
+    border-radius: 5px 5px 5px 5px;
+    padding: 5px;
+}
+
+.cjs-pn-div{
+    font-size:14px;
+    border-top:1px solid #ddd;
+    border-bottom:1px solid #ddd;
+}
+
+.cjs-patw-div{
+    font-size:14px;
+    border: 1px solid #ddd;
+    /*background: greenyellow;*/
+    /*border-bottom: 1px solid #ddd;*/
+    /*padding: 8px;*/
+}

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>msite (developing)</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=1366,  maximum-scale=1.5, user-scalable=yes" />
+        <script type="text/javascript" src="lib/jquery.min.js"></script> 
+        <link rel="stylesheet" href="lib/bootstrap.min.css" >
+        <link rel="stylesheet" href="css/wangEditor.min.css">
+        <link rel="stylesheet" href="css/cardjs.css?t=20170518001">
+        <link rel="stylesheet" href="css/msite.css?t=20170518001">
+        <script type="text/javascript" src="lib/bootstrap.min.js"></script>
+        <script type="text/javascript" src="lib/mustache.js"></script>
+        <script type="text/javascript" src="lib/xss.js"></script>
+        <script type="text/javascript" src="lib/md5.js"></script>
+        <script type="text/javascript" src="lib/wangEditor.js"></script>
+        <script type="text/javascript" src="js/card.js?t=20170518001"></script>
+        <script type="text/javascript" src="js/msite.js?t=20170518001"></script>
+    </head>
+    <body >
+        <div id="page-wrap">
+            <div id="banner" ></div>
+            <div id="main-page-container"></div>
+            <div id="foot-note"></div>
+        </div>
+        <noscript>对不起你的浏览器不支持JavaScript!<br />Sorry, your browser does not support JavaScript!</noscript>
+        <div id="templates" style="display: none;"></div>
+        <script>
+            var main_page;
+            $(document).ready(function () {
+                $("#templates").load("res/template.html", function () {
+                    main_page = ms.o.MPanel.cNew("main-page-container").show();
+                });
+            });
+        </script>
+    </body>
+</html>
