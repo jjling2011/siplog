@@ -17,7 +17,7 @@ A single page blog.
   
 3.添加mariandb数据库及新建用户  
 
-4.打开浏览器访问 `http://......../siplog/install.php` 填入相应信息  
+4.打开浏览器访问 `http://......../siplog/src/install.php` 填入相应信息  
 
 以上
 
