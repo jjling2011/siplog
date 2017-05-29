@@ -141,7 +141,23 @@
 
 <script type="text/template" id="tp-at-help">
     <div style="padding: 0px;margin: 8px;">
-    搜索说明：
+	【更新主页】<br>
+	<input id="{{ids.0}}" type="button" value="立即更新" class="btn btn-sm btn-warning"><br>
+	
+	主页搜索框的缓存数据约24小时更新一次，<br>
+	如果要立即更新可以手动点上面的按钮。<br>
+	
+	**注意，此功能需要较长的处理时间。<br><br>
+	
+	【编辑及删除文件】<br>
+	先在 [管理] -> [搜索] 中输入条件，<br>
+	找到你想编辑或删除的文件。<br>
+	点中后相应行会变色，<br>
+	然后切换到 [编辑] 分页即可修改。<br><br>
+	
+	
+    【搜索选项】
+	**注意，这个是[管理]页面中的搜索，非[主页]中的搜索。
     <ul>
     <li>@名字</li>
     <li>#标题</li>
@@ -150,7 +166,8 @@
     </ul>
     例子：<br />
     ( 汽车 or 自行车 ) #便宜 and =0 <br />
-    搜索分类0里面，标题含有【便宜】，正文含有 【汽车】或【自行车】的文章
+    搜索分类0里面，标题含有【便宜】<br>
+	正文含有 【汽车】或【自行车】的文章<br>
     </div>
 </script>
 
@@ -192,6 +209,34 @@
     </table>
 </script>
 
+<script type="text/template" id="tp-art-viewer">
+<table style="width:100%;padding:10px;">
+    <tr>
+        <td style="width:100%;text-align:center;padding-top:15px;padding:10px;">
+            <table style="width:100%;padding:10px;">
+                <tr>
+                    <td >
+                        <div style="padding-top: 7px;text-align: center;font-size: 20px;text-overflow:ellipsis;">
+                            {{title}}
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align:right;padding-right:25px;padding-bottom:5px;">&nbsp;{{name}}&nbsp;{{mtime}}&nbsp;
+                        <input type="button" class="btn btn-xs" value="{{type}}">
+                    </td>
+                </tr>
+                <tr>
+                    <td style="border-top:1px solid #ddd;padding:8px;">
+                        <div  style="font-size: 15px;width: 100%;text-align: left; " >{{{content}}}</div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</script>
+
 <script type="text/template" id="tp-art-list">
 <table style="width:100%;border-collapse: separate;border-spacing: 0px 5px;">
 {{#d}}<tr>
@@ -202,7 +247,7 @@
 <script type="text/template" id="tp-art-search-box" >
     <table >
         <tr>
-            <td>
+            <td style="width:100%;">
                 <table > 
                     <tr>
                         <td><input type="text" id="{{ids.0}}" value="" class="form-control" ></td>
@@ -218,7 +263,7 @@
 <script type="text/template" id="tp-main-page">
     <table style="width:100%;">
         <tr>
-            <td id="{{ids.0}}" >
+            <td id="{{ids.0}}" style="vertical-align:top;">
                 文章列表
             </td>
             <td style="width:220px;text-align:center;vertical-align:top;">

@@ -10,7 +10,6 @@ var ms = CardJS.cNew({
     server_page: 'php/serv.php',
     //最近文章数据的位置
     top_art_path: 'json/top.json',
-    //article_type: ['其他', '资讯'],
     // 文章分类
     atypes_path: 'json/atypes.json',
     msg_path: 'json/msg.json',
@@ -85,6 +84,9 @@ ms.o.MP_msg = {
                     var d = o.objs[0].value;
                     if (d.length > 0) {
                         o.f.fetch('post_msg', d, function () {
+                            if(!ms.cache.msg){
+                                ms.cache.msg=[];
+                            }
                             ms.cache.msg.push({
                                 ctime: new Date().toJSON().slice(0, 10),
                                 name: 'me',
@@ -283,10 +285,13 @@ ms.o.UMA_editor = {
             add_event: true
         });
 
-        o.article_type = [];
-        ms.s.atypes.forEach(function (e, i) {
-            o.article_type.push([i, e]);
-        });
+        o.article_type = [[0,'无']];
+        if (ms.s.atypes) {
+            o.article_type=[];
+            ms.s.atypes.forEach(function (e, i) {
+                o.article_type.push([i, e]);
+            });
+        }
 
 
         o.data_parser = function () {
@@ -455,14 +460,12 @@ ms.o.UMA_types = {
                             types.push(this.value);
                         }
                     });
+                    //console.log(types);
                     o.f.fetch('update_atypes', types, function () {
                         ms.s.atypes = types;
                         alert('分类信息修改成功！');
                         o.show();
-                    }, function (r) {
-                        alert(r);
                     });
-
                 },
                 //key  up enter
                 function (e) {
@@ -816,6 +819,7 @@ ms.o.UM_wrap = {
                     um.show_user_panel();
                 });
             }
+            setTimeout(um.f.fetch('wakeup'),5000);
         };
 
         um.refresh = function () {
@@ -843,11 +847,25 @@ ms.o.UMA_help = {
         var o = ms.CARD.cNew(cid);
         o.f.merge({
             id_num: 1,
-            id_header: 'at_help'
+            id_header: 'at_help',
+            add_event:true
         });
 
         o.gen_html = function () {
-            return $('#tp-at-help').html();
+            return Mustache.render($('#tp-at-help').html(),o);
+        };
+        
+        o.gen_ev_handler=function(){
+            o.ev_handler=[
+                function(){
+                    o.f.fetch('update_all_article');
+                    alert('更新请求已发送，处理需要点时间，可以玩去咯。');
+                }
+            ];
+        };
+        
+        o.add_event=function(){
+            o.f.on('click',0);
         };
 
         return o;
@@ -1078,8 +1096,8 @@ ms.o.ART_list = {
                 var data = ms.cache.viewer.data[
                         ms.cache.viewer.result[idx]
                 ];
-                o.out_put.innerHTML =
-                        Mustache.render($('#tp-art-viewer').html(), data);
+                //console.log(data);
+                o.out_put.html(Mustache.render($('#tp-art-viewer').html(), data));
             } else {
                 console.log('没容器可以用来输出选中的文章！');
             }
@@ -1097,7 +1115,7 @@ ms.o.ART_list = {
                 })());
             }
         };
-        
+
         o.add_event = function () {
             for (var i = 0; i < o.ids.length; i++) {
                 o.f.on('click', i);
@@ -1139,7 +1157,7 @@ ms.o.ART_search_box = {
                 //focus in search box
                 function () {
                     if (!ms.cache.viewer.data) {
-                        console.log('忘了搬服务器的文章,偷偷加载数据中 ...');
+                        //console.log('忘了搬服务器的文章,偷偷加载数据中 ...');
                         $.getJSON(ms.s.article_path, function (data) {
                             ms.cache.viewer.data = [];
                             data.forEach(function (e) {
@@ -1152,7 +1170,7 @@ ms.o.ART_search_box = {
                                     type: ms.s.atypes[e.type]
                                 });
                             });
-                            console.log('终于搬完了。呼~~');
+                            //console.log('终于搬完了。呼~~');
                         }).fail(function () {
                             o.objs[2].innerHTML = '<font color="red">加载文章数据失败！</font>';
                         });
@@ -1221,110 +1239,6 @@ ms.o.ART_search_box = {
         return o;
     }
 };
-
-ms.o.del_ART_wrap = {
-    cNew: function (cid) {
-        var o = ms.CARD.cNew(cid);
-        o.f.merge({
-            id_num: 4,
-            id_header: 'atw',
-            add_event: true
-        });
-
-        o.chile = null;
-
-        o.gen_ev_handler = function () {
-            o.ev_handler = [
-                //keyup
-                function (e) {
-                    var k = e || window.event;
-                    if (k.keyCode !== 13) {
-                        return;
-                    }
-                    o.objs[2].click();
-                },
-                //click
-                function () {
-                    //search
-                    //console.log('objs1:',o.objs[1]);
-                    var keywords = o.objs[1].value.split(" ");
-
-                    //console.log(ms.cache.viewer.data);
-                    var i, j, kw = [], td, result = [], count = 0;
-                    keywords.forEach(function (e) {
-                        if (e.length > 0) {
-                            kw.push(e);
-                        }
-                    });
-                    for (i = 0; i < 15 && i < ms.cache.viewer.data.length; i++) {
-                        td = ms.cache.viewer.data[i];
-                        //console.log(td);
-                        if (kw.length > 0) {
-                            count = 0;
-                            for (j = 0; j < kw.length; j++) {
-                                if (td.title.indexOf(kw[j]) >= 0
-                                        || td.content.indexOf(kw[j]) >= 0) {
-
-                                    count++;
-                                }
-                            }
-                            if (count === kw.length) {
-                                result.push(i);
-                            }
-                        } else {
-                            result.push(i);
-                        }
-                    }
-                    ms.cache.viewer.list = result;
-                    //console.log('from art:', result);
-                    if (result.length > 0) {
-                        o.show_article(result[0]);
-                        o.child && o.child.destroy();
-                        o.child = ms.o.ART_list.cNew(o.ids[3], o.ids[0]).show();
-                    } else {
-                        o.objs[3].innerHTML = '<font color="red">没有找到相关记录</font>';
-                    }
-                }
-            ];
-        };
-
-
-
-        o.add_event = function () {
-            o.f.on('click', 2, 1);
-            o.f.on('keyup', 1, 0);
-        };
-
-        o.gen_html = function () {
-            return Mustache.render($('#tp-art-wrap').html(), o);
-        };
-
-        o.show_article = function (idx) {
-            var data = ms.cache.viewer.data[idx];
-            o.objs[0].innerHTML = Mustache.render($('#tp-art-viewer').html(), data);
-        };
-
-        o.after_add_event = function () {
-            console.log('正在后台更新数据');
-            o.objs[1].focus();
-
-            // debug中暂时不更新
-            o.f.fetch('wakeup', function (r) {
-                console.log(r);
-            }, function (r) {
-                console.log(r);
-            });
-        };
-
-        o.clean_up = function () {
-            o.child && o.child.destroy();
-        };
-
-
-        return o;
-    }
-};
-
 
 ms.o.MPage = {
     cNew: function (container_id) {

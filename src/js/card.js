@@ -324,25 +324,14 @@ var CardJS = {
                         }
                         //console.log('param',params,'func',func);
                         //console.log('fetch arguments:',arguments,'params:',params,'func:',func);
-                        if (func.length === 0) {
-                            func.push(function (r) {
-                                console.log('Fetch:func_ok not set! ','Using default method log return data here.');
-                                console.log(r);
-                            });
-                        }
-                        if (func.length === 1) {
-                            func.push(function (r) {
-                                console.log('Fetch:func_fail not set!','Using default method log return data here.');
-                                console.log(r);
-                            });
-                        }
+
 
                         if (params.length < 1 || type(params[0]) !== 'String') {
                             console.log('error: cardjs.CARD.fetch()', 'parameters not match!');
                             return;
                         }
 
-                        var op, param = null, verbose = false, func_ok, func_fail;
+                        var op, param = null, verbose = false;
 
                         op = params[0];
 
@@ -362,6 +351,25 @@ var CardJS = {
                             if (type(params[params.length - 1]) === "Boolean") {
                                 verbose = params[params.length - 1];
                             }
+                        }
+
+                        if (func.length === 0) {
+                            func.push(function (r) {
+                                var flag = verbose;
+                                if (flag) {
+                                    console.log('Fetch:func_ok not set! \n Server response:');
+                                }
+                                console.log(r);
+                            });
+                        }
+                        if (func.length === 1) {
+                            func.push(function (r) {
+                                var flag = verbose;
+                                if (flag) {
+                                    console.log('Fetch:func_fail not set! \n Server response:');
+                                }
+                                console.log(r);
+                            });
                         }
 
                         var xhr = new XMLHttpRequest();
@@ -386,7 +394,7 @@ var CardJS = {
                                 func[0](rsp.data);
                             } else {
                                 // function fial
-                                func[1](rsp.mst);
+                                func[1](rsp.msg);
                             }
                         };
                         xhr.send(encodeURI('op=' + op + '&data=' + param));

@@ -1,10 +1,20 @@
 <?php
 
+
+header("Content-Type:text/plain");
+
+function err($msg){
+    die('error|'.$msg);
+}
+
+if(!UPLOAD_SUPPORT){
+    err('图片上传功能未开启！');
+}
+
 require_once 'usermgr.php';
 
 $um = new UserMgr();
 
-header("Content-Type:text/plain");
 
 if (!$um->check_login()) {
     die("error|未登录不可上传文件！");
@@ -45,4 +55,4 @@ if(file_exists($file)){
     die(get_actual_link($file));
 }
 
-die("error|我也不知道哪里出错了，总之你上传的图片用不了。");
+die("error|我也不知道哪里出错了，总之你上传的图片不见了。");

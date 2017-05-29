@@ -21,6 +21,7 @@ class Serv extends UserMgr {
         $this->fn = array_merge($this->fn, [
             'post_article',
             'fetch_article',
+            'update_all_article',
             'post_msg',
             'wakeup',
             'delete_article',
@@ -280,6 +281,15 @@ class Serv extends UserMgr {
         }
         $this->haste($r['status']);
     }
+    
+    public function update_all_article() {
+        $user_info = $this->get_user_info();
+        if (!($user_info['login'] && $user_info['prv']['ARTM'])) {
+            $this->fail('无权操作！');
+            return;
+        }
+        $this->export_all_article();
+    }
 
     public function wakeup() {
         if (!file_exists(ARTICLE_PATH)) {
@@ -386,6 +396,7 @@ class Serv extends UserMgr {
         $id = $raw_id + 0;
         $r = CommLib::query('delete from article where id=?', 'i', [&$id]);
         $this->haste($r['status']);
+        $this->export_article();
     }
 
     public function post_article($raw_data) {
