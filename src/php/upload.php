@@ -7,11 +7,12 @@ function err($msg){
     die('error|'.$msg);
 }
 
+
+require_once 'usermgr.php';
+
 if(!UPLOAD_SUPPORT){
     err('图片上传功能未开启！');
 }
-
-require_once 'usermgr.php';
 
 $um = new UserMgr();
 
