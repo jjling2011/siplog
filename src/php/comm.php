@@ -6,7 +6,7 @@
  * and open the template in the editor.
  */
 
-include '../config/settings.php';
+include '../upload/config/settings.php';
 
 class CommLib {
 

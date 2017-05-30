@@ -1,6 +1,5 @@
 nbproject
-src/config/settings.php
 src/test/
-src/json/*
 todo
 src/bak
+upload

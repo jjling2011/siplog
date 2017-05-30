@@ -34,7 +34,11 @@ and open the template in the editor.
             var main_page;
             $(document).ready(function () {
                 $("#templates").load("res/template.html", function () {
-                    main_page = ms.o.MPanel.cNew("main-page-container").show();
+                    $.getJSON(ms.s.uset_path+'?t='+ms.f.rand(), function (data) {
+                        ms.f.merge_uset(data);
+                    }).always(function () {
+                        main_page = ms.o.MPanel.cNew("main-page-container").show();
+                    });
                 });
             });
         </script>

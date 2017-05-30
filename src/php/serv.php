@@ -22,13 +22,61 @@ class Serv extends UserMgr {
             'post_article',
             'fetch_article',
             'update_all_article',
+            'delete_all_orphan_img',
             'post_msg',
             'wakeup',
+            'list_orphan_img',
+            'set_upload_support',
             'delete_article',
-            'update_atypes',
+            'update_uset',
             //'export_article',
             'search'
         ]);
+    }
+
+    public function delete_all_orphan_img() {
+        $user_info = $this->get_user_info();
+        if (!($user_info['login'] && $user_info['prv']['ARTM'])) {
+            $this->fail('无权操作！');
+            return;
+        }
+        $data=$this->get_orphan_imag();
+        $count=0;
+        foreach($data as $d){
+            if(file_exists($d['path'])){
+                unlink($d['path']);
+                $count++;
+            }
+        }
+        CommLib::query('delete from pics where tag=4 or atid=0');
+        $this->ok("删除了 $count 张图片");
+    }
+
+    public function set_upload_support($raw_setting) {
+        $user_info = $this->get_user_info();
+        if (!($user_info['login'] && $user_info['prv']['SETM'])) {
+            $this->fail('无权操作!');
+            return;
+        }
+        if (($raw_setting + 0) === 0) {
+            file_put_contents(UPLOAD_PATH . 'lock', date('Y-m-d H:i:s'));
+            $this->ok('locked');
+        } else {
+            if (file_exists(UPLOAD_PATH . 'lock')) {
+                unlink(UPLOAD_PATH . 'lock');
+            }
+            $this->ok('unlock');
+        }
+    }
+
+    public function update_uset($raw_json_string) {
+        $user_info = $this->get_user_info();
+        if (!($user_info['login'] && $user_info['prv']['SETM'])) {
+            $this->fail('无权操作!');
+            return;
+        }
+        file_put_contents(USET_PATH, $raw_json_string);
+        $this->ok('设置已更新');
     }
 
     private function export_article() {
@@ -281,7 +329,7 @@ class Serv extends UserMgr {
         }
         $this->haste($r['status']);
     }
-    
+
     public function update_all_article() {
         $user_info = $this->get_user_info();
         if (!($user_info['login'] && $user_info['prv']['ARTM'])) {
@@ -377,14 +425,34 @@ class Serv extends UserMgr {
         file_put_contents(MSG_PATH, json_encode(array_reverse($data)));
     }
 
-    public function update_atypes($raw_types) {
+    public function list_orphan_img() {
         $user_info = $this->get_user_info();
         if (!($user_info['login'] && $user_info['prv']['ARTM'])) {
             $this->fail('无权操作！');
             return;
         }
-        file_put_contents(ATYPES_PATH, $raw_types);
-        $this->ok('成功！');
+        $this->ok($this->get_orphan_imag());
+    }
+
+    private function get_orphan_imag() {
+        $sql = 'select atid,path,uptime,deltime from pics where atid=0 or tag=4';
+        $db = CommLib::open_db();
+        $stmt = $db->prepare($sql);
+        $stmt->execute();
+        $atid = $path = $uptime = $deltime = null;
+        $stmt->bind_result($atid, $path, $uptime, $deltime);
+        $stmt->store_result();
+        $data = [];
+        while ($stmt->fetch()) {
+            $data[] = [
+                'atid' => $atid,
+                'path' => $path,
+                'uptime' => $uptime,
+                'deltime' => $deltime
+            ];
+        }
+        $stmt->free_result();
+        return($data);
     }
 
     public function delete_article($raw_id) {
@@ -394,6 +462,7 @@ class Serv extends UserMgr {
             return;
         }
         $id = $raw_id + 0;
+        CommLib::query('update pics set  tag=4 where atid=?', 'i', [&$id]);
         $r = CommLib::query('delete from article where id=?', 'i', [&$id]);
         $this->haste($r['status']);
         $this->export_article();
@@ -420,12 +489,14 @@ class Serv extends UserMgr {
           'id': ms.cache.article.current_id
           };
          */
-
+        $r = false;
+        $id = 0;
         if ($data['id'] + 0 > 0) {
             //modify
+            $id = $data['id'] + 0;
             $sql = 'update article set title=?,content=?,type=?,userid=?,name=? where id=?';
             $type = 'ssiiss';
-            $r = CommLib::query($sql, $type, [
+            $t = CommLib::query($sql, $type, [
                         &$title,
                         &$content,
                         &$data['type'],
@@ -433,20 +504,37 @@ class Serv extends UserMgr {
                         &$user_info['name'],
                         &$data['id']
             ]);
-            $this->haste($r['status']);
+            $r = $t['status'];
         } else {
             //insert new
             $sql = 'insert into article set title=?,content=?,type=?,userid=?,name=?';
             $type = 'ssiis';
-            $r = CommLib::query($sql, $type, [
-                        &$title,
-                        &$content,
-                        &$data['type'],
-                        &$user_info['id'],
-                        &$user_info['name']
-            ]);
-            $this->haste($r['status']);
+            $db = CommLib::open_db();
+            $stmt = $db->prepare($sql);
+            $stmt->bind_param('ssiis', $title, $content, $data['type'], $user_info['id'], $user_info['name']);
+            if ($stmt->execute()) {
+                $r = true;
+                $id = $stmt->insert_id + 0;
+            }
+//            $r = CommLib::query($sql, $type, [
+//                        &$title,
+//                        &$content,
+//                        &$data['type'],
+//                        &$user_info['id'],
+//                        &$user_info['name']
+//            ]);
+//            
         }
+
+        $doc = new DOMDocument();
+        @$doc->loadHTML($content);
+
+        $tags = $doc->getElementsByTagName('img');
+        foreach ($tags as $tag) {
+            $url = $tag->getAttribute('src');
+            CommLib::query('update pics set atid=? where url=?', 'is', [&$id, &$url]);
+        }
+        $this->haste($r);
         $this->export_article();
     }
 
