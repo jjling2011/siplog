@@ -1,5 +1,5 @@
 <?php
-if (file_exists('res/lock')) {
+if (file_exists('upload/config/lock')) {
     die('不能重复安装，请删除所有文件再重新安装。');
 }
 
@@ -17,31 +17,29 @@ if ($r[0]) {
 function install() {
     global $param;
     
-    unlink('json/top.json');
-    unlink('json/atypes.json');
-    unlink('json/msg.json');
-    unlink('json/article.json');
-    unlink('config/settings.php');
-
-    if (!file_exists('config')) {
-        mkdir('config', 0777, true);
-    }
-    if (!file_exists('json')) {
-        mkdir('json', 0777, true);
-    }
-
-    copy('res/settings.skeleton.php', 'config/settings.php');
-    copy('res/article.json', 'json/article.json');
-    copy('res/atypes.json', 'json/atypes.json');
-    copy('res/top.json', 'json/top.json');
-    copy('res/msg.json', 'json/msg.json');
+    del_file('upload/json/top.json');
+    del_file('upload/json/msg.json');
+    del_file('upload/json/uset.json');
+    del_file('upload/json/article.json');
+    del_file('upload/config/settings.php');
+    
+    make_dir('upload');
+    make_dir('upload/config');
+    make_dir('upload/json');
+    make_dir('upload/pics');
+    
+    copy('res/settings.skeleton.php', 'upload/config/settings.php');
+    copy('res/article.json', 'upload/json/article.json');
+    copy('res/uset.json', 'upload/json/uset.json');
+    copy('res/top.json', 'upload/json/top.json');
+    copy('res/msg.json', 'upload/json/msg.json');
 
     set('DB_HOST', $param['host']);
     set('DB_USER', $param['dbuser']);
     set('DB_PASS', $param['dbpass1']);
     set('DB_NAME', $param['dbname']);
 
-    $tables = ['article', 'ip', 'log', 'msg', 'sys', 'user'];
+    $tables = ['article', 'ip', 'log', 'msg', 'sys', 'user','pics'];
     $sql = gen_sql();
 
     foreach ($tables as $t) {
@@ -57,7 +55,19 @@ function install() {
     // insert admin 
     query("insert into user set user='" . $param['user'] . "',psw='$pass',prv=3,salt='$salt',token='$token',name='" . $param['name'] . "'");
 
-    file_put_contents('res/lock', date('Y-m-d H:i:s'));
+    file_put_contents('upload/config/lock', date('Y-m-d H:i:s'));
+}
+
+function del_file($file){
+    if(file_exists($file)){
+        unlink($file);
+    }
+}
+
+function make_dir($dir) {
+    if (!file_exists($dir)) {
+        mkdir($dir, 0755, true);
+    }
 }
 
 function rand_str($length = 48) {
@@ -72,6 +82,18 @@ function rand_str($length = 48) {
 
 function gen_sql() {
     $sql = [];
+    
+    $sql['pics']="CREATE TABLE IF NOT EXISTS `pics` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `url` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `uptime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `deltime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `path` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `atid` int(11) NOT NULL DEFAULT '0',
+  `tag` int(11) NOT NULL DEFAULT '0',
+  KEY `id` (`id`),
+  KEY `url` (`url`(191))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='上传图片数据'";
 
     $sql['user'] = "CREATE TABLE IF NOT EXISTS `user` (
   `user` char(50) NOT NULL,
@@ -144,7 +166,7 @@ function gen_sql() {
 
 function set($key, $value) {
     // define('DB_HOST', 'localhost');
-    file_put_contents('config/settings.php', "\ndefine('$key','$value');", FILE_APPEND);
+    file_put_contents('upload/config/settings.php', "\ndefine('$key','$value');", FILE_APPEND);
 }
 
 function query($sql) {

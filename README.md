@@ -12,10 +12,14 @@ A single page blog.
 1.克隆这个源的全部文件到支持php的http目录。例如：`/srv/http`  
 `git clone https://github.com/jjling2011/siplog.git`  
 
-2.修改文件所有者信息，http用户需有写入权限  
-`chown http:http /srv/http/siplog -R `  
+2.创建并为http用户添加upload目录的写入权限。  
+```
+# mkdir upload
+# chown http:http upload
+# chmod u+rwx upload
+```  
   
-3.添加mariandb数据库及新建用户  
+3.添加mariandb数据库及添加用户(略)  
 
 4.打开浏览器访问 `http://......../siplog/src/install.php` 填入相应信息  
 

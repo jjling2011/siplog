@@ -107,7 +107,7 @@
     </table>
 </script>
 
-<script type="text/template" id="tp-at-editor">
+<script type="text/template" id="tp-uma-editor">
     <table style="width:100%;">
     <tr>
     <td style="text-align: center;width: 60px;">标题</td>
@@ -139,7 +139,7 @@
     </table>
 </script>
 
-<script type="text/template" id="tp-at-help">
+<script type="text/template" id="tp-uma-help">
     <div style="padding: 0px;margin: 8px;">
 	【更新主页】<br>
 	<input id="{{ids.0}}" type="button" value="立即更新" class="btn btn-sm btn-warning"><br>
@@ -171,7 +171,7 @@
     </div>
 </script>
 
-<script type="text/template" id="tp-at-search-box">
+<script type="text/template" id="tp-uma-search-box">
     <table style="width:100%;">
     <tr>
     <td align="center">
@@ -189,7 +189,7 @@
     </table>
 </script>
 
-<script type="text/template" id="tp-at-search-result">
+<script type="text/template" id="tp-uma-search-result">
     <table style="width:100%;">
     <tr>
     <td>
@@ -263,17 +263,63 @@
 <script type="text/template" id="tp-main-page">
     <table style="width:100%;">
         <tr>
-            <td id="{{ids.0}}" style="vertical-align:top;">
-                文章列表
-            </td>
+            <td id="{{ids.0}}" style="vertical-align:top;"></td>
             <td style="width:220px;text-align:center;vertical-align:top;">
                 <table style="width:100%;">
-                    <tr><td id="{{ids.1}}">搜索框</td></tr>
-                    <tr><td id="{{ids.2}}">留言栏</td></tr>
+                    <tr><td id="{{ids.1}}"></td></tr>
+                    <tr><td id="{{ids.2}}"></td></tr>
                 </table>
             </td>
         </tr>
     </table>
+</script>
+<script type="text/template" id="tp-uma-set-wrap">
+<table>
+	<tr>
+		<td id="{{ids.0}}" style="vertical-align:top;"></td>
+		<td id="{{ids.1}}" style="vertical-align:top;"></td>
+	</tr>
+</table>
+</script>
+<script type="text/template" id="tp-uma-loi">
+<table>
+    <tr>
+		<td>
+            <table class="table table-striped" style="margin-bottom:5px;">
+                <tr><th>文章ID</th><th>上传时间</th><th>删除时间</th><th>图片链接</th></tr>
+                {{#data}}<tr><td>{{atid}}</td><td>{{uptime}}</td><td>{{deltime}}</td><td><a href="{{path}}" target="_blank">{{path}}</a></td></tr>{{/data}}
+            </table>
+        </td>
+	</tr>
+	<tr>
+		<td style="text-align:center;">
+            <table style="border-collapse: separate;border-spacing: 10px 0px;">
+                <tr>
+                    <td><input type="button" class="btn btn-sm btn-info" value="列出图片" id="{{ids.0}}"></td>
+                    <td><input type="button" class="btn btn-sm btn-warning" value="清理全部图片" id="{{ids.1}}"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</script>
+
+<script type="text/template" id="tp-uma-settings">
+    <table>
+		<tr>
+			<td>
+				<table style="margin: 5px;">
+					{{#fn_label}}
+						<tr>
+							<td style="text-align:center;width:20px;"><input name="{{ids.0}}" type="checkbox" ></td>
+							<td style="text-align:left;">{{.}}</td>
+						</tr>
+					{{/fn_label}}
+				</table>
+			</td>
+		</tr>
+        <tr><td style="text-align:center;"><input class="btn btn-sm btn-info" type="button" id="{{ids.1}}" value="提交"></td></tr>
+	</table>
 </script>
 
 <script type="text/template" id="tp-article-container">    
@@ -297,20 +343,29 @@
     </table>
 </script>
 
-<script type="text/template" id="tp-at-atypes">    
-    <table sytle="wdith:100%;padding:10px;"><tr><td style="padding:10px;">
-    <table sytle="wdith:100%;padding:10px;" class="table table-bordered" style="text-align:center;vertical-align:middle;margin:0px;">
-    <tr><th>序号</th><th>分类</th></tr>
-    {{#data}}<tr>
-        <td style="vertical-align:middle;">{{index}}</td>
-            <td><input type="text" class="form-control" name="{{name}}" value="{{.}}" ></td>
-</tr>{{/data}}
-<tr><td style="vertical-align:middle;">{{index}}</td>
-    <td><input id="{{new_type}}" type="text" class="form-control" name="{{name}}" value="" ></td></tr>
-</table></td></tr>
-<tr><td style="text-align:center;" ><input type="button" class="btn btn-info" value="提交" id="{{btn_summit}}"></td></tr>
-</td></tr></table>
-    {{resetIndex}}
+<script type="text/template" id="tp-uma-atypes">    
+<table sytle="wdith:100%;">
+    <tr>
+        <td >
+            <table style="border-collapse: separate;border-spacing: 5px 5px;">
+                {{#data}}<tr>
+                    <td style="vertical-align:middle; text-align: center;width:30px;">{{index}}</td>
+                    <td><input type="text" class="form-control" name="{{name}}" value="{{.}}" style="width: 130px;" ></td>
+                </tr>{{/data}}
+                <tr>
+                    <td style="vertical-align:middle;text-align: center;width:30px;">{{index}}</td>
+                    <td>
+					<input id="{{new_type}}" type="text" class="form-control" name="{{name}}" value="" style="width: 130px;">
+					</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td style="text-align:center;" ><input type="button" class="btn btn-sm btn-info" value="提交" id="{{btn_summit}}"></td>
+    </tr>
+</table>
+{{resetIndex}}
 </script>
     
 <script type="text/templlate" id="tp-mp-msg">

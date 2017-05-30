@@ -9,14 +9,26 @@
 var ms = CardJS.cNew({
     server_page: 'php/serv.php',
     //最近文章数据的位置
-    top_art_path: 'json/top.json',
+    top_art_path: 'upload/json/top.json',
     // 文章分类
-    atypes_path: 'json/atypes.json',
-    msg_path: 'json/msg.json',
-    article_path: 'json/article.json',
-    atypes: null,
-    msg_keep: 5
+    atypes_path: 'upload/json/atypes.json',
+    msg_path: 'upload/json/msg.json',
+    article_path: 'upload/json/article.json',
+    uset_path: 'upload/json/uset.json'
 });
+
+// 这些不太重要的设置可以用户自己改。
+ms.uset = {
+    //显示留言信息
+    show_mbox: true,
+
+    //是否开启上传图片功能
+    upload: true,
+
+    atypes: ['默认分类'],
+
+    msg_keep: 5
+};
 
 ms.cache = {
     viewer: {
@@ -40,6 +52,12 @@ ms.cache = {
         'total': -1,
         'cache_kw': '',
         'content': null
+    }
+};
+
+ms.f.merge_uset = function (settings) {
+    for (var key in settings) {
+        ms.uset[key] = settings[key];
     }
 };
 
@@ -84,15 +102,15 @@ ms.o.MP_msg = {
                     var d = o.objs[0].value;
                     if (d.length > 0) {
                         o.f.fetch('post_msg', d, function () {
-                            if(!ms.cache.msg){
-                                ms.cache.msg=[];
+                            if (!ms.cache.msg) {
+                                ms.cache.msg = [];
                             }
                             ms.cache.msg.push({
                                 ctime: new Date().toJSON().slice(0, 10),
                                 name: 'me',
                                 text: filterXSS(d)
                             });
-                            while (ms.cache.msg.length > ms.s.msg_keep) {
+                            while (ms.cache.msg.length > ms.uset.msg_keep) {
                                 ms.cache.msg.shift();
                             }
                             o.show();
@@ -120,8 +138,7 @@ ms.o.MPanel = {
     cNew: function (container_id) {
         var mp = ms.PANEL.cNew(container_id,
                 [
-                    //['测试', ['Test']],
-
+                    //['测试', ['AATest']],
                     ['主页', ['MPage']],
                     //['文章', ['ART_wrap']],
                     ['管理', ['UM_wrap']]
@@ -265,15 +282,73 @@ ms.o.UMA_search_result = {
                     title: filterXSS(c.title),
                     time: ms.f.YMD(c.mtime),
                     author: filterXSS(c.name),
-                    type: ms.s.atypes[c.type]
+                    type: (c.type < ms.uset.atypes.length) ? ms.uset.atypes[c.type] : '无'
                 });
             }
-            return (Mustache.render($('#tp-at-search-result').html(), o.d));
+            return (Mustache.render($('#tp-uma-search-result').html(), o.d));
         };
 
         return o;
     }
 
+};
+
+ms.o.UMA_list_orphan_img = {
+    cNew: function (cid) {
+        var o = ms.CARD.cNew(cid);
+
+        o.f.merge({
+            id_header: 'uma_loi',
+            id_num: 2,
+            add_event: true
+        });
+
+        o.data = [];
+
+        o.gen_ev_handler = function () {
+            o.ev_handler = [
+                function () {
+                    o.f.fetch('list_orphan_img', function (data) {
+                        o.data = [];
+                        data.forEach(function (e) {
+                            o.data.push({
+                                'atid': e.atid,
+                                'uptime': ms.f.YMD(e.uptime),
+                                'deltime': ms.f.YMD(e.deltime),
+                                'path': e.path && e.path.substr(3, e.path.length)
+                            });
+                        });
+                        o.show();
+                        if (o.data.length === 0) {
+                            alert('没有孤儿图片');
+                        }
+                    });
+                },
+                function () {
+                    if (confirm('删除所有孤儿图片？')) {
+                        o.f.fetch('delete_all_orphan_img', function (r) {
+                            alert(r);
+                            o.objs[0].click();
+                        }, function (r) {
+                            alert(r);
+                            o.objs[0].click();
+                        });
+                    }
+                }
+            ];
+        };
+
+        o.add_event = function () {
+            o.f.on('click', 0);
+            o.f.on('click', 1);
+        };
+
+        o.gen_html = function () {
+            return Mustache.render($('#tp-uma-loi').html(), o);
+        };
+
+        return o;
+    }
 };
 
 ms.o.UMA_editor = {
@@ -285,10 +360,10 @@ ms.o.UMA_editor = {
             add_event: true
         });
 
-        o.article_type = [[0,'无']];
-        if (ms.s.atypes) {
-            o.article_type=[];
-            ms.s.atypes.forEach(function (e, i) {
+        o.article_type = [[0, '无']];
+        if (ms.uset.atypes) {
+            o.article_type = [];
+            ms.uset.atypes.forEach(function (e, i) {
                 o.article_type.push([i, e]);
             });
         }
@@ -360,15 +435,17 @@ ms.o.UMA_editor = {
         };
 
         o.gen_html = function () {
-            return Mustache.render($('#tp-at-editor').html(), o);
+            return Mustache.render($('#tp-uma-editor').html(), o);
         };
 
         o.after_add_event = function () {
             o.editor && o.editor.destroy();
             o.editor = null;
             o.editor = new wangEditor(o.ids[1]);
-            o.editor.config.uploadImgUrl = "./php/upload.php";
-            o.editor.config.uploadImgFileName = 'upload';
+            if (ms.uset.upload) {
+                o.editor.config.uploadImgUrl = "./php/upload.php";
+                o.editor.config.uploadImgFileName = 'upload';
+            }
             o.editor.create();
 
             //console.log(ms.cache.article);
@@ -417,7 +494,11 @@ ms.o.UMA_editor = {
             //console.log('load_cache');
             if (ms.cache.article.html) {
                 o.objs[0].value = filterXSS(ms.cache.article.title);
-                o.objs[2].options[ms.cache.article.type].selected = true;
+                var type_no = 0;
+                if (ms.cache.article.type < ms.uset.atypes.length) {
+                    type_no = ms.cache.article.type;
+                }
+                o.objs[2].options[type_no].selected = true;
                 o.editor.$txt.html(filterXSS(ms.cache.article.html));
                 var cid = ms.cache.article.cache_id;
                 if (cid) {
@@ -461,8 +542,8 @@ ms.o.UMA_types = {
                         }
                     });
                     //console.log(types);
-                    o.f.fetch('update_atypes', types, function () {
-                        ms.s.atypes = types;
+                    ms.uset.atypes = types;
+                    o.f.fetch('update_uset', ms.uset, function () {
                         alert('分类信息修改成功！');
                         o.show();
                     });
@@ -479,7 +560,7 @@ ms.o.UMA_types = {
                             types.push(this.value);
                         }
                     });
-                    ms.s.atypes = types;
+                    ms.uset.atypes = types;
                     o.show();
                 }
             ];
@@ -495,7 +576,7 @@ ms.o.UMA_types = {
                 name: o.ids[0],
                 new_type: o.ids[1],
                 btn_summit: o.ids[2],
-                data: ms.s.atypes,
+                data: ms.uset.atypes,
                 index: function () {
                     return ++window['INDEX'] || (window['INDEX'] = 0);
                 },
@@ -510,7 +591,8 @@ ms.o.UMA_types = {
                 o.objs[1].focus();
             };
             // create data view
-            return Mustache.render($('#tp-at-atypes').html(), d);
+            var content=Mustache.render($('#tp-uma-atypes').html(), d);
+            return ms.f.add_frame('tp-frame-tag-card', content, '分类管理');
         };
 
         return o;
@@ -523,7 +605,9 @@ ms.o.UMA_wrap = {
                 [
                     ['搜索', ['UMA_search_box']],
                     ['编辑', ['UMA_editor']],
-                    ['分类', ['UMA_types']],
+                    //['分类', ['UMA_types']],
+                    ['图片管理', ['UMA_list_orphan_img']],
+                    ['设置', ['UMA_set_wrap']],
                     ['说明', ['UMA_help']]
                 ],
                 {
@@ -775,6 +859,83 @@ ms.o.UM_management = {
 
 };
 
+ms.o.UMA_set_wrap={
+    cNew:function(cid){
+        var o=ms.CARD.cNew(cid);
+        o.f.merge({
+            id_num:2,
+            id_header:'uma_swrap'
+        });
+        o.gen_html=function(){
+            return Mustache.render($('#tp-uma-set-wrap').html(),o);
+            
+        };
+        o.child=[];
+        o.after_add_event=function(){
+            o.child.push(ms.o.UMA_types.cNew(o.ids[0]).show());
+            o.child.push(ms.o.UMA_settings.cNew(o.ids[1]).show());
+        };
+        o.clean_up=function(){
+            o.child.forEach(function(e){
+                e && e.destroy();
+            });
+            o.child=[];
+        };
+        return o;
+    }
+};
+
+ms.o.UMA_settings = {
+    cNew: function (cid) {
+        var o = ms.CARD.cNew(cid);
+
+        o.f.merge({
+            id_header: "uma_uset",
+            id_num: 2,
+            add_event: true
+        });
+
+        o.fn_label = ['主页显示留言', '上传本地图片'];
+        o.fn_name = ['show_mbox', 'upload'];
+
+        o.gen_html = function () {
+            var content= Mustache.render($('#tp-uma-settings').html(), o);
+            return ms.f.add_frame('tp-frame-tag-card', content, '界面设置');
+            
+        };
+
+        o.after_add_event = function () {
+            var uset = $('[name=' + o.ids[0] + ']');
+            for (var i = 0; i < o.fn_name.length; i++) {
+                uset[i].checked = ms.uset[o.fn_name[i]];
+            }
+        };
+
+        o.gen_ev_handler = function () {
+            o.ev_handler = [
+                function () {
+                    var uset = $('[name=' + o.ids[0] + ']');
+                    for (var i = 0; i < o.fn_name.length; i++) {
+                        ms.uset[o.fn_name[i]] = uset[i].checked;
+                    }
+                    //console.log(ms.uset);
+                    o.f.fetch('set_upload_support', ms.uset.upload ? 1 : 0);
+                    o.f.fetch('update_uset', ms.uset, function (r) {
+                        alert(r);
+                    });
+                }
+            ];
+        };
+
+        o.add_event = function () {
+            o.f.on('click', 1, 0);
+        }
+        ;
+
+        return o;
+    }
+};
+
 ms.o.UM_wrap = {
     cNew: function (container_id) {
         var um = ms.CARD.cNew(container_id);
@@ -795,7 +956,6 @@ ms.o.UM_wrap = {
                 return;
             }
             var info = ms.cache.user_info;
-            um.o[0].push(ms.o.UMA_wrap.cNew(um.ids[0]).show());
             var current_id = 1;
             if (info && info.login) {
                 um.objs[current_id++].innerHTML = Mustache.render($('#tp-um-welcome').html(), info);
@@ -806,10 +966,10 @@ ms.o.UM_wrap = {
             } else {
                 um.o[1].push(ms.o.UM_login.cNew(um.ids[current_id++]).show());
             }
-
         };
 
         um.after_add_event = function () {
+            um.o[0].push(ms.o.UMA_wrap.cNew(um.ids[0]).show());
             if (ms.cache.user_info) {
                 //console.log('using cache');
                 um.show_user_panel();
@@ -819,7 +979,9 @@ ms.o.UM_wrap = {
                     um.show_user_panel();
                 });
             }
-            setTimeout(um.f.fetch('wakeup'),5000);
+            setTimeout(function () {
+                um.f.fetch('wakeup');
+            }, 6000);
         };
 
         um.refresh = function () {
@@ -848,24 +1010,24 @@ ms.o.UMA_help = {
         o.f.merge({
             id_num: 1,
             id_header: 'at_help',
-            add_event:true
+            add_event: true
         });
 
         o.gen_html = function () {
-            return Mustache.render($('#tp-at-help').html(),o);
+            return Mustache.render($('#tp-uma-help').html(), o);
         };
-        
-        o.gen_ev_handler=function(){
-            o.ev_handler=[
-                function(){
+
+        o.gen_ev_handler = function () {
+            o.ev_handler = [
+                function () {
                     o.f.fetch('update_all_article');
                     alert('更新请求已发送，处理需要点时间，可以玩去咯。');
                 }
             ];
         };
-        
-        o.add_event=function(){
-            o.f.on('click',0);
+
+        o.add_event = function () {
+            o.f.on('click', 0);
         };
 
         return o;
@@ -882,7 +1044,7 @@ ms.o.UMA_search_box = {
         });
 
         o.gen_html = function () {
-            return Mustache.render($('#tp-at-search-box').html(), o);
+            return Mustache.render($('#tp-uma-search-box').html(), o);
         };
 
         o.child = null;
@@ -955,7 +1117,7 @@ ms.o.UMA_search_box = {
     }
 };
 
-ms.o.Test = {
+ms.o.AATest = {
     cNew: function (cid) {
         var o = ms.CARD.cNew(cid);
         o.f.merge({
@@ -967,40 +1129,14 @@ ms.o.Test = {
         o.gen_ev_handler = function () {
             o.ev_handler = [
                 function () {
-                    o.test('aaa', function () {
-                        console.log('hello 1');
-                    }, true, 'bbb', [1, 2, 3], {a: 1, b: 2}, function () {
-                        console.log('hello 2');
-                    });
+                    ms.uset.show_mbox = true;
+                    o.f.fetch('update_settings', ms.uset);
                 }
             ];
         };
 
         o.add_event = function () {
             o.f.on('click', 0);
-        };
-
-        o.test = function () {
-            console.log("arguments", arguments, "type");
-            function type(obj) {
-                return Object.prototype.toString.call(obj).slice(8, -1);
-            }
-            var i, param = [], func = [];
-            for (i = 0; i < arguments.length; i++) {
-                console.log(type(arguments[i]));
-                switch (type(arguments[i])) {
-                    case 'Function':
-                        func.push(arguments[i]);
-                        break;
-                    default:
-                        param.push(arguments[i]);
-                        break;
-                }
-            }
-            console.log(param, func);
-            func[0]();
-            func[1]();
-
         };
 
         o.gen_html = function () {
@@ -1167,7 +1303,7 @@ ms.o.ART_search_box = {
                                     mtime: ms.f.YMD(e.mtime),
                                     name: filterXSS(e.name),
                                     title: filterXSS(e.title),
-                                    type: ms.s.atypes[e.type]
+                                    type: ms.uset.atypes[(e.type < ms.uset.atypes.length ? e.type : 0)]
                                 });
                             });
                             //console.log('终于搬完了。呼~~');
@@ -1258,13 +1394,7 @@ ms.o.MPage = {
         m.after_add_event = function () {
             m.child.push(ms.o.ART_search_box.cNew(m.ids[1]).show());
             ms.cache.viewer.output = m.ids[0];
-            if (!ms.s.atypes) {
-                $.getJSON(ms.s.atypes_path, function (data) {
-                    ms.s.atypes = data;
-                }).fail(function () {
-                    console.log('分类文件加载失败！');
-                });
-            }
+
             if (!ms.cache.mst) {
                 $.getJSON(ms.s.msg_path, function (data) {
                     ms.cache.msg = [];
@@ -1278,10 +1408,14 @@ ms.o.MPage = {
                 }).fail(function () {
                     console.log('留言文件加载失败！');
                 }).always(function () {
-                    m.child.push(ms.o.MP_msg.cNew(m.ids[2]).show());
+                    if (ms.uset.show_mbox) {
+                        m.child.push(ms.o.MP_msg.cNew(m.ids[2]).show());
+                    }
                 });
             } else {
-                m.child.push(ms.o.MP_msg.cNew(m.ids[2]).show());
+                if (ms.uset.show_mbox) {
+                    m.child.push(ms.o.MP_msg.cNew(m.ids[2]).show());
+                }
             }
 
             if (!ms.cache.article.top) {
@@ -1295,7 +1429,7 @@ ms.o.MPage = {
                             mtime: ms.f.YMD(e.mtime),
                             ctime: ms.f.YMD(e.ctime),
                             id: e.id,
-                            type: ms.s.atypes[e.type],
+                            type: ms.uset.atypes[(e.type < ms.uset.atypes.length ? e.type : 0)],
                             name: filterXSS(e.name),
                             content: filterXSS(ms.f.base64_to_utf8(e.content))
                         });
