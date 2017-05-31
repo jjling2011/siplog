@@ -17,7 +17,29 @@ var ms = CardJS.cNew({
     uset_path: 'upload/json/uset.json'
 });
 
-// 这些不太重要的设置可以用户自己改。
+ms.f.get_offset = function (el) {
+    el = el.getBoundingClientRect();
+    return {
+        left: el.left + window.scrollX + el.width,
+        top: el.top + window.scrollY + el.height
+    };
+};
+
+ms.f.bak_get_offset = function (element) {
+    var top = 0, left = 0;
+    do {
+        top += element.offsetTop || 0;
+        left += element.offsetLeft || 0;
+        element = element.offsetParent;
+    } while (element);
+
+    return {
+        top: top,
+        left: left
+    };
+};
+
+// 这些不太重要的设置，用户可以自己改。
 ms.uset = {
     //显示留言信息
     show_mbox: true,
@@ -31,19 +53,22 @@ ms.uset = {
 };
 
 ms.cache = {
-    viewer: {
+    mpsearch: {
         data: null,
         result: [],
         output: null
     },
     msg: null,
     article: {
+        top: null,
         title: null,
         html: null,
         type: null,
+        lock:false,
+        recent:null,
         cache_id: null,
-        selected_id: null,
-        top: null
+        selected_id: null
+        
     },
     search: {
         'current_kw': '',
@@ -52,6 +77,11 @@ ms.cache = {
         'total': -1,
         'cache_kw': '',
         'content': null
+    },
+    um: {
+        wrap: null,
+        user_info: null,
+        all_user_info: null
     }
 };
 
@@ -134,12 +164,12 @@ ms.o.MP_msg = {
         return o;
     }
 };
-ms.o.MPanel = {
+ms.o.Main_wrap = {
     cNew: function (container_id) {
         var mp = ms.PANEL.cNew(container_id,
                 [
                     //['测试', ['AATest']],
-                    ['主页', ['MPage']],
+                    ['主页', ['MP_wrap']],
                     //['文章', ['ART_wrap']],
                     ['管理', ['UM_wrap']]
                 ],
@@ -355,7 +385,7 @@ ms.o.UMA_editor = {
     cNew: function (cid) {
         var o = ms.CARD.cNew(cid);
         o.f.merge({
-            id_num: 7,
+            id_num: 11,
             id_header: 'edt',
             add_event: true
         });
@@ -367,7 +397,6 @@ ms.o.UMA_editor = {
                 o.article_type.push([i, e]);
             });
         }
-
 
         o.data_parser = function () {
             o.editor && o.editor.destroy();
@@ -382,14 +411,21 @@ ms.o.UMA_editor = {
                         'title': ms.f.utf8_to_base64(o.objs[0].value),
                         'content': ms.f.utf8_to_base64(content),
                         'type': o.objs[2].options[o.objs[2].selectedIndex].value,
-                        'id': ms.cache.article.cache_id
+                        'id': ms.cache.article.cache_id,
+                        'top':o.objs[10].checked?1:0,
+                        'lock':o.objs[9].checked?1:0
+                        
                     };
                     //console.log(content);
                     if (!confirm('确定提交？')) {
                         return;
                     }
+
+                    // clean cache
+                    ms.cache.article.recent = null;
+
                     o.objs[5].innerHTML = '正在提交数据 ...';
-                    o.f.fetch('post_article', data, function (r) {
+                    o.f.fetch('post_article', data, function () {
                         alert('提交成功!');
                         o.objs[4].click();
                         //console.log(r);
@@ -413,9 +449,14 @@ ms.o.UMA_editor = {
                         o.objs[4].click();
                         return;
                     }
+
                     if (!confirm("确定删除文章？")) {
                         return;
                     }
+
+                    // clean cache
+                    ms.cache.article.recent = null;
+
                     o.f.fetch('delete_article', ms.cache.article.cache_id,
                             function () {
                                 alert('删除成功！');
@@ -424,7 +465,18 @@ ms.o.UMA_editor = {
                             }, false, function (r) {
                         alert(r);
                     });
+                },
+                function () {
+                    if (o.objs[8].style.display === 'block') {
+                        o.objs[8].style.display = 'none';
+                    } else {
+                        var pos = ms.f.get_offset(o.objs[1]);
+                        o.objs[8].style.left = (pos.left - 8 - parseInt(o.objs[8].style.width)) + "px";
+                        o.objs[8].style.top = (pos.top - 8 - parseInt(o.objs[8].style.height)) + "px";
+                        o.objs[8].style.display = 'block';
+                    }
                 }
+
             ];
         };
 
@@ -432,6 +484,7 @@ ms.o.UMA_editor = {
             o.f.on('click', 3, 0);
             o.f.on('click', 4, 1);
             o.f.on('click', 6, 2);
+            o.f.on('click', 7, 3);
         };
 
         o.gen_html = function () {
@@ -470,6 +523,8 @@ ms.o.UMA_editor = {
                     ms.cache.article.title = ms.f.base64_to_utf8(data.title);
                     ms.cache.article.html = ms.f.base64_to_utf8(data.content);
                     ms.cache.article.type = data.type;
+                    ms.cache.article.lock=!(data.lock===0);
+                    ms.cache.article.top=!(data.top===0);
                     //console.log('loadhtml', ms.cache.article.html);
                     o.load_cache();
                 }, false, function (r) {
@@ -487,6 +542,9 @@ ms.o.UMA_editor = {
             if (o.editor) {
                 ms.cache.article.html = o.editor.$txt.html();
             }
+            ms.cache.article.lock=o.objs[9].checked;
+            ms.cache.article.top=o.objs[10].checked;
+            
             // console.log(ms.cache.article);
         };
 
@@ -500,6 +558,8 @@ ms.o.UMA_editor = {
                 }
                 o.objs[2].options[type_no].selected = true;
                 o.editor.$txt.html(filterXSS(ms.cache.article.html));
+                o.objs[9].checked=ms.cache.article.lock;
+                o.objs[10].checked=ms.cache.article.top;
                 var cid = ms.cache.article.cache_id;
                 if (cid) {
                     o.objs[5].innerHTML = "修改文章： #" + cid;
@@ -591,7 +651,7 @@ ms.o.UMA_types = {
                 o.objs[1].focus();
             };
             // create data view
-            var content=Mustache.render($('#tp-uma-atypes').html(), d);
+            var content = Mustache.render($('#tp-uma-atypes').html(), d);
             return ms.f.add_frame('tp-frame-tag-card', content, '分类管理');
         };
 
@@ -648,8 +708,11 @@ ms.o.UM_logout = {
                 },
                 // logout
                 function () {
-                    o.f.fetch('logout', null, function (r) {
-                        ms.cache.umwrap && ms.cache.umwrap.refresh();
+                    o.f.fetch('logout', function (r) {
+                        console.log(r);
+                        ms.cache.um.user_info = null;
+                        ms.cache.um.all_user_info = null;
+                        ms.cache.um.wrap && ms.cache.um.wrap.refresh();
                     });
                 }
             ];
@@ -707,7 +770,9 @@ ms.o.UM_change_psw = {
                     var data = {'name': name, 'opsw': md5(org_psw), 'npsw': md5(new_psw)};
                     o.f.fetch('user_modify', data, function (r) {
                         o.objs[5].innerHTML = ms.f.html_escape(r);
-                        ms.cache.umwrap && ms.cache.umwrap.refresh();
+                        ms.cache.um.user_info = null;
+                        ms.cache.um.all_user_info = null;
+                        ms.cache.um.wrap && ms.cache.um.wrap.refresh();
                     }, false, function (r) {
                         o.objs[5].innerHTML = ms.f.html_escape(r);
                     });
@@ -729,21 +794,36 @@ ms.o.UM_management = {
     cNew: function (cid) {
         var o = ms.CARD.cNew(cid);
 
-        o.tpd = null;
-        o.data = null;
-
         o.f.merge({
             id_num: 9,
             id_header: "um_mod",
-            add_event: false,
-            fetch: ['fetch_all_user_info']
+            add_event: false
         });
 
+        o.refresh = function () {
+            ms.cache.um.all_user_info = null;
+            o.f.fetch('fetch_all_user_info', function (data) {
+                ms.cache.um.all_user_info = data;
+                o.show();
+            }, function (r) {
+                alert(r);
+            });
+        };
+
+        o.after_add_event = function () {
+            if (!ms.cache.um.all_user_info) {
+                o.refresh();
+            } else {
+                o.ev_handler[0]();
+            }
+        };
+
         o.data_parser = function () {
-            if (o.data) {
+
+            if (ms.cache.um.all_user_info) {
                 o.f.merge({add_event: true});
-                o.tpd = o.data;
-                //console.log(o.tpd);
+            } else {
+                o.f.merge({add_event: false});
             }
         };
 
@@ -751,24 +831,27 @@ ms.o.UM_management = {
             o.ev_handler = [
                 // select change
                 function () {
-                    var id = o.objs[0].value;
-                    o.objs[1].value = ms.f.html_escape(o.tpd.name_list[id]);
-                    o.objs[8].value = ms.f.html_escape(o.tpd.user_list[id]);
-                    if (o.tpd.ban_list[id]) {
+                    var id = o.objs[0].value,
+                            uinfo = ms.cache.um.all_user_info;
+
+                    o.objs[1].value = ms.f.html_escape(uinfo.name_list[id]);
+                    o.objs[8].value = ms.f.html_escape(uinfo.user_list[id]);
+                    if (uinfo.ban_list[id]) {
                         o.objs[8].style.backgroundColor = 'lightgray';
                     } else {
                         o.objs[8].style.backgroundColor = 'transparent';
                     }
                     var pv = $('[name=' + o.ids[3] + ']');
                     for (var i = 0; i < pv.length; i++) {
-                        pv[i].checked = o.tpd.user_prv[id][o.tpd.prv_list[i]];
+                        pv[i].checked = uinfo.user_prv[id][uinfo.prv_list[i]];
                     }
                 },
                 // reset psw
                 function () {
                     var id = o.objs[0].value;
                     o.f.fetch('user_reset', id, function (d) {
-                        console.log(d);
+                        //console.log(d);
+                        ms.cache.um.all_user_info = null;
                         o.refresh();
                     });
                 },
@@ -791,7 +874,7 @@ ms.o.UM_management = {
                             p = [];
                     for (var i = 0; i < pv.length; i++) {
                         if (pv[i].checked) {
-                            p.push(o.tpd.prv_list[i]);
+                            p.push(ms.cache.um.all_user_info.prv_list[i]);
                         }
                     }
                     o.f.fetch('user_management', {'id': id, 'name': name, 'user': user, 'prv_list': p},
@@ -813,7 +896,7 @@ ms.o.UM_management = {
                     var pv = $('[name=' + o.ids[3] + ']');
                     for (var i = 0; i < pv.length; i++) {
                         if (pv[i].checked) {
-                            param.prv.push(o.tpd.prv_list[i]);
+                            param.prv.push(ms.cache.um.all_user_info.prv_list[i]);
                         }
                     }
                     //console.log(param);
@@ -836,21 +919,12 @@ ms.o.UM_management = {
         };
 
         o.gen_html = function () {
-            if (!o.tpd) {
-                return('正在读取数据 ...');
-            }
-            o.tpd['ids'] = o.ids;
-            //console.log(o.tpd);
-            //return 'debug';
-            var content = Mustache.render($("#tp-um-modify").html(), o.tpd);
-            return ms.f.add_frame('tp-frame-tag-card', content, '账号管理');
-        };
-
-        o.after_add_event = function () {
-            if (!o.tpd) {
-                o.refresh();
+            if (ms.cache.um.all_user_info) {
+                ms.cache.um.all_user_info.ids = o.ids;
+                var content = Mustache.render($("#tp-um-modify").html(), ms.cache.um.all_user_info);
+                return ms.f.add_frame('tp-frame-tag-card', content, '账号管理');
             } else {
-                o.ev_handler[0]();
+                return('正在读取数据 ...');
             }
         };
 
@@ -859,27 +933,27 @@ ms.o.UM_management = {
 
 };
 
-ms.o.UMA_set_wrap={
-    cNew:function(cid){
-        var o=ms.CARD.cNew(cid);
+ms.o.UMA_set_wrap = {
+    cNew: function (cid) {
+        var o = ms.CARD.cNew(cid);
         o.f.merge({
-            id_num:2,
-            id_header:'uma_swrap'
+            id_num: 2,
+            id_header: 'uma_swrap'
         });
-        o.gen_html=function(){
-            return Mustache.render($('#tp-uma-set-wrap').html(),o);
-            
+        o.gen_html = function () {
+            return Mustache.render($('#tp-uma-set-wrap').html(), o);
+
         };
-        o.child=[];
-        o.after_add_event=function(){
+        o.child = [];
+        o.after_add_event = function () {
             o.child.push(ms.o.UMA_types.cNew(o.ids[0]).show());
             o.child.push(ms.o.UMA_settings.cNew(o.ids[1]).show());
         };
-        o.clean_up=function(){
-            o.child.forEach(function(e){
+        o.clean_up = function () {
+            o.child.forEach(function (e) {
                 e && e.destroy();
             });
-            o.child=[];
+            o.child = [];
         };
         return o;
     }
@@ -899,9 +973,9 @@ ms.o.UMA_settings = {
         o.fn_name = ['show_mbox', 'upload'];
 
         o.gen_html = function () {
-            var content= Mustache.render($('#tp-uma-settings').html(), o);
+            var content = Mustache.render($('#tp-uma-settings').html(), o);
             return ms.f.add_frame('tp-frame-tag-card', content, '界面设置');
-            
+
         };
 
         o.after_add_event = function () {
@@ -939,66 +1013,69 @@ ms.o.UMA_settings = {
 ms.o.UM_wrap = {
     cNew: function (container_id) {
         var um = ms.CARD.cNew(container_id);
-        ms.cache.umwrap = um;
+
+        ms.cache.um.wrap = um;
 
         um.f.merge({
             id_num: 5,
             id_header: 'um-wrap'
         });
-        um.o = [[], []];
+
+        um.child = [];
+        um.timer = null;
 
         um.gen_html = function () {
             return Mustache.render($('#tp-um-wrap').html(), um);
         };
 
         um.show_user_panel = function () {
-            if (!ms.cache.user_info) {
-                return;
-            }
-            var info = ms.cache.user_info;
+            var info = ms.cache.um.user_info;
             var current_id = 1;
             if (info && info.login) {
                 um.objs[current_id++].innerHTML = Mustache.render($('#tp-um-welcome').html(), info);
                 if (info.prv['USERM']) {
-                    um.o[1].push(ms.o.UM_management.cNew(um.ids[current_id++]).show());
+                    um.child.push(ms.o.UM_management.cNew(um.ids[current_id++]).show());
                 }
-                um.o[1].push(ms.o.UM_logout.cNew(um.ids[current_id++]).show());
+                um.child.push(ms.o.UM_logout.cNew(um.ids[current_id++]).show());
             } else {
-                um.o[1].push(ms.o.UM_login.cNew(um.ids[current_id++]).show());
+                um.child.push(ms.o.UM_login.cNew(um.ids[current_id++]).show());
             }
         };
 
         um.after_add_event = function () {
-            um.o[0].push(ms.o.UMA_wrap.cNew(um.ids[0]).show());
-            if (ms.cache.user_info) {
+            um.child.push(ms.o.UMA_wrap.cNew(um.ids[0]).show());
+            if (ms.cache.um.user_info) {
                 //console.log('using cache');
                 um.show_user_panel();
             } else {
                 um.f.fetch('fetch_user_info', null, function (info) {
-                    ms.cache.user_info = info;
+                    ms.cache.um.user_info = info;
                     um.show_user_panel();
                 });
             }
-            setTimeout(function () {
-                um.f.fetch('wakeup');
-            }, 6000);
+            if (!um.timer) {
+                um.timer = setTimeout(function () {
+                    um.f.fetch('wakeup', function () {
+                        ms.cache.mpsearch.data = null;
+                    });
+                }, 6000);
+            }
         };
 
         um.refresh = function () {
-            ms.cache.user_info = null;
+            ms.cache.um.all_user_info = null;
+            ms.cache.um.user_info = null;
             um.clean_up();
             um.show();
         };
 
         um.clean_up = function () {
-            um.o.forEach(function (side) {
-                side.forEach(function (e) {
-                    if (e) {
-                        e.destroy();
-                    }
-                });
+            um.child.forEach(function (e) {
+                e && e.destroy();
             });
-            um.o = [[], []];
+            um.child = [];
+            clearTimeout(um.timer);
+            um.timer = null;
         };
         return um;
     }
@@ -1020,7 +1097,10 @@ ms.o.UMA_help = {
         o.gen_ev_handler = function () {
             o.ev_handler = [
                 function () {
-                    o.f.fetch('update_all_article');
+                    o.f.fetch('update_all_article', function () {
+                        // force update mp_search_box cache
+                        ms.cache.mpsearch.data = null;
+                    });
                     alert('更新请求已发送，处理需要点时间，可以玩去咯。');
                 }
             ];
@@ -1158,8 +1238,7 @@ ms.o.UM_login = {
         um.f.merge({
             id_num: 5,
             id_header: 'um_login',
-            add_event: true,
-            fetch: ['fetch_user_info']
+            add_event: true
         });
 
         um.gen_ev_handler = function () {
@@ -1176,9 +1255,7 @@ ms.o.UM_login = {
                     //console.log(user_info);
                     um.f.fetch('login', user_info,
                             function () {
-                                //console.log('reload');
-                                //um.parent && um.parent.refresh();
-                                ms.cache.umwrap && ms.cache.umwrap.refresh();
+                                ms.cache.um.wrap && ms.cache.um.wrap.refresh();
                             },
                             false,
                             function (d) {
@@ -1188,7 +1265,6 @@ ms.o.UM_login = {
                 function (e) {
                     var k = e || window.event;
                     if (k.keyCode === 13) {
-                        //console.log('fire');
                         um.objs[2].click();
                     }
                 }
@@ -1217,10 +1293,10 @@ ms.o.ART_list = {
             id_header: 'art_list'
         });
 
-        o.out_put = $('#' + ms.cache.viewer.output) || null;
+        o.out_put = $('#' + ms.cache.mpsearch.output) || null;
 
         o.data_parser = function () {
-            o.settings.id_num = ms.cache.viewer.result.length;
+            o.settings.id_num = ms.cache.mpsearch.result.length;
             o.settings.add_event = false;
             if (o.settings.id_num > 0) {
                 o.settings.add_event = true;
@@ -1229,8 +1305,8 @@ ms.o.ART_list = {
 
         o.show_article = function (idx) {
             if (o.out_put) {
-                var data = ms.cache.viewer.data[
-                        ms.cache.viewer.result[idx]
+                var data = ms.cache.mpsearch.data[
+                        ms.cache.mpsearch.result[idx]
                 ];
                 //console.log(data);
                 o.out_put.html(Mustache.render($('#tp-art-viewer').html(), data));
@@ -1262,11 +1338,11 @@ ms.o.ART_list = {
             var data = {
                 d: []
             };
-            //console.log('from list:', ms.cache.viewer.list);
-            ms.cache.viewer.result.forEach(function (e, i) {
+            //console.log('from list:', ms.cache.mpsearch.list);
+            ms.cache.mpsearch.result.forEach(function (e, i) {
                 data.d.push({
                     id: o.ids[i],
-                    title: ms.cache.viewer.data[e].title
+                    title: ms.cache.mpsearch.data[e].title
                 });
             });
             //console.log(data);
@@ -1292,12 +1368,12 @@ ms.o.ART_search_box = {
 
                 //focus in search box
                 function () {
-                    if (!ms.cache.viewer.data) {
+                    if (!ms.cache.mpsearch.data) {
                         //console.log('忘了搬服务器的文章,偷偷加载数据中 ...');
-                        $.getJSON(ms.s.article_path, function (data) {
-                            ms.cache.viewer.data = [];
+                        $.getJSON(ms.s.article_path + '?t=' + ms.f.rand(), function (data) {
+                            ms.cache.mpsearch.data = [];
                             data.forEach(function (e) {
-                                ms.cache.viewer.data.push({
+                                ms.cache.mpsearch.data.push({
                                     id: e.id,
                                     content: filterXSS(e.content),
                                     mtime: ms.f.YMD(e.mtime),
@@ -1322,7 +1398,7 @@ ms.o.ART_search_box = {
                 },
                 // click
                 function () {
-                    if (!ms.cache.viewer.data) {
+                    if (!ms.cache.mpsearch.data) {
                         o.objs[2].innerHTML = '<font color="red">没有数据</font>';
                         return;
                     }
@@ -1331,8 +1407,8 @@ ms.o.ART_search_box = {
                         return (e.length > 0);
                     });
                     var i, j, td, result = [], count = 0;
-                    for (i = 0; i < 15 && i < ms.cache.viewer.data.length; i++) {
-                        td = ms.cache.viewer.data[i];
+                    for (i = 0; i < 15 && i < ms.cache.mpsearch.data.length; i++) {
+                        td = ms.cache.mpsearch.data[i];
                         //console.log(td);
                         if (kw.length > 0) {
                             count = 0;
@@ -1350,7 +1426,7 @@ ms.o.ART_search_box = {
                             result.push(i);
                         }
                     }
-                    ms.cache.viewer.result = result;
+                    ms.cache.mpsearch.result = result;
                     if (result.length > 0) {
                         o.child && o.child.destroy();
                         o.child = ms.o.ART_list.cNew(o.ids[2]).show();
@@ -1376,7 +1452,7 @@ ms.o.ART_search_box = {
     }
 };
 
-ms.o.MPage = {
+ms.o.MP_wrap = {
     cNew: function (container_id) {
         var m = ms.CARD.cNew(container_id);
         m.f.merge({
@@ -1393,10 +1469,10 @@ ms.o.MPage = {
 
         m.after_add_event = function () {
             m.child.push(ms.o.ART_search_box.cNew(m.ids[1]).show());
-            ms.cache.viewer.output = m.ids[0];
+            ms.cache.mpsearch.output = m.ids[0];
 
-            if (!ms.cache.mst) {
-                $.getJSON(ms.s.msg_path, function (data) {
+            if (!ms.cache.msg) {
+                $.getJSON(ms.s.msg_path + '?t=' + ms.f.rand(), function (data) {
                     ms.cache.msg = [];
                     data.forEach(function (e) {
                         ms.cache.msg.push({
@@ -1418,13 +1494,13 @@ ms.o.MPage = {
                 }
             }
 
-            if (!ms.cache.article.top) {
-                $.getJSON(ms.s.top_art_path, function (data) {
-                    ms.cache.article.top = [];
+            if (!ms.cache.article.recent) {
+                $.getJSON(ms.s.top_art_path + '?t=' + ms.f.rand(), function (data) {
+                    ms.cache.article.recent = [];
 
                     data.forEach(function (e) {
 
-                        ms.cache.article.top.push({
+                        ms.cache.article.recent.push({
                             title: filterXSS(ms.f.base64_to_utf8(e.title)),
                             mtime: ms.f.YMD(e.mtime),
                             ctime: ms.f.YMD(e.ctime),
@@ -1434,14 +1510,16 @@ ms.o.MPage = {
                             content: filterXSS(ms.f.base64_to_utf8(e.content))
                         });
                     });
-                    //console.log('mpage', ms.cache.article.top);
-                    m.child.push(ms.o.MP_worker.cNew(m.ids[0]).show());
+                    //console.log('mpage', ms.cache.article.recent);
+                    m.objs[0].innerHTML = Mustache.render($('#tp-article-container').html(), ms.cache.article);
+                    //m.child.push(ms.o.MP_worker.cNew(m.ids[0]).show());
                 }).fail(function () {
                     m.objs[0].innerHTML = "<font color=red>无数据</font>";
                 });
             } else {
                 //console.log('mp.art.using cache');
-                m.child.push(ms.o.MP_worker.cNew(m.ids[0]).show());
+                //m.child.push(ms.o.MP_worker.cNew(m.ids[0]).show());
+                m.objs[0].innerHTML = Mustache.render($('#tp-article-container').html(), ms.cache.article);
             }
 
         };
@@ -1457,6 +1535,8 @@ ms.o.MPage = {
 };
 
 ms.o.MP_worker = {
+
+    // 准备删除 。
     cNew: function (cid) {
         var o = ms.CARD.cNew(cid);
         o.f.merge({
@@ -1465,7 +1545,7 @@ ms.o.MP_worker = {
         });
 
         o.gen_html = function () {
-            //console.log('article', ms.cache.article.top);
+            //console.log('article', ms.cache.article.recent);
             return Mustache.render($('#tp-article-container').html(), ms.cache.article);
         };
 

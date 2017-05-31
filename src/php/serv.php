@@ -33,6 +33,8 @@ class Serv extends UserMgr {
             'search'
         ]);
     }
+    
+    
 
     public function delete_all_orphan_img() {
         $user_info = $this->get_user_info();
@@ -40,10 +42,10 @@ class Serv extends UserMgr {
             $this->fail('无权操作！');
             return;
         }
-        $data=$this->get_orphan_imag();
-        $count=0;
-        foreach($data as $d){
-            if(file_exists($d['path'])){
+        $data = $this->get_orphan_imag();
+        $count = 0;
+        foreach ($data as $d) {
+            if (file_exists($d['path'])) {
                 unlink($d['path']);
                 $count++;
             }
@@ -299,18 +301,20 @@ class Serv extends UserMgr {
         $param = json_decode($raw_param, true);
         $aid = $param['id'] + 0;
         $db = CommLib::open_db();
-        $stmt = $db->prepare('select id,type,title,content from article where id=?');
+        $stmt = $db->prepare('select id,type,title,content,`top`,`lock` from article where id=?');
         $stmt->bind_param('i', $aid);
         $stmt->execute();
-        $id = $type = $title = $content = null;
+        $id = $type = $title = $content = $top = $lock = null;
         $stmt->store_result();
-        $stmt->bind_result($id, $type, $title, $content);
+        $stmt->bind_result($id, $type, $title, $content, $top, $lock);
         $stmt->fetch();
         $this->ok(array(
             'id' => $id,
             'type' => $type,
             'title' => CommLib::utf8_to_base64($title),
-            'content' => CommLib::utf8_to_base64($content)
+            'content' => CommLib::utf8_to_base64($content),
+            'top' => $top,
+            'lock' => $lock
         ));
     }
 
