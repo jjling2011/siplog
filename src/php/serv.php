@@ -33,13 +33,12 @@ class Serv extends UserMgr {
             'test'
         ]);
     }
-<<<<<<< Updated upstream
-=======
+
 
     public function test() {
         $this->ok('Hellooooo');        
     }
->>>>>>> Stashed changes
+
 
     public function delete_all_orphan_img() {
         $user_info = $this->get_user_info();

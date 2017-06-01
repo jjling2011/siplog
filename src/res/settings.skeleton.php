@@ -25,6 +25,7 @@ $PRVS = array(
     'USERM' => 0,
     'ARTM' => 1,
     'SETM' => 2,
+    'ARTL' => 3
 );
 
 
