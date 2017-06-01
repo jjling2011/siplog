@@ -22,9 +22,13 @@ define('TZ_UTC', '+00:00');
 define('DDOS', 10); // 10 operation in 30 seconds
 
 $PRVS = array(
+    // 添加、修改用户信息
     'USERM' => 0,
+    // 发布、修改、删除文章
     'ARTM' => 1,
+    // 修改界面设定，分类设定
     'SETM' => 2,
+    // 锁定、置顶文章
     'ARTL' => 3
 );
 

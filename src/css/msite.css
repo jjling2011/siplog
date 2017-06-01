@@ -82,3 +82,14 @@ body {
     text-align: left;
 }
 
+.uma-float-setting-box{
+    display:none;
+    background: white;
+    z-index:3;
+    position:absolute;
+    border: 1px solid #ccc;
+    padding: 5px;
+    border-radius: 5px;
+    box-shadow: 3px 2px 5px #999;
+}
+

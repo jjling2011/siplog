@@ -37,7 +37,7 @@ and open the template in the editor.
                     $.getJSON(ms.s.uset_path+'?t='+ms.f.rand(), function (data) {
                         ms.f.merge_uset(data);
                     }).always(function () {
-                        main_page = ms.o.MPanel.cNew("main-page-container").show();
+                        main_page = ms.o.Main_wrap.cNew("main-page-container").show();
                     });
                 });
             });

@@ -122,41 +122,41 @@ class UserMgr extends Reply {
     public function fetch_all_user_info() {
         global $PRVS;
         //error_log('hello!');
-        if ($this->check_login() && $this->check_prv('USERM')) {
-            //error_log('reading data');
-            $db = CommLib::open_db();
-            $stmt = $db->prepare('select user,name,id,prv,ban from user');
+        if (!($this->check_login() && $this->check_prv('USERM'))) {
+            $this->fail('无权操作!');
+            return;
+        }
+        //error_log('reading data');
+        $db = CommLib::open_db();
+        $stmt = $db->prepare('select user,name,id,prv,ban from user');
 
-            $data = [
-                'id_list' => [],
-                'prv_list' => array_keys($PRVS),
-                // {id1:name1,id2:name2}
-                'name_list' => [],
-                'user_list' => [],
-                // {id:{prv_list},id2:{}...
-                'user_prv' => [],
-                'ban_list' => []
-            ];
-            //$data['prv_list']= array_keys($PRVS);
+        $data = [
+            'id_list' => [],
+            'prv_list' => array_keys($PRVS),
+            // {id1:name1,id2:name2}
+            'name_list' => [],
+            'user_list' => [],
+            // {id:{prv_list},id2:{}...
+            'user_prv' => [],
+            'ban_list' => []
+        ];
+        //$data['prv_list']= array_keys($PRVS);
 //            foreach ($PRVS as $key => $_) {
 //                $data['prv_list'][] = $key;
 //            }
-            $name = $prv = $id = $user = $ban = null;
-            $stmt->execute();
-            $stmt->bind_result($user, $name, $id, $prv, $ban);
-            //$stmt->store_result();
-            while ($stmt->fetch()) {
-                array_push($data['id_list'], $id);
-                $data['name_list'][$id] = $name;
-                $data['user_list'][$id] = $user;
-                $data['ban_list'][$id] = !($ban === 0);
-                $data['user_prv'][$id] = $this->prv_num_to_name($prv);
-            }
-            $stmt->free_result();
-            $this->ok($data);
-        } else {
-            $this->fail('无权操作!');
+        $name = $prv = $id = $user = $ban = null;
+        $stmt->execute();
+        $stmt->bind_result($user, $name, $id, $prv, $ban);
+        //$stmt->store_result();
+        while ($stmt->fetch()) {
+            array_push($data['id_list'], $id);
+            $data['name_list'][$id] = $name;
+            $data['user_list'][$id] = $user;
+            $data['ban_list'][$id] = !($ban === 0);
+            $data['user_prv'][$id] = $this->prv_num_to_name($prv);
         }
+        $stmt->free_result();
+        $this->ok($data);
     }
 
     public function fetch_user_info() {
