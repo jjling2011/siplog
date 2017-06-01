@@ -10,6 +10,55 @@ include '../upload/config/settings.php';
 
 class CommLib {
 
+    public static function fetch_assoc($sql, $types = false, $params = false) {
+
+        $db = CommLib::open_db();
+        $stmt = $db->prepare($sql);
+
+        // bind params
+        if (is_string($types) && is_array($params) && count($params) === strlen($types)) {
+            $p = [];
+            for ($i = 0; $i < count($params); $i++) {
+                $p[$i] = &$params[$i];
+            }
+            call_user_func_array(array($stmt, 'bind_param'), array_merge(array($types), $p));
+        }
+
+        if (!$stmt->execute()) {
+            // some thing wrong
+            return false;
+        }
+        $stmt->store_result();
+
+        // get column name 
+        $metadata = $stmt->result_metadata();
+        $datas = [];
+        if ($metadata) {
+            $fields = $metadata->fetch_fields();
+
+            $results = [];
+            $ref_results = [];
+            foreach ($fields as $field) {
+                $results[$field->name] = null;
+                $ref_results[] = &$results[$field->name];
+            }
+
+            call_user_func_array(array($stmt, 'bind_result'), $ref_results);
+
+            
+            while ($stmt->fetch()) {
+                $data = [];
+                foreach ($results as $key => $value) {
+                    $data[$key] = $value;
+                }
+                $datas[] = $data;
+            }
+
+            $stmt->free_result();
+        }
+        return $datas;
+    }
+
     public static function base64_to_utf8($txt_b64) {
         return urldecode(base64_decode($txt_b64));
     }

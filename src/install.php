@@ -16,18 +16,18 @@ if ($r[0]) {
 
 function install() {
     global $param;
-    
+
     del_file('upload/json/top.json');
     del_file('upload/json/msg.json');
     del_file('upload/json/uset.json');
     del_file('upload/json/article.json');
     del_file('upload/config/settings.php');
-    
+
     make_dir('upload');
     make_dir('upload/config');
     make_dir('upload/json');
     make_dir('upload/pics');
-    
+
     copy('res/settings.skeleton.php', 'upload/config/settings.php');
     copy('res/article.json', 'upload/json/article.json');
     copy('res/uset.json', 'upload/json/uset.json');
@@ -39,7 +39,7 @@ function install() {
     set('DB_PASS', $param['dbpass1']);
     set('DB_NAME', $param['dbname']);
 
-    $tables = ['article', 'ip', 'log', 'msg', 'sys', 'user','pics'];
+    $tables = ['article', 'ip', 'log', 'msg', 'sys', 'user', 'pics'];
     $sql = gen_sql();
 
     foreach ($tables as $t) {
@@ -58,8 +58,8 @@ function install() {
     file_put_contents('upload/config/lock', date('Y-m-d H:i:s'));
 }
 
-function del_file($file){
-    if(file_exists($file)){
+function del_file($file) {
+    if (file_exists($file)) {
         unlink($file);
     }
 }
@@ -82,8 +82,8 @@ function rand_str($length = 48) {
 
 function gen_sql() {
     $sql = [];
-    
-    $sql['pics']="CREATE TABLE IF NOT EXISTS `pics` (
+
+    $sql['pics'] = "CREATE TABLE IF NOT EXISTS `pics` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `url` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `uptime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -155,6 +155,8 @@ function gen_sql() {
   `ctime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `mtime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `name` char(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `lock` tinyint(4) NOT NULL DEFAULT '0',
+  `top` tinyint(4) NOT NULL DEFAULT '0',
   UNIQUE KEY `id` (`id`),
   KEY `modify` (`mtime`),
   FULLTEXT KEY `title` (`title`),
