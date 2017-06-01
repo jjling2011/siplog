@@ -64,11 +64,11 @@ ms.cache = {
         title: null,
         html: null,
         type: null,
-        lock:false,
-        recent:null,
+        lock: false,
+        recent: null,
         cache_id: null,
         selected_id: null
-        
+
     },
     search: {
         'current_kw': '',
@@ -312,7 +312,9 @@ ms.o.UMA_search_result = {
                     title: filterXSS(c.title),
                     time: ms.f.YMD(c.mtime),
                     author: filterXSS(c.name),
-                    type: (c.type < ms.uset.atypes.length) ? ms.uset.atypes[c.type] : '无'
+                    type: (c.type < ms.uset.atypes.length) ? ms.uset.atypes[c.type] : '无',
+                    top:c.top===0?false:true,
+                    lock:c.lock===0?false:true
                 });
             }
             return (Mustache.render($('#tp-uma-search-result').html(), o.d));
@@ -412,9 +414,9 @@ ms.o.UMA_editor = {
                         'content': ms.f.utf8_to_base64(content),
                         'type': o.objs[2].options[o.objs[2].selectedIndex].value,
                         'id': ms.cache.article.cache_id,
-                        'top':o.objs[10].checked?1:0,
-                        'lock':o.objs[9].checked?1:0
-                        
+                        'top': o.objs[10].checked ? 1 : 0,
+                        'lock': o.objs[9].checked ? 1 : 0
+
                     };
                     //console.log(content);
                     if (!confirm('确定提交？')) {
@@ -439,10 +441,15 @@ ms.o.UMA_editor = {
                     ms.cache.article.selected_id = null;
                     ms.cache.article.title = null;
                     ms.cache.article.html = null;
+                    ms.cache.article.top=false;
+                    ms.cache.article.lock=false;
+                    o.objs[9].checked=false;
+                    o.objs[10].checked=false;
                     o.objs[0].value = '';
                     o.objs[2].options[0].selected = true;
                     o.editor.$txt.html('<p><br></p>');
                     o.objs[5].innerHTML = "新文章";
+                    
                 },
                 function () {
                     if (!ms.cache.article.cache_id > 0) {
@@ -523,8 +530,8 @@ ms.o.UMA_editor = {
                     ms.cache.article.title = ms.f.base64_to_utf8(data.title);
                     ms.cache.article.html = ms.f.base64_to_utf8(data.content);
                     ms.cache.article.type = data.type;
-                    ms.cache.article.lock=!(data.lock===0);
-                    ms.cache.article.top=!(data.top===0);
+                    ms.cache.article.lock = !(data.lock === 0);
+                    ms.cache.article.top = !(data.top === 0);
                     //console.log('loadhtml', ms.cache.article.html);
                     o.load_cache();
                 }, false, function (r) {
@@ -542,9 +549,9 @@ ms.o.UMA_editor = {
             if (o.editor) {
                 ms.cache.article.html = o.editor.$txt.html();
             }
-            ms.cache.article.lock=o.objs[9].checked;
-            ms.cache.article.top=o.objs[10].checked;
-            
+            ms.cache.article.lock = o.objs[9].checked;
+            ms.cache.article.top = o.objs[10].checked;
+
             // console.log(ms.cache.article);
         };
 
@@ -558,8 +565,8 @@ ms.o.UMA_editor = {
                 }
                 o.objs[2].options[type_no].selected = true;
                 o.editor.$txt.html(filterXSS(ms.cache.article.html));
-                o.objs[9].checked=ms.cache.article.lock;
-                o.objs[10].checked=ms.cache.article.top;
+                o.objs[9].checked = ms.cache.article.lock;
+                o.objs[10].checked = ms.cache.article.top;
                 var cid = ms.cache.article.cache_id;
                 if (cid) {
                     o.objs[5].innerHTML = "修改文章： #" + cid;
@@ -1209,8 +1216,7 @@ ms.o.AATest = {
         o.gen_ev_handler = function () {
             o.ev_handler = [
                 function () {
-                    ms.uset.show_mbox = true;
-                    o.f.fetch('update_settings', ms.uset);
+                    o.f.fetch('test');
                 }
             ];
         };
@@ -1507,18 +1513,16 @@ ms.o.MP_wrap = {
                             id: e.id,
                             type: ms.uset.atypes[(e.type < ms.uset.atypes.length ? e.type : 0)],
                             name: filterXSS(e.name),
-                            content: filterXSS(ms.f.base64_to_utf8(e.content))
+                            content: filterXSS(ms.f.base64_to_utf8(e.content)),
+                            top:e.top===0?false:true,
+                            lock:e.lock===0?false:true
                         });
                     });
-                    //console.log('mpage', ms.cache.article.recent);
                     m.objs[0].innerHTML = Mustache.render($('#tp-article-container').html(), ms.cache.article);
-                    //m.child.push(ms.o.MP_worker.cNew(m.ids[0]).show());
                 }).fail(function () {
                     m.objs[0].innerHTML = "<font color=red>无数据</font>";
                 });
             } else {
-                //console.log('mp.art.using cache');
-                //m.child.push(ms.o.MP_worker.cNew(m.ids[0]).show());
                 m.objs[0].innerHTML = Mustache.render($('#tp-article-container').html(), ms.cache.article);
             }
 
@@ -1531,25 +1535,6 @@ ms.o.MP_wrap = {
             m.child = [];
         };
         return m;
-    }
-};
-
-ms.o.MP_worker = {
-
-    // 准备删除 。
-    cNew: function (cid) {
-        var o = ms.CARD.cNew(cid);
-        o.f.merge({
-            id_header: 'm_sha',
-            add_event: true
-        });
-
-        o.gen_html = function () {
-            //console.log('article', ms.cache.article.recent);
-            return Mustache.render($('#tp-article-container').html(), ms.cache.article);
-        };
-
-        return o;
     }
 };
 
