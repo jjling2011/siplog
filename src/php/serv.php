@@ -29,10 +29,17 @@ class Serv extends UserMgr {
             'set_upload_support',
             'delete_article',
             'update_uset',
-            //'export_article',
-            'search'
+            'search',
+            'test'
         ]);
     }
+<<<<<<< Updated upstream
+=======
+
+    public function test() {
+        $this->ok('Hellooooo');        
+    }
+>>>>>>> Stashed changes
 
     public function delete_all_orphan_img() {
         $user_info = $this->get_user_info();
@@ -85,36 +92,49 @@ class Serv extends UserMgr {
             //$this->fail('无权操作!');
             return;
         }
-        file_put_contents(EXPORT_PATH, json_encode($this->get_top_article(10)));
+        file_put_contents(EXPORT_PATH, json_encode($this->get_recent_articles(10)));
         //$this->ok('完成!');
     }
 
-    private function get_top_article($raw_num = 5) {
+    private function get_recent_articles($raw_num = 5) {
         $num = $raw_num + 0;
         if ($num > 20) {
             $num = 20;
         }
-        $sql = 'select title,mtime,ctime,id,name,content,type from article order by mtime desc limit ' . $num;
-        $db = CommLib::open_db();
-        $stmt = $db->prepare($sql);
-        $title = $mtime = $id = $ctime = $name = $content = $type = null;
-        $stmt->execute();
-        $stmt->store_result();
-        $stmt->bind_result($title, $mtime, $ctime, $id, $name, $content, $type);
-        $data = [];
-        while ($stmt->fetch()) {
-            $data[] = array(
-                'title' => CommLib::utf8_to_base64($title),
-                'mtime' => $mtime,
-                'ctime' => $ctime,
-                'id' => $id,
-                'type' => $type,
-                'name' => $name,
-                'content' => CommLib::utf8_to_base64($content)
-            );
+        $data1 = CommLib::fetch_assoc('select title,mtime,ctime,id,name,content,type,`top`,`lock` from article where `top`=1 order by mtime ');
+        $sql = 'select title,mtime,ctime,id,name,content,type,`top`,`lock` from article where `top`=0 order by mtime desc limit ' . $num;
+        $data2 = CommLib::fetch_assoc($sql);
+
+        $r = [];
+        foreach ($data1 as $d1) {
+            $r[] = [
+                'title' => CommLib::utf8_to_base64($d1['title']),
+                'content' => CommLib::utf8_to_base64($d1['content']),
+                'mtime' => $d1['mtime'],
+                'ctime' => $d1['ctime'],
+                'id' => $d1['id'] + 0,
+                'type' => $d1['type'] + 0,
+                'name' => $d1['name'],
+                'top' => $d1['top'],
+                'lock' => $d1['lock']
+            ];
         }
-        $stmt->free_result();
-        return $data;
+
+        foreach ($data2 as $d1) {
+            $r[] = [
+                'title' => CommLib::utf8_to_base64($d1['title']),
+                'content' => CommLib::utf8_to_base64($d1['content']),
+                'mtime' => $d1['mtime'],
+                'ctime' => $d1['ctime'],
+                'id' => $d1['id'] + 0,
+                'type' => $d1['type'] + 0,
+                'name' => $d1['name'],
+                'top' => $d1['top'],
+                'lock' => $d1['lock']
+            ];
+        }
+
+        return $r;
     }
 
     private function gen_sql($raw_key_words, $page = 0, $page_size = 25) {
@@ -127,8 +147,8 @@ class Serv extends UserMgr {
 
         $key_words = explode(' ', $this->patch_key_word(CommLib::filter_str($raw_key_words, 200)));
 
-        $sql_head = 'select id,title,name,mtime,type from article ';
-        $sql_total_head = 'select count(*) from article ';
+        $sql_head = 'select id,title,name,mtime,type,`top`,`lock` from article ';
+        $sql_total_head = 'select count(*) as total from article ';
         $sql_tail = 'order by mtime desc limit ' . $begin . ',' . $page_size;
 
         $sql_conditions = '';
@@ -263,34 +283,11 @@ class Serv extends UserMgr {
         $pn = $param['pn'] + 0;
         $page_size = $param['page_size'] + 0;
         $sql = $this->gen_sql($param['kw'], $pn, $page_size);
-
-        $db = CommLib::open_db();
-        $stmt = $db->prepare($sql['query']);
-        //'select id,title,name,mtime,type from article '
-        $id = $title = $name = $mtime = $type = null;
-        $stmt->execute();
-        $stmt->bind_result($id, $title, $name, $mtime, $type);
-        $stmt->store_result();
-        $data = array();
-        while ($stmt->fetch()) {
-            $data[] = array(
-                'id' => $id,
-                'title' => $title,
-                'name' => $name,
-                'mtime' => $mtime,
-                'type' => $type + 0
-            );
-        }
-        $stmt->free_result();
+        $data = CommLib::fetch_assoc($sql['query']);
         $total = -1;
-        if ($param['get_total']) {
-            //error_log($sql['total']);
-            $stmt2 = $db->prepare($sql['total']);
-            $stmt2->execute();
-            $stmt2->bind_result($total);
-            $stmt2->store_result();
-            $stmt2->fetch();
-            $stmt2->free_result();
+        $r = CommLib::fetch_assoc($sql['total']);
+        if ($r) {
+            $total = $r[0]['total'];
         }
         $this->ok(array('total' => $total, 'data' => $data, 'page_size' => $page_size));
     }
@@ -380,34 +377,12 @@ class Serv extends UserMgr {
             session_write_close();
         }
 
-        $sql = 'select id,title,content,type,name,mtime from article '
+        $sql = 'select id,title,content,type,name,mtime,`lock`,`top` from article '
                 . 'where mtime >= date_sub(utc_timestamp(), interval 1 year)'
                 . ' order by mtime desc';
-        $db = CommLib::open_db();
-        $stmt = $db->prepare($sql);
-        $stmt->execute();
-        $title = $content = $id = $type = $name = $mtime = null;
-        $stmt->bind_result($id, $title, $content, $type, $name, $mtime);
-        $stmt->store_result();
-        $data = [];
-        while ($stmt->fetch()) {
-            $data[] = [
-                'id' => $id,
-                'title' => $title,
-                'content' => $content,
-                'type' => $type,
-                'name' => $name,
-                'mtime' => $mtime
-            ];
-        }
-        $stmt->free_result();
+
+        $data = CommLib::fetch_assoc($sql);
         file_put_contents(ARTICLE_PATH, json_encode($data));
-//        error_log('begin');
-//        for ($i = 0; $i < 5; $i++) {
-//            sleep($i);
-//            error_log('wait');
-//        }
-//        error_log('end');
     }
 
     private function update_msg() {
@@ -462,6 +437,14 @@ class Serv extends UserMgr {
             return;
         }
         $id = $raw_id + 0;
+
+        $t = CommLib::fetch_assoc('select `lock` from article where id=?', 'i', [$id]);
+
+        if (!($user_info['prv']['ARTL']) && $t['lock'] !== 0) {
+            $this->fail('文件已经锁定，不能删除！');
+            return;
+        }
+
         CommLib::query('update pics set  tag=4 where atid=?', 'i', [&$id]);
         $r = CommLib::query('delete from article where id=?', 'i', [&$id]);
         $this->haste($r['status']);
@@ -475,6 +458,7 @@ class Serv extends UserMgr {
             $this->fail('无权操作！');
             return;
         }
+        //error_log(print_r($user_info, true));
 
         $data = json_decode($raw_data, true);
 
@@ -486,44 +470,53 @@ class Serv extends UserMgr {
           'title': o.objs[0].value,
           'content': o.editor.$txt.html(),
           'type': o.objs[2].options[o.objs[2].selectedIndex].value,
-          'id': ms.cache.article.current_id
+          'id': ms.cache.article.current_id,
+          'top','lock'
           };
          */
         $r = false;
         $id = 0;
+
         if ($data['id'] + 0 > 0) {
             //modify
             $id = $data['id'] + 0;
-            $sql = 'update article set title=?,content=?,type=?,userid=?,name=? where id=?';
-            $type = 'ssiiss';
-            $t = CommLib::query($sql, $type, [
-                        &$title,
-                        &$content,
-                        &$data['type'],
-                        &$user_info['id'],
-                        &$user_info['name'],
-                        &$data['id']
-            ]);
-            $r = $t['status'];
+            $temp_d = CommLib::fetch_assoc('select `lock`,`top` from article where id=?', 'i', [$id]);
+            //error_log(print_r($temp_d,true));
+            if ($temp_d) {
+                if (!$user_info['prv']['ARTL']) {
+                    $data['top'] = $temp_d[0]['top'];
+                    $data['lock'] = $temp_d[0]['lock'];
+                }
+                if ($user_info['prv']['ARTL'] || $temp_d[0]['lock'] === 0) {
+                    //can modify
+                    CommLib::fetch_assoc('update article set title=?,content=?,type=?,userid=?,name=?,`top`=?,`lock`=? where id=?', 'ssiisiii', [
+                        $title,
+                        $content,
+                        $data['type'] + 0,
+                        $user_info['id'] + 0,
+                        $user_info['name'],
+                        $data['top'] + 0,
+                        $data['lock'] + 0,
+                        $data['id'] + 0]
+                    );
+                    $r = true;
+                }
+            }
         } else {
             //insert new
-            $sql = 'insert into article set title=?,content=?,type=?,userid=?,name=?';
-            $type = 'ssiis';
+            if (!($user_info['prv']['ARTL'])) {
+                $data['top'] = 0;
+                $data['lock'] = 0;
+            }
+
+            $sql = 'insert into article set title=?,content=?,type=?,userid=?,name=?,`top`=?,`lock`=?';
             $db = CommLib::open_db();
             $stmt = $db->prepare($sql);
-            $stmt->bind_param('ssiis', $title, $content, $data['type'], $user_info['id'], $user_info['name']);
+            $stmt->bind_param('ssiisii', $title, $content, $data['type'], $user_info['id'], $user_info['name'], $data['top'], $data['lock']);
             if ($stmt->execute()) {
                 $r = true;
                 $id = $stmt->insert_id + 0;
             }
-//            $r = CommLib::query($sql, $type, [
-//                        &$title,
-//                        &$content,
-//                        &$data['type'],
-//                        &$user_info['id'],
-//                        &$user_info['name']
-//            ]);
-//            
         }
 
         $doc = new DOMDocument();

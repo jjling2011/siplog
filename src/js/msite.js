@@ -41,9 +41,17 @@ ms.cache = {
         title: null,
         html: null,
         type: null,
+<<<<<<< Updated upstream
         cache_id: null,
         selected_id: null,
         top: null
+=======
+        lock: false,
+        recent: null,
+        cache_id: null,
+        selected_id: null
+
+>>>>>>> Stashed changes
     },
     search: {
         'current_kw': '',
@@ -282,7 +290,9 @@ ms.o.UMA_search_result = {
                     title: filterXSS(c.title),
                     time: ms.f.YMD(c.mtime),
                     author: filterXSS(c.name),
-                    type: (c.type < ms.uset.atypes.length) ? ms.uset.atypes[c.type] : '无'
+                    type: (c.type < ms.uset.atypes.length) ? ms.uset.atypes[c.type] : '无',
+                    top:c.top===0?false:true,
+                    lock:c.lock===0?false:true
                 });
             }
             return (Mustache.render($('#tp-uma-search-result').html(), o.d));
@@ -382,7 +392,14 @@ ms.o.UMA_editor = {
                         'title': ms.f.utf8_to_base64(o.objs[0].value),
                         'content': ms.f.utf8_to_base64(content),
                         'type': o.objs[2].options[o.objs[2].selectedIndex].value,
+<<<<<<< Updated upstream
                         'id': ms.cache.article.cache_id
+=======
+                        'id': ms.cache.article.cache_id,
+                        'top': o.objs[10].checked ? 1 : 0,
+                        'lock': o.objs[9].checked ? 1 : 0
+
+>>>>>>> Stashed changes
                     };
                     //console.log(content);
                     if (!confirm('确定提交？')) {
@@ -403,10 +420,15 @@ ms.o.UMA_editor = {
                     ms.cache.article.selected_id = null;
                     ms.cache.article.title = null;
                     ms.cache.article.html = null;
+                    ms.cache.article.top=false;
+                    ms.cache.article.lock=false;
+                    o.objs[9].checked=false;
+                    o.objs[10].checked=false;
                     o.objs[0].value = '';
                     o.objs[2].options[0].selected = true;
                     o.editor.$txt.html('<p><br></p>');
                     o.objs[5].innerHTML = "新文章";
+                    
                 },
                 function () {
                     if (!ms.cache.article.cache_id > 0) {
@@ -470,6 +492,11 @@ ms.o.UMA_editor = {
                     ms.cache.article.title = ms.f.base64_to_utf8(data.title);
                     ms.cache.article.html = ms.f.base64_to_utf8(data.content);
                     ms.cache.article.type = data.type;
+<<<<<<< Updated upstream
+=======
+                    ms.cache.article.lock = !(data.lock === 0);
+                    ms.cache.article.top = !(data.top === 0);
+>>>>>>> Stashed changes
                     //console.log('loadhtml', ms.cache.article.html);
                     o.load_cache();
                 }, false, function (r) {
@@ -487,6 +514,12 @@ ms.o.UMA_editor = {
             if (o.editor) {
                 ms.cache.article.html = o.editor.$txt.html();
             }
+<<<<<<< Updated upstream
+=======
+            ms.cache.article.lock = o.objs[9].checked;
+            ms.cache.article.top = o.objs[10].checked;
+
+>>>>>>> Stashed changes
             // console.log(ms.cache.article);
         };
 
@@ -500,6 +533,11 @@ ms.o.UMA_editor = {
                 }
                 o.objs[2].options[type_no].selected = true;
                 o.editor.$txt.html(filterXSS(ms.cache.article.html));
+<<<<<<< Updated upstream
+=======
+                o.objs[9].checked = ms.cache.article.lock;
+                o.objs[10].checked = ms.cache.article.top;
+>>>>>>> Stashed changes
                 var cid = ms.cache.article.cache_id;
                 if (cid) {
                     o.objs[5].innerHTML = "修改文章： #" + cid;
@@ -1129,8 +1167,7 @@ ms.o.AATest = {
         o.gen_ev_handler = function () {
             o.ev_handler = [
                 function () {
-                    ms.uset.show_mbox = true;
-                    o.f.fetch('update_settings', ms.uset);
+                    o.f.fetch('test');
                 }
             ];
         };
@@ -1431,17 +1468,27 @@ ms.o.MPage = {
                             id: e.id,
                             type: ms.uset.atypes[(e.type < ms.uset.atypes.length ? e.type : 0)],
                             name: filterXSS(e.name),
-                            content: filterXSS(ms.f.base64_to_utf8(e.content))
+                            content: filterXSS(ms.f.base64_to_utf8(e.content)),
+                            top:e.top===0?false:true,
+                            lock:e.lock===0?false:true
                         });
                     });
+<<<<<<< Updated upstream
                     //console.log('mpage', ms.cache.article.top);
                     m.child.push(ms.o.MP_worker.cNew(m.ids[0]).show());
+=======
+                    m.objs[0].innerHTML = Mustache.render($('#tp-article-container').html(), ms.cache.article);
+>>>>>>> Stashed changes
                 }).fail(function () {
                     m.objs[0].innerHTML = "<font color=red>无数据</font>";
                 });
             } else {
+<<<<<<< Updated upstream
                 //console.log('mp.art.using cache');
                 m.child.push(ms.o.MP_worker.cNew(m.ids[0]).show());
+=======
+                m.objs[0].innerHTML = Mustache.render($('#tp-article-container').html(), ms.cache.article);
+>>>>>>> Stashed changes
             }
 
         };
@@ -1456,6 +1503,7 @@ ms.o.MPage = {
     }
 };
 
+<<<<<<< Updated upstream
 ms.o.MP_worker = {
     cNew: function (cid) {
         var o = ms.CARD.cNew(cid);
@@ -1473,5 +1521,7 @@ ms.o.MP_worker = {
     }
 };
 
+=======
+>>>>>>> Stashed changes
 
 

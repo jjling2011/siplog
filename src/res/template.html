@@ -159,15 +159,15 @@
 	然后切换到 [编辑] 分页即可修改。<br><br>
 	
 	
-    【搜索选项】  
-	**注意，这个是[管理]页面中的搜索，非[主页]中的搜索。
+    【搜索选项】<br>
+	注意，这里是指[管理]页面中的搜索，并不是[主页]中的搜索。
     <ul>
     <li>@名字</li>
     <li>#标题</li>
     <li>=分类(注意分类用数字）</li>
     <li>内容直接搜索</li>
     </ul>
-    例子：<br />
+    例如：<br />
     ( 汽车 or 自行车 ) #便宜 and =0 <br />
     搜索分类0里面，标题含有【便宜】<br>
 	正文含有 【汽车】或【自行车】的文章<br>
@@ -193,23 +193,34 @@
 </script>
 
 <script type="text/template" id="tp-uma-search-result">
-    <table style="width:100%;">
+ <table style="width:100%;">
     <tr>
-    <td>
-    <div class="btn-group" style="margin-left:8px;margin-bottom:8px;">
-    {{#btn}}<input type="button" id="{{id}}" value="{{value}}" class="btn btn-sm btn-default">{{/btn}}
-    </div>
-    </td>
+        <td>
+            <div class="btn-group" style="margin-left:8px;margin-bottom:8px;">
+                {{#btn}}<input type="button" id="{{id}}" value="{{value}}" class="btn btn-sm btn-default">{{/btn}}
+            </div>
+        </td>
     </tr>
     <tr>
-    <td>
-    <table class="table table-striped">
-    <tr><th style="width:80px;">分类</th><th >标题</th><th style="width:120px;">修改时间</th><th style="width:80px;">修改者</th></tr>  
-    {{#tb}}<tr id="{{oid}}"><td>{{type}}</td><td>{{title}}</td><td>{{time}}</td><td>{{author}}</td></tr>{{/tb}}
-    </table>
-    </td>
+        <td>
+            <table class="table table-striped">
+                <tr><th >标题</th><th style="width:120px;">修改时间</th><th style="width:80px;">修改者</th></tr>  
+                {{#tb}}
+                <tr id="{{oid}}">
+                    <td>
+                        {{title}}
+						&nbsp;<input type="button" class="btn btn-xs" value="{{type}}">
+                        {{#top}}&nbsp;<input type="button" class="btn btn-xs" value="置顶">{{/top}}
+                        {{#lock}}&nbsp;<input type="button" class="btn btn-xs" value="锁定">{{/lock}}
+                    </td>
+                    <td>{{time}}</td>
+                    <td>{{author}}</td>
+                </tr>
+                {{/tb}}
+            </table>
+        </td>
     </tr>
-    </table>
+</table>
 </script>
 
 <script type="text/template" id="tp-art-viewer">
@@ -326,6 +337,7 @@
 </script>
 
 <script type="text/template" id="tp-article-container">    
+<<<<<<< Updated upstream
     <table style="width:100%;padding:10px;">
     {{#top}}<tr>
     <td style="width:100%;text-align:center;padding-top:15px;padding:10px;">
@@ -344,6 +356,36 @@
     </td>
     </tr>{{/top}}
     </table>
+=======
+<table style="width:100%;padding:10px;">
+    {{#recent}}
+    <tr>
+        <td style="width:100%;text-align:center;padding-top:15px;padding:10px;">
+            <table style="width:100%;padding:10px;">
+                <tr>
+                    <td >
+                        <div style="padding-top: 7px;text-align: center;font-size: 20px;text-overflow:ellipsis;">{{title}}</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align:right;padding-right:25px;padding-bottom:5px;">
+                        &nbsp;{{name}}&nbsp;{{mtime}}&nbsp;
+                        <input type="button" class="btn btn-xs" value="{{type}}">
+						{{#lock}}&nbsp;<input type="button" class="btn btn-xs " value="LOCK">{{/lock}}
+                        {{#top}}&nbsp;<input type="button" class="btn btn-xs " value="置顶">{{/top}}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="border-top:1px solid #ddd;padding:8px;">
+                        <div class="article-content" >{{{content}}}</div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    {{/recent}}
+</table>
+>>>>>>> Stashed changes
 </script>
 
 <script type="text/template" id="tp-uma-atypes">    
