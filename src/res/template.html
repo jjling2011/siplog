@@ -139,7 +139,7 @@
     </tr>
 	<tr><td><div class="uma-float-setting-box" style="width:80px;height:60px;" id="{{ids.8}}">
 	<table style="border-collapse: separate;border-spacing: 8px 1px;">
-		<tr><td><input type="checkbox" id="{{ids.9}}"></td><td>锁定</td></tr>
+		<tr><td><input type="checkbox" id="{{ids.9}}" ></td><td>锁定</td></tr>
 		<tr><td><input type="checkbox" id="{{ids.10}}" > </td><td>置顶</td></tr>
 	</table>
 	</div></td></tr>
@@ -217,8 +217,8 @@
                     <td>
                         {{title}}
 						&nbsp;<input type="button" class="btn btn-xs" value="{{type}}">
-                        {{#top}}&nbsp;<input type="button" class="btn btn-xs" value="置顶">{{/top}}
-                        {{#lock}}&nbsp;<input type="button" class="btn btn-xs" value="锁定">{{/lock}}
+                        {{#top}}&nbsp;<input type="button" class="btn btn-xs" style="background:lightblue;" value="置顶">{{/top}}
+                        {{#lock}}&nbsp;<input type="button" class="btn btn-xs" style="background:bisque;" value="锁定">{{/lock}}
                     </td>
                     <td>{{time}}</td>
                     <td>{{author}}</td>
@@ -272,7 +272,7 @@
                 <table > 
                     <tr>
                         <td><input type="text" id="{{ids.0}}" value="" class="form-control" ></td>
-                        <td style="width:50px;text-align:right;"><input type="button" class="btn btn-sm" id="{{ids.1}}" value="搜索"></td>
+                        <td style="width:50px;text-align:right;"><input type="button" class="btn btn-sm btn-info" id="{{ids.1}}" value="搜索"></td>
                     </tr>
                 </table>
             </td>
@@ -356,10 +356,10 @@
                 </tr>
                 <tr>
                     <td style="text-align:right;padding-right:25px;padding-bottom:5px;">
-                        &nbsp;{{name}}&nbsp;{{mtime}}&nbsp;
-                        <input type="button" class="btn btn-xs" value="{{type}}">
-						{{#lock}}&nbsp;<input type="button" class="btn btn-xs " value="LOCK">{{/lock}}
-                        {{#top}}&nbsp;<input type="button" class="btn btn-xs " value="置顶">{{/top}}
+						{{#lock}}&nbsp;<input type="button" class="btn btn-xs " style="background:bisque;" value="锁定">{{/lock}}
+                        {{#top}}&nbsp;<input type="button" class="btn btn-xs " style="background:lightblue;" value="置顶">{{/top}}
+						<input type="button" class="btn btn-xs" value="{{type}}">
+						&nbsp;{{name}}&nbsp;{{mtime}}&nbsp;
                     </td>
                 </tr>
                 <tr>
@@ -413,7 +413,7 @@
 			<table style="width:100%;border-collapse:separate;border:1px solid #ddd;border-radius:6px;padding:4px;" > 
 			  <tr>
 			  <td><input type="text" id="{{ids.0}}" value="" class="form-control" ></td>
-			  <td style="width:50px;text-align:right;"><input type="button" class="btn btn-sm" id="{{ids.1}}" value="留言"></td>
+			  <td style="width:50px;text-align:right;"><input type="button" class="btn btn-sm btn-info" id="{{ids.1}}" value="留言"></td>
 			  </tr>
 			</table>
 		</td>
