@@ -135,13 +135,13 @@ ms.o.MP_msg = {
                             if (!ms.cache.msg) {
                                 ms.cache.msg = [];
                             }
-                            ms.cache.msg.push({
+                            ms.cache.msg.unshift({
                                 ctime: new Date().toJSON().slice(0, 10),
                                 name: 'me',
                                 text: filterXSS(d)
                             });
                             while (ms.cache.msg.length > ms.uset.msg_keep) {
-                                ms.cache.msg.shift();
+                                ms.cache.msg.pop();
                             }
                             o.show();
                         }, function (r) {
@@ -296,8 +296,8 @@ ms.o.Main_wrap = {
                 });
             }
             o.contents = [];
-            for(var i=0;i<4;i++){
-                o.objs[i].innerHTML='';
+            for (var i = 0; i < 4; i++) {
+                o.objs[i].innerHTML = '';
             }
             clearTimeout(o.timer);
             o.timer = null;
@@ -319,30 +319,6 @@ ms.o.Main_wrap = {
         };
 
         return o;
-    }
-};
-ms.o.bak_Main_wrap = {
-    cNew: function (container_id) {
-        var mp = ms.PANEL.cNew(container_id,
-                [
-                    //['测试', ['AATest']],
-                    ['主页', ['MP_wrap']],
-                    //['文章', ['ART_wrap']],
-                    ['管理', ['UM_wrap']]
-                ],
-                {
-                    // 顶上的标签按钮
-                    'tag': 'cjs-pn-tag',
-                    // 各个“页”的外框
-                    'page': 'cjs-pn-div',
-                    // 各个“卡片”的外框
-                    'card': 'cjs-card-div',
-                    // 选中时
-                    'active': 'cjs-pn-tag-active'
-                }
-        );
-
-        return mp;
     }
 };
 
@@ -799,7 +775,7 @@ ms.o.UMA_types = {
             var d = {
                 name: o.ids[0],
                 new_type: o.ids[1],
-                btn_summit: o.ids[2],
+                btn_sumit: o.ids[2],
                 data: ms.uset.atypes,
                 index: function () {
                     return ++window['INDEX'] || (window['INDEX'] = 0);
@@ -827,8 +803,8 @@ ms.o.UMA_wrap = {
     cNew: function (cid) {
         var pn = ms.PANEL.cNew(cid,
                 [
-                    ['搜索', ['UMA_search_box']],
                     ['编辑', ['UMA_editor']],
+                    ['搜索', ['UMA_search_box']],
                     //['分类', ['UMA_types']],
                     ['图片管理', ['UMA_list_orphan_img']],
                     ['设置', ['UMA_set_wrap']],
@@ -1174,77 +1150,6 @@ ms.o.UMA_settings = {
     }
 };
 
-ms.o.bak_UM_wrap = {
-    cNew: function (container_id) {
-        var um = ms.CARD.cNew(container_id);
-
-        ms.cache.um.wrap = um;
-
-        um.f.merge({
-            id_num: 5,
-            id_header: 'um-wrap'
-        });
-
-        um.child = [];
-        um.timer = null;
-
-        um.gen_html = function () {
-            return Mustache.render($('#tp-um-wrap').html(), um);
-        };
-
-        um.show_user_panel = function () {
-            var info = ms.cache.um.user_info;
-            var current_id = 1;
-            if (info && info.login) {
-                um.objs[current_id++].innerHTML = Mustache.render($('#tp-um-welcome').html(), info);
-                if (info.prv['USERM']) {
-                    um.child.push(ms.o.UM_management.cNew(um.ids[current_id++]).show());
-                }
-                um.child.push(ms.o.UM_logout.cNew(um.ids[current_id++]).show());
-            } else {
-                um.child.push(ms.o.UM_login.cNew(um.ids[current_id++]).show());
-            }
-        };
-
-        um.after_add_event = function () {
-            um.child.push(ms.o.UMA_wrap.cNew(um.ids[0]).show());
-            if (ms.cache.um.user_info) {
-                //console.log('using cache');
-                um.show_user_panel();
-            } else {
-                um.f.fetch('fetch_user_info', null, function (info) {
-                    ms.cache.um.user_info = info;
-                    um.show_user_panel();
-                });
-            }
-            if (!um.timer) {
-                um.timer = setTimeout(function () {
-                    um.f.fetch('wakeup', function () {
-                        ms.cache.mpsearch.data = null;
-                    });
-                }, 6000);
-            }
-        };
-
-        um.refresh = function () {
-            ms.cache.um.all_user_info = null;
-            ms.cache.um.user_info = null;
-            um.clean_up();
-            um.show();
-        };
-
-        um.clean_up = function () {
-            um.child.forEach(function (e) {
-                e && e.destroy();
-            });
-            um.child = [];
-            clearTimeout(um.timer);
-            um.timer = null;
-        };
-        return um;
-    }
-};
-
 ms.o.UMA_help = {
     cNew: function (cid) {
         var o = ms.CARD.cNew(cid);
@@ -1468,11 +1373,15 @@ ms.o.ART_list = {
 
         o.show_article = function (idx) {
             if (o.out_put) {
-                var data = ms.cache.mpsearch.data[
-                        ms.cache.mpsearch.result[idx]
-                ];
+                var data = {recent: [ms.cache.mpsearch.data[ms.cache.mpsearch.result[idx]]]};
                 //console.log(data);
-                o.out_put.html(Mustache.render($('#tp-art-viewer').html(), data));
+                //o.out_put.html(Mustache.render($('#tp-art-viewer').html(), data));
+                o.out_put.html(Mustache.render($('#tp-article-summary-container').html(), data));
+                var obj = document.getElementsByName('article-content');
+                if (obj && obj[0]) {
+                    obj[0].setAttribute('style', "font-size: 15px;width: 100%;text-align: left; ");
+                }
+                //                console.log(obj);
             } else {
                 console.log('没容器可以用来输出选中的文章！');
             }
@@ -1614,88 +1523,4 @@ ms.o.ART_search_box = {
         return o;
     }
 };
-
-
-
-ms.o.bak_MP_wrap = {
-    cNew: function (container_id) {
-        var m = ms.CARD.cNew(container_id);
-        m.f.merge({
-            id_num: 3,
-            id_header: 'main',
-            add_event: true
-        });
-
-        m.child = [];
-
-        m.gen_html = function () {
-            return Mustache.render($('#tp-main-page').html(), m);
-        };
-
-        m.after_add_event = function () {
-            m.child.push(ms.o.ART_search_box.cNew(m.ids[1]).show());
-            ms.cache.mpsearch.output = m.ids[0];
-
-            if (!ms.cache.msg) {
-                $.getJSON(ms.s.msg_path + '?t=' + ms.f.rand(), function (data) {
-                    ms.cache.msg = [];
-                    data.forEach(function (e) {
-                        ms.cache.msg.push({
-                            text: filterXSS(e.text),
-                            ctime: ms.f.YMD(e.time),
-                            name: filterXSS(e.name)
-                        });
-                    });
-                }).fail(function () {
-                    console.log('留言文件加载失败！');
-                }).always(function () {
-                    if (ms.uset.show_mbox) {
-                        m.child.push(ms.o.MP_msg.cNew(m.ids[2]).show());
-                    }
-                });
-            } else {
-                if (ms.uset.show_mbox) {
-                    m.child.push(ms.o.MP_msg.cNew(m.ids[2]).show());
-                }
-            }
-
-            if (!ms.cache.article.recent) {
-                $.getJSON(ms.s.top_art_path + '?t=' + ms.f.rand(), function (data) {
-                    ms.cache.article.recent = [];
-
-                    data.forEach(function (e) {
-
-                        ms.cache.article.recent.push({
-                            title: filterXSS(ms.f.base64_to_utf8(e.title)),
-                            mtime: ms.f.YMD(e.mtime),
-                            ctime: ms.f.YMD(e.ctime),
-                            id: e.id,
-                            type: ms.uset.atypes[(e.type < ms.uset.atypes.length ? e.type : 0)],
-                            name: filterXSS(e.name),
-                            content: filterXSS(ms.f.base64_to_utf8(e.content)),
-                            top: e.top === 0 ? false : true,
-                            lock: e.lock === 0 ? false : true
-                        });
-                    });
-                    m.objs[0].innerHTML = Mustache.render($('#tp-article-container').html(), ms.cache.article);
-                }).fail(function () {
-                    m.objs[0].innerHTML = "<font color=red>无数据</font>";
-                });
-            } else {
-                m.objs[0].innerHTML = Mustache.render($('#tp-article-container').html(), ms.cache.article);
-            }
-
-        };
-
-        m.clean_up = function () {
-            m.child.forEach(function (e) {
-                e.destroy();
-            });
-            m.child = [];
-        };
-        return m;
-    }
-};
-
-
 

@@ -196,7 +196,7 @@ namespace_fractal.Fractal = {
                 if (skip > 1)
                     timer = setTimeout(
                             function () {
-                                console.log('center(', ox, ',', oy, ") scale:", scale);
+                                //console.log('center(', ox, ',', oy, ") scale:", scale);
                                 fractal.show(1);
                             },
                             1200);
