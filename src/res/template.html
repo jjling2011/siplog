@@ -20,6 +20,23 @@
     </table>
 </script>
 
+<script type="text/template" id="tp-main-wrap">
+    <table style="width:100%;">
+    <tr>
+    <td style="vertical-align: top;" id="{{ids.0}}">
+    </td>
+    <td align="right" style="width:200px;vertical-align: top;">
+    <table style="width:100%;">
+	<tr><td  style="text-align: right;width:100%;padding-top:5px;" ><input class="btn btn-xs " type="button" id="{{ids.4}}" value="管理页面"></td></tr>
+    <tr><td  style="text-align: right;width:100%;" id="{{ids.1}}"></td></tr>
+    <tr><td  style="text-align: right;width:100%;" id="{{ids.2}}"></td></tr>
+    <tr><td  style="text-align: right;width:100%;" id="{{ids.3}}"></td></tr>
+    </table>
+    </td>
+    </tr>
+    </table>
+</script>
+
 <script type="text/template" id="tp-um-login">
     <table style="width:100%; border-collapse:separate;border-spacing: 4px 5px;" >
     <tr>
@@ -233,18 +250,19 @@
 <script type="text/template" id="tp-art-viewer">
 <table style="width:100%;padding:10px;">
     <tr>
-        <td style="width:100%;text-align:center;padding-top:15px;padding:10px;">
+        <td style="width:100%;text-align:center;padding-left:10px;padding-right:10px;">
             <table style="width:100%;padding:10px;">
                 <tr>
                     <td >
-                        <div style="padding-top: 7px;text-align: center;font-size: 20px;text-overflow:ellipsis;">
+                        <div style="text-align: center;font-size: 20px;text-overflow:ellipsis;">
                             {{title}}
                         </div>
                     </td>
                 </tr>
                 <tr>
-                    <td style="text-align:right;padding-right:25px;padding-bottom:5px;">&nbsp;{{name}}&nbsp;{{mtime}}&nbsp;
+                    <td style="text-align:right;padding-right:20px;padding-bottom:5px;">
                         <input type="button" class="btn btn-xs" value="{{type}}">
+						&nbsp;{{name}}&nbsp;{{mtime}}&nbsp;
                     </td>
                 </tr>
                 <tr>
@@ -343,19 +361,19 @@
 	</table>
 </script>
 
-<script type="text/template" id="tp-article-container">    
-<table style="width:100%;padding:10px;">
+<script type="text/template" id="tp-article-summary-container">    
+<table style="width:100%;">
     {{#recent}}
     <tr>
-        <td style="width:100%;text-align:center;padding-top:15px;padding:10px;">
-            <table style="width:100%;padding:10px;">
+        <td style="width:100%;text-align:center;padding-left:10px;padding-right:10px;">
+            <table style="width:100%;">
                 <tr>
                     <td >
-                        <div style="padding-top: 7px;text-align: center;font-size: 20px;text-overflow:ellipsis;">{{title}}</div>
+                        <div style="text-align: center;font-size: 20px;text-overflow:ellipsis;">{{title}}</div>
                     </td>
                 </tr>
                 <tr>
-                    <td style="text-align:right;padding-right:25px;padding-bottom:5px;">
+                    <td style="text-align:right;padding-right:20px;padding-bottom:5px;">
 						{{#lock}}&nbsp;<input type="button" class="btn btn-xs " style="background:bisque;" value="锁定">{{/lock}}
                         {{#top}}&nbsp;<input type="button" class="btn btn-xs " style="background:lightblue;" value="置顶">{{/top}}
 						<input type="button" class="btn btn-xs" value="{{type}}">

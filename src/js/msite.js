@@ -164,7 +164,164 @@ ms.o.MP_msg = {
         return o;
     }
 };
+
 ms.o.Main_wrap = {
+    cNew: function (cid) {
+        var o = ms.CARD.cNew(cid);
+        o.f.merge({
+            id_num: 5,
+            id_header: 'main_wrap',
+            add_event: true
+        });
+
+        o.gen_ev_handler = function () {
+            o.ev_handler = [
+                function () {
+                    if (o.objs[4].value === '管理页面') {
+                        //switch to admin
+                        //console.log('switch to admin');
+                        o.objs[4].value = '返回主页';
+                        show_mgr_page();
+                    } else {
+                        //console.log('switch back to main_page');
+                        o.objs[4].value = '管理页面';
+                        show_main_page();
+                    }
+
+                }
+            ];
+        };
+
+        function show_main_page() {
+            clear_contents();
+            var cnum = 1;
+            ms.cache.mpsearch.output = o.ids[0];
+            o.contents.push(ms.o.ART_search_box.cNew(o.ids[cnum++]).show());
+
+            if (!ms.cache.msg) {
+                $.getJSON(ms.s.msg_path + '?t=' + ms.f.rand(), function (data) {
+                    ms.cache.msg = [];
+                    data.forEach(function (e) {
+                        ms.cache.msg.push({
+                            text: filterXSS(e.text),
+                            ctime: ms.f.YMD(e.time),
+                            name: filterXSS(e.name)
+                        });
+                    });
+                }).fail(function () {
+                    console.log('留言文件加载失败！');
+                }).always(function () {
+                    if (ms.uset.show_mbox) {
+                        o.contents.push(ms.o.MP_msg.cNew(o.ids[cnum++]).show());
+                    }
+                });
+            } else {
+                if (ms.uset.show_mbox) {
+                    o.contents.push(ms.o.MP_msg.cNew(o.ids[cnum++]).show());
+                }
+            }
+
+            if (!ms.cache.article.recent) {
+                $.getJSON(ms.s.top_art_path + '?t=' + ms.f.rand(), function (data) {
+                    ms.cache.article.recent = [];
+                    data.forEach(function (e) {
+                        ms.cache.article.recent.push({
+                            title: filterXSS(ms.f.base64_to_utf8(e.title)),
+                            mtime: ms.f.YMD(e.mtime),
+                            ctime: ms.f.YMD(e.ctime),
+                            id: e.id,
+                            type: ms.uset.atypes[(e.type < ms.uset.atypes.length ? e.type : 0)],
+                            name: filterXSS(e.name),
+                            content: filterXSS(ms.f.base64_to_utf8(e.content)),
+                            top: e.top === 0 ? false : true,
+                            lock: e.lock === 0 ? false : true
+                        });
+                    });
+                    o.objs[0].innerHTML = Mustache.render($('#tp-article-summary-container').html(), ms.cache.article);
+                }).fail(function () {
+                    o.objs[0].innerHTML = "<font color=red>无数据</font>";
+                });
+            } else {
+                o.objs[0].innerHTML = Mustache.render($('#tp-article-summary-container').html(), ms.cache.article);
+            }
+        }
+
+        o.show_user_panel = function () {
+            var info = ms.cache.um.user_info;
+            var current_id = 1;
+            if (info && info.login) {
+                o.objs[current_id++].innerHTML = Mustache.render($('#tp-um-welcome').html(), info);
+                if (info.prv['USERM']) {
+                    o.contents.push(ms.o.UM_management.cNew(o.ids[current_id++]).show());
+                }
+                o.contents.push(ms.o.UM_logout.cNew(o.ids[current_id++]).show());
+            } else {
+                o.contents.push(ms.o.UM_login.cNew(o.ids[current_id++]).show());
+            }
+        };
+
+        function show_mgr_page() {
+            clear_contents();
+            o.contents.push(ms.o.UMA_wrap.cNew(o.ids[0]).show());
+            if (ms.cache.um.user_info) {
+                //console.log('using cache');
+                o.show_user_panel();
+            } else {
+                o.f.fetch('fetch_user_info', null, function (info) {
+                    ms.cache.um.user_info = info;
+                    o.show_user_panel();
+                });
+            }
+            if (!o.timer) {
+                o.timer = setTimeout(function () {
+                    o.f.fetch('wakeup', function () {
+                        ms.cache.mpsearch.data = null;
+                    });
+                }, 6000);
+            }
+        }
+
+        o.add_event = function () {
+            o.f.on('click', 4, 0);
+        };
+
+        o.gen_html = function () {
+            return Mustache.render($('#tp-main-wrap').html(), o);
+        };
+
+        function clear_contents() {
+            if (o.contents && o.contents.length > 0) {
+                o.contents.forEach(function (e) {
+                    e.destroy();
+                });
+            }
+            o.contents = [];
+            for(var i=0;i<4;i++){
+                o.objs[i].innerHTML='';
+            }
+            clearTimeout(o.timer);
+            o.timer = null;
+        }
+
+        o.refresh = function () {
+            console.log('call main_page.refresh()');
+            ms.cache.um.all_user_info = null;
+            ms.cache.um.user_info = null;
+            clear_contents();
+            show_mgr_page();
+        };
+
+        o.after_add_event = function () {
+            ms.cache.um.wrap = o;
+            clear_contents();
+
+            show_main_page();
+        };
+
+        return o;
+    }
+};
+ms.o.bak_Main_wrap = {
     cNew: function (container_id) {
         var mp = ms.PANEL.cNew(container_id,
                 [
@@ -313,8 +470,8 @@ ms.o.UMA_search_result = {
                     time: ms.f.YMD(c.mtime),
                     author: filterXSS(c.name),
                     type: (c.type < ms.uset.atypes.length) ? ms.uset.atypes[c.type] : '无',
-                    top:c.top===0?false:true,
-                    lock:c.lock===0?false:true
+                    top: c.top === 0 ? false : true,
+                    lock: c.lock === 0 ? false : true
                 });
             }
             return (Mustache.render($('#tp-uma-search-result').html(), o.d));
@@ -441,15 +598,15 @@ ms.o.UMA_editor = {
                     ms.cache.article.selected_id = null;
                     ms.cache.article.title = null;
                     ms.cache.article.html = null;
-                    ms.cache.article.top=false;
-                    ms.cache.article.lock=false;
-                    o.objs[9].checked=false;
-                    o.objs[10].checked=false;
+                    ms.cache.article.top = false;
+                    ms.cache.article.lock = false;
+                    o.objs[9].checked = false;
+                    o.objs[10].checked = false;
                     o.objs[0].value = '';
                     o.objs[2].options[0].selected = true;
                     o.editor.$txt.html('<p><br></p>');
                     o.objs[5].innerHTML = "新文章";
-                    
+
                 },
                 function () {
                     if (!ms.cache.article.cache_id > 0) {
@@ -1017,7 +1174,7 @@ ms.o.UMA_settings = {
     }
 };
 
-ms.o.UM_wrap = {
+ms.o.bak_UM_wrap = {
     cNew: function (container_id) {
         var um = ms.CARD.cNew(container_id);
 
@@ -1458,7 +1615,9 @@ ms.o.ART_search_box = {
     }
 };
 
-ms.o.MP_wrap = {
+
+
+ms.o.bak_MP_wrap = {
     cNew: function (container_id) {
         var m = ms.CARD.cNew(container_id);
         m.f.merge({
@@ -1514,8 +1673,8 @@ ms.o.MP_wrap = {
                             type: ms.uset.atypes[(e.type < ms.uset.atypes.length ? e.type : 0)],
                             name: filterXSS(e.name),
                             content: filterXSS(ms.f.base64_to_utf8(e.content)),
-                            top:e.top===0?false:true,
-                            lock:e.lock===0?false:true
+                            top: e.top === 0 ? false : true,
+                            lock: e.lock === 0 ? false : true
                         });
                     });
                     m.objs[0].innerHTML = Mustache.render($('#tp-article-container').html(), ms.cache.article);
