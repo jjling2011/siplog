@@ -396,7 +396,7 @@ class Serv extends UserMgr {
             $data[] = array('name' => $name, 'ctime' => $ctime, 'text' => $msg);
         }
 
-        file_put_contents(MSG_PATH, json_encode(array_reverse($data)));
+        file_put_contents(MSG_PATH, json_encode($data));
     }
 
     public function list_orphan_img() {
