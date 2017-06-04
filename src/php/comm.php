@@ -10,6 +10,12 @@ include '../upload/config/settings.php';
 
 class CommLib {
 
+    public static function mkdir($path) {
+        if (!is_dir($path)) {
+            mkdir($path, 0755, true);
+        }
+    }
+
     public static function fetch_assoc($sql, $types = false, $params = false) {
 
         $db = CommLib::open_db();
@@ -45,7 +51,7 @@ class CommLib {
 
             call_user_func_array(array($stmt, 'bind_result'), $ref_results);
 
-            
+
             while ($stmt->fetch()) {
                 $data = [];
                 foreach ($results as $key => $value) {
