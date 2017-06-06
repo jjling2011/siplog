@@ -129,7 +129,7 @@
     </select>
     </td>
     <td style="text-align:center;width:70px;"><input id="{{ids.3}}" type="button" class="btn btn-info" value="提交"></td>
-    <td style="text-align:center;width:70px;"><input id="{{ids.4}}" type="button" class="btn btn-info" value="新增"></td>
+    <td style="text-align:center;width:70px;"><input id="{{ids.4}}" type="button" class="btn btn-info" value="清空"></td>
     <td style="text-align:center;width:70px;"><input id="{{ids.6}}" type="button" class="btn btn-warning" value="删除"></td>
 	<td style="text-align:center;width:70px;"><input id="{{ids.7}}" type="button" class="btn btn-info" value="设置"></td>
     </tr>
@@ -147,18 +147,11 @@
 
 <script type="text/template" id="tp-uma-help">
     <div style="padding: 0px;margin: 8px;">
-	【更新主页】<br>
-	<input id="{{ids.0}}" type="button" value="立即更新" class="btn btn-sm btn-warning"><br>
+	【主页搜索】<br>
+	主页右侧搜索框只能搜索最近半年的数据。<br>
+	主页左侧的文章概要在每次发布、修改、删除文章后更新。<br><br>
 	
-	主页搜索框的缓存数据是一年内的所有文章。<br>
-	更新较耗资源，默认24小时更新一次。<br>
-	如果要立即更新可以手动点上面的按钮。<br>
-	*注意*<br>
-	搜索框使用的数据和主页显示的文章数据并不相同。<br>
-	主页的文章数据在每次发布、修改、删除文章后更新。<br><br>
-	
-	
-	【编辑及删除文件】<br>
+	【编辑及删除文章】<br>
 	先在 [管理] -> [搜索] 中输入条件，<br>
 	找到你想编辑或删除的文件。<br>
 	点中后相应行会变色，<br>
@@ -166,7 +159,7 @@
 	
 	
     【搜索选项】<br>
-	注意，这里是指[管理]页面中的搜索，并不是[主页]中的搜索。
+	注意，这里是指[管理]页面中的搜索，不是[主页]中的搜索。
     <ul>
     <li>@名字</li>
     <li>#标题</li>

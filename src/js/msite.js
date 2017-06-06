@@ -13,7 +13,7 @@ var ms = CardJS.cNew({
     // 文章分类
     atypes_path: 'upload/json/atypes.json',
     msg_path: 'upload/json/msg.json',
-    article_path: 'upload/json/article.json',
+    article_path: 'upload/json/',
     uset_path: 'upload/json/uset.json'
 });
 
@@ -272,13 +272,7 @@ ms.o.Main_wrap = {
                     o.show_user_panel();
                 });
             }
-            if (!o.timer) {
-                o.timer = setTimeout(function () {
-                    o.f.fetch('wakeup', function () {
-                        ms.cache.mpsearch.data = null;
-                    });
-                }, 6000);
-            }
+
         }
 
         o.add_event = function () {
@@ -299,12 +293,10 @@ ms.o.Main_wrap = {
             for (var i = 0; i < 4; i++) {
                 o.objs[i].innerHTML = '';
             }
-            clearTimeout(o.timer);
-            o.timer = null;
         }
 
         o.refresh = function () {
-            console.log('call main_page.refresh()');
+            //console.log('call main_page.refresh()');
             ms.cache.um.all_user_info = null;
             ms.cache.um.user_info = null;
             clear_contents();
@@ -558,6 +550,7 @@ ms.o.UMA_editor = {
 
                     // clean cache
                     ms.cache.article.recent = null;
+                    ms.cache.mpsearch.data = null;
 
                     o.objs[5].innerHTML = '正在提交数据 ...';
                     o.f.fetch('post_article', data, function () {
@@ -596,6 +589,7 @@ ms.o.UMA_editor = {
 
                     // clean cache
                     ms.cache.article.recent = null;
+                    ms.cache.mpsearch.data = null;
 
                     o.f.fetch('delete_article', ms.cache.article.cache_id,
                             function () {
@@ -1154,16 +1148,18 @@ ms.o.UMA_help = {
     cNew: function (cid) {
         var o = ms.CARD.cNew(cid);
         o.f.merge({
-            id_num: 1,
-            id_header: 'at_help',
-            add_event: true
+            //id_num: 1,
+            id_header: 'at_help'
+                    //add_event: true
         });
 
         o.gen_html = function () {
-            return Mustache.render($('#tp-uma-help').html(), o);
+            return Mustache.render($('#tp-uma-help').html());
         };
 
         o.gen_ev_handler = function () {
+
+            //准备删除下面这个函数
             o.ev_handler = [
                 function () {
                     o.f.fetch('update_all_article', function () {
@@ -1176,7 +1172,7 @@ ms.o.UMA_help = {
         };
 
         o.add_event = function () {
-            o.f.on('click', 0);
+            //o.f.on('click', 0);
         };
 
         return o;
@@ -1435,12 +1431,53 @@ ms.o.ART_search_box = {
 
         o.child = null;
 
+        function get_article(path) {
+            //console.log('get_article:'+path);
+            $.getJSON(path + '?t=' + ms.f.rand(), function (data) {
+                //ms.cache.mpsearch.data = [];
+                //console.log('got '+data.length+' record!');
+                data.forEach(function (e) {
+                    ms.cache.mpsearch.data.push({
+                        title: filterXSS(ms.f.base64_to_utf8(e.title)),
+                        mtime: ms.f.YMD(e.mtime),
+                        ctime: ms.f.YMD(e.ctime),
+                        id: e.id,
+                        type: ms.uset.atypes[(e.type < ms.uset.atypes.length ? e.type : 0)],
+                        name: filterXSS(e.name),
+                        content: filterXSS(ms.f.base64_to_utf8(e.content)),
+                        top: e.top === 0 ? false : true,
+                        lock: e.lock === 0 ? false : true
+                    });
+                });
+            });
+        }
+
         o.gen_ev_handler = function () {
             o.ev_handler = [
 
                 //focus in search box
                 function () {
                     if (!ms.cache.mpsearch.data) {
+                        console.log('准备加载数据!');
+                        var d = new Date();
+                        var year = d.getUTCFullYear(),
+                                month = d.getUTCMonth(),
+                                dir = ms.s.article_path,
+                                path = "";
+                        ms.cache.mpsearch.data = [];
+                        for (var i = 0; i < 6; i++) {
+                            path = dir + (year) + '/' + (month + 1) + '.json';
+                            get_article(path);
+                            month--;
+                            if (month < 0) {
+                                month += 12;
+                                year--;
+                            }
+                        }
+                    }
+
+                    //准备删除下面这个函数.
+                    if (false && !ms.cache.mpsearch.data) {
                         //console.log('忘了搬服务器的文章,偷偷加载数据中 ...');
                         $.getJSON(ms.s.article_path + '?t=' + ms.f.rand(), function (data) {
                             ms.cache.mpsearch.data = [];
@@ -1455,9 +1492,11 @@ ms.o.ART_search_box = {
                                 });
                             });
                             //console.log('终于搬完了。呼~~');
-                        }).fail(function () {
+                        }
+                        ).fail(function () {
                             o.objs[2].innerHTML = '<font color="red">加载文章数据失败！</font>';
-                        });
+                        }
+                        );
                     }
                 },
                 //keyup

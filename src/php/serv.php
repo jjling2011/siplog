@@ -89,7 +89,7 @@ class Serv extends UserMgr {
         if ($year > 0 && $month > 0 && $month < 13) {
             $sql = 'select title,mtime,ctime,id,name,content,type,`top`,`lock` from article where year(ctime)=? and month(ctime)=?';
             $articles = CommLib::fetch_assoc($sql, 'ii', [$year, $month]);
-            if ($articles !== false && count($articles) > 0) {
+            if ($articles !== false ) {
                 CommLib::mkdir(ARTICLE_PATH . $year);
                 file_put_contents(ARTICLE_PATH . $year . '/' . $month . '.json', $this->article_array_to_json($articles));
             }
