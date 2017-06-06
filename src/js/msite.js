@@ -1148,31 +1148,11 @@ ms.o.UMA_help = {
     cNew: function (cid) {
         var o = ms.CARD.cNew(cid);
         o.f.merge({
-            //id_num: 1,
             id_header: 'at_help'
-                    //add_event: true
         });
 
         o.gen_html = function () {
             return Mustache.render($('#tp-uma-help').html());
-        };
-
-        o.gen_ev_handler = function () {
-
-            //准备删除下面这个函数
-            o.ev_handler = [
-                function () {
-                    o.f.fetch('update_all_article', function () {
-                        // force update mp_search_box cache
-                        ms.cache.mpsearch.data = null;
-                    });
-                    alert('更新请求已发送，处理需要点时间，可以玩去咯。');
-                }
-            ];
-        };
-
-        o.add_event = function () {
-            //o.f.on('click', 0);
         };
 
         return o;
@@ -1475,29 +1455,6 @@ ms.o.ART_search_box = {
                             }
                         }
                     }
-
-                    //准备删除下面这个函数.
-                    if (false && !ms.cache.mpsearch.data) {
-                        //console.log('忘了搬服务器的文章,偷偷加载数据中 ...');
-                        $.getJSON(ms.s.article_path + '?t=' + ms.f.rand(), function (data) {
-                            ms.cache.mpsearch.data = [];
-                            data.forEach(function (e) {
-                                ms.cache.mpsearch.data.push({
-                                    id: e.id,
-                                    content: filterXSS(e.content),
-                                    mtime: ms.f.YMD(e.mtime),
-                                    name: filterXSS(e.name),
-                                    title: filterXSS(e.title),
-                                    type: ms.uset.atypes[(e.type < ms.uset.atypes.length ? e.type : 0)]
-                                });
-                            });
-                            //console.log('终于搬完了。呼~~');
-                        }
-                        ).fail(function () {
-                            o.objs[2].innerHTML = '<font color="red">加载文章数据失败！</font>';
-                        }
-                        );
-                    }
                 },
                 //keyup
                 function (e) {
@@ -1555,7 +1512,9 @@ ms.o.ART_search_box = {
             return ms.f.add_frame('tp-frame-tag-card', content, '搜索', 'margin:0px;margin-top:5px;');
         };
         o.add_event = function () {
-            o.f.on('focus', 0, 0);
+            //o.f.on('focus', 0, 0);
+            o.f.on('mouseover',0,0);
+            o.f.on('mouseover',1,0);
             o.f.on('keyup', 0, 1);
             o.f.on('click', 1, 2);
         };

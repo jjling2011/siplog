@@ -20,7 +20,7 @@ function install() {
     del_file('upload/json/top.json');
     del_file('upload/json/msg.json');
     del_file('upload/json/uset.json');
-    del_file('upload/json/article.json');
+    # del_file('upload/json/article.json');
     del_file('upload/config/settings.php');
 
     make_dir('upload');
@@ -29,7 +29,7 @@ function install() {
     make_dir('upload/pics');
 
     copy('res/settings.skeleton.php', 'upload/config/settings.php');
-    copy('res/article.json', 'upload/json/article.json');
+    # copy('res/article.json', 'upload/json/article.json');
     copy('res/uset.json', 'upload/json/uset.json');
     copy('res/top.json', 'upload/json/top.json');
     copy('res/msg.json', 'upload/json/msg.json');
