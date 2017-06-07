@@ -299,7 +299,7 @@
 <table style="width:100%;">
     {{#recent}}
     <tr>
-        <td style="width:100%;text-align:center;padding-left:10px;padding-right:10px;">
+        <td style="width:100%;text-align:center;padding-left:10px;padding-right:10px;padding-bottom:16px;">
             <table style="width:100%;">
                 <tr>
                     <td >
@@ -351,7 +351,7 @@
 {{resetIndex}}
 </script>
     
-<script type="text/templlate" id="tp-mp-msg">
+<script type="text/template" id="tp-mp-msg">
   <table style="width:100%;">
     <tr>
         <td style="padding-bottom:5px;">
@@ -376,7 +376,26 @@
 </table>
 </script>
     
-	
-	
-	
-	
+<script type="text/template" id="tp-uma-backup">
+<table style="width:100%;text-align: left;">
+    <tr><td style="padding: 8px;" id="{{ids.0}}"></td></tr>
+    <tr><td style="padding: 8px;"><input type="button" id="{{ids.1}}" value="导出图片数据库" class="btn btn-info btn-sm"></td></tr>
+    <tr><td style="padding: 8px;"><input type="button" id="{{ids.2}}" value="从upload目录导入数据" class="btn btn-info btn-sm"></td></tr>
+    <tr>
+        <td>备份过程：<br>
+            <ul>
+                <li>点击上面的[导出图片数据库]</li>
+                <li>下载upload目录下的pic及json两个文件夹</li>
+            </ul>
+        </td>
+    </tr>
+    <tr>
+        <td>还原过程：<br>
+            <ul>
+                <li>上载pic及json两个文件夹到upload目录中</li>
+                <li>点击上面的[从upload目录导入数据]</li>
+            </ul>
+        </td>
+    </tr>
+</table>
+</script>

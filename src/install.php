@@ -20,7 +20,7 @@ function install() {
     del_file('upload/json/top.json');
     del_file('upload/json/msg.json');
     del_file('upload/json/uset.json');
-    # del_file('upload/json/article.json');
+    del_file('upload/json/files.json');
     del_file('upload/config/settings.php');
 
     make_dir('upload');
@@ -29,7 +29,7 @@ function install() {
     make_dir('upload/pics');
 
     copy('res/settings.skeleton.php', 'upload/config/settings.php');
-    # copy('res/article.json', 'upload/json/article.json');
+    copy('res/files.json', 'upload/json/files.json');
     copy('res/uset.json', 'upload/json/uset.json');
     copy('res/top.json', 'upload/json/top.json');
     copy('res/msg.json', 'upload/json/msg.json');
@@ -39,7 +39,7 @@ function install() {
     set('DB_PASS', $param['dbpass1']);
     set('DB_NAME', $param['dbname']);
 
-    $tables = ['article', 'ip', 'log', 'msg', 'sys', 'user', 'pics'];
+    $tables = ['article', 'ip', 'log', 'msg',  'user', 'pics'];
     $sql = gen_sql();
 
     foreach ($tables as $t) {
@@ -112,13 +112,7 @@ function gen_sql() {
   UNIQUE KEY `user` (`user`),
   KEY `token` (`token`),
   KEY `id` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='user info';";
-
-    $sql['sys'] = "CREATE TABLE IF NOT EXISTS `sys` (
-  `utime` timestamp NULL DEFAULT NULL,
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  UNIQUE KEY `id` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统信息'";
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='user info';"; 
 
     $sql['msg'] = "CREATE TABLE IF NOT EXISTS `msg` (
   `id` int(11) NOT NULL AUTO_INCREMENT,

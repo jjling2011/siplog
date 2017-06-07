@@ -795,6 +795,7 @@ ms.o.UMA_wrap = {
                     //['分类', ['UMA_types']],
                     ['图片管理', ['UMA_list_orphan_img']],
                     ['设置', ['UMA_set_wrap']],
+                    ['备份', ['UMA_backup']],
                     ['说明', ['UMA_help']]
                 ],
                 {
@@ -1532,6 +1533,49 @@ ms.o.ART_search_box = {
             o.f.on('keyup', 0, 1);
             o.f.on('click', 1, 2);
         };
+        return o;
+    }
+};
+
+ms.o.UMA_backup = {
+    cNew: function (cid) {
+        var o = ms.CARD.cNew(cid);
+        o.f.merge({
+            id_header: 'uma_backup',
+            id_num: 3,
+            add_event: true
+        });
+
+        o.gen_html = function () {
+            return Mustache.render($('#tp-uma-backup').html(), o);
+        };
+
+        o.gen_ev_handler = function () {
+            o.ev_handler = [
+                function () {
+                    o.f.fetch('export_picdb', function (r) {
+                        alert(r);
+                    }, function (r) {
+                        alert(r);
+                    });
+                },
+                function () {
+                    if (confirm('现有数据将被清除，确定要导入数据？')) {
+                        o.f.fetch('import_from_json', function (r) {
+                            alert(r);
+                        }, function (r) {
+                            alert(r);
+                        });
+                    }
+                }
+            ];
+        };
+
+        o.add_event = function () {
+            o.f.on('click', 1, 0);
+            o.f.on('click', 2, 1);
+        };
+
         return o;
     }
 };

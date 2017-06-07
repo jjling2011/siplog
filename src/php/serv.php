@@ -17,6 +17,8 @@ class Serv extends UserMgr {
             'delete_article',
             'update_uset',
             'search',
+            'export_picdb',
+            'import_from_json',
             'test'
         ]);
     }
@@ -41,6 +43,84 @@ class Serv extends UserMgr {
         }
         CommLib::query('delete from pics where tag=4 or atid=0');
         $this->ok("删除了 $count 张图片");
+    }
+
+    public function export_picdb() {
+        $user_info = $this->get_user_info();
+        if (!($user_info['login'] && $user_info['prv']['BACKUP'])) {
+            $this->fail('无权操作!');
+            return;
+        }
+        $data = CommLib::fetch_assoc('select * from pics');
+        if ($data === false) {
+            $this->fail('导出数据出错，请看php错误日志！');
+            return;
+        }
+        //id	url	uptime	deltime	path	atid	tag
+        file_put_contents(PICDB_PATH, json_encode($data));
+        $this->ok('导出了 ' . (count($data)) . ' 条记录');
+    }
+
+    public function import_from_json() {
+        $user_info = $this->get_user_info();
+        if (!($user_info['login'] && $user_info['prv']['BACKUP'])) {
+            $this->fail('无权操作!');
+            return;
+        }
+
+        CommLib::query('truncate pics');
+        if (file_exists(PICDB_PATH)) {
+            $datas = json_decode(file_get_contents(PICDB_PATH), true);
+            if ($datas !== false) {
+                foreach ($datas as $d) {
+                    $sql = 'insert into pics set `id`=?,`url`=?,`uptime`=?,`deltime`=?,`path`=?,`atid`=?,`tag`=?';
+                    CommLib::fetch_assoc($sql, 'issssii', [
+                        $d['id'],
+                        $d['url'],
+                        $d['uptime'],
+                        $d['deltime'],
+                        $d['path'],
+                        $d['atid'],
+                        $d['tag']
+                    ]);
+                }
+            }
+        }
+
+        CommLib::query('truncate article');
+        $files = [];
+        if (file_exists(FILE_PATH)) {
+            $files = array_keys(json_decode(file_get_contents(FILE_PATH), true));
+        }
+        foreach ($files as $file) {
+            $filename = '../upload/json/' . substr($file, 0, 4) . '/' . substr($file, 4) . '.json';
+            //error_log($filename);
+            if (file_exists($filename)) {
+                $datas = json_decode(file_get_contents($filename), true);
+                //$msg.='read file:'.$filename."\nrecords:".count($datas);
+                //error_log($msg);
+                foreach ($datas as $d) {
+                    //	id userid type title content tag ctime mtime name lock top 
+                    $sql = 'insert into article set '
+                            . '`id`=?,`userid`=?,`type`=?,`title`=?,`content`=?,'
+                            . '`tag`=?,`ctime`=?,`mtime`=?,`name`=?,`lock`=?,`top`=? ';
+                    CommLib::fetch_assoc($sql, 'iiississsii', [
+                        $d['id'] + 0,
+                        $d['userid'] + 0,
+                        $d['type'] + 0,
+                        CommLib::base64_to_utf8($d['title']),
+                        CommLib::base64_to_utf8($d['content']),
+                        $d['tag'] + 0,
+                        $d['ctime'],
+                        $d['mtime'],
+                        $d['name'],
+                        $d['lock'] + 0,
+                        $d['top'] + 0
+                    ]);
+                }
+            }
+        }
+        $this->ok('导入完成');
     }
 
     public function set_upload_support($raw_setting) {
@@ -71,12 +151,12 @@ class Serv extends UserMgr {
     }
 
     private function export_article($year, $month) {
-        $top_articles = CommLib::fetch_assoc('select title,mtime,ctime,id,name,content,type,`top`,`lock` from article where `top`=1 order by mtime ');
-        $recent_articles = CommLib::fetch_assoc('select title,mtime,ctime,id,name,content,type,`top`,`lock` from article where `top`=0 order by mtime desc limit 15');
+        $top_articles = CommLib::fetch_assoc('select * from article where `top`=1 order by mtime desc ');
+        $recent_articles = CommLib::fetch_assoc('select * from article where `top`=0 order by mtime desc limit 15');
         file_put_contents(EXPORT_PATH, $this->article_array_to_json($top_articles, $recent_articles));
         //$this->ok('完成!');
         if ($year > 0 && $month > 0 && $month < 13) {
-            $sql = 'select title,mtime,ctime,id,name,content,type,`top`,`lock` from article where year(ctime)=? and month(ctime)=?';
+            $sql = 'select * from article where year(ctime)=? and month(ctime)=?';
             $articles = CommLib::fetch_assoc($sql, 'ii', [$year, $month]);
             if ($articles !== false) {
                 CommLib::mkdir(ARTICLE_PATH . $year);
@@ -88,6 +168,8 @@ class Serv extends UserMgr {
                 }
                 $files["$year$month"] = true;
                 file_put_contents(FILE_PATH, json_encode($files));
+            } else {
+                error_log('query fail!');
             }
         }
     }
@@ -102,6 +184,8 @@ class Serv extends UserMgr {
                     'mtime' => $p['mtime'],
                     'ctime' => $p['ctime'],
                     'id' => $p['id'] + 0,
+                    'tag' => $p['tag'] + 0,
+                    'userid' => $p['userid'] + 0,
                     'type' => $p['type'] + 0,
                     'name' => $p['name'],
                     'top' => $p['top'],
