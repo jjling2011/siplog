@@ -212,28 +212,65 @@ ms.o.Main_wrap = {
                 }
             }
 
-            if (!ms.cache.article.recent) {
-                $.getJSON(ms.s.top_art_path + '?t=' + ms.f.rand(), function (data) {
-                    ms.cache.article.recent = [];
-                    data.forEach(function (e) {
-                        ms.cache.article.recent.push({
-                            title: filterXSS(ms.f.base64_to_utf8(e.title)),
-                            mtime: ms.f.YMD(e.mtime),
-                            ctime: ms.f.YMD(e.ctime),
-                            id: e.id,
-                            type: ms.uset.atypes[(e.type < ms.uset.atypes.length ? e.type : 0)],
-                            name: filterXSS(e.name),
-                            content: filterXSS(ms.f.base64_to_utf8(e.content)),
-                            top: e.top === 0 ? false : true,
-                            lock: e.lock === 0 ? false : true
-                        });
-                    });
-                    o.objs[0].innerHTML = Mustache.render($('#tp-article-summary-container').html(), ms.cache.article);
-                }).fail(function () {
-                    o.objs[0].innerHTML = "<font color=red>无数据</font>";
+            var y = ms.f.get_url_param('y'),
+                    m = ms.f.get_url_param('m'),
+                    id = parseInt(ms.f.get_url_param('id'));
+            if (y && m && id) {
+                $.getJSON('upload/json/' + y + '/' + m + '.json', function (data) {
+                    //console.log(data,tid);
+                    for (var i = 0; i < data.length; i++) {
+                        if (data[i].id === id) {
+                            break;
+                        }
+                    }
+                    //console.log(data[i]);
+                    if (data[i]) {
+                        var e = data[i];
+                        //console.log(e);
+                        var d = {
+                            recent: [{
+                                    title: filterXSS(ms.f.base64_to_utf8(e.title)),
+                                    mtime: ms.f.YMD(e.mtime),
+                                    ctime: ms.f.YMD(e.ctime),
+                                    id: e.id,
+                                    type: ms.uset.atypes[(e.type < ms.uset.atypes.length ? e.type : 0)],
+                                    name: filterXSS(e.name),
+                                    content: filterXSS(ms.f.base64_to_utf8(e.content)),
+                                    top: e.top === 0 ? false : true,
+                                    lock: e.lock === 0 ? false : true
+                                }]
+                        };
+                        o.objs[0].innerHTML = Mustache.render($('#tp-article-summary-container').html(), d);
+                        var obj = document.getElementsByName('article-content');
+                        if (obj && obj[0]) {
+                            obj[0].setAttribute('style', "font-size: 15px;width: 100%;text-align: left;color:#000; ");
+                        }
+                    }
                 });
             } else {
-                o.objs[0].innerHTML = Mustache.render($('#tp-article-summary-container').html(), ms.cache.article);
+                if (!ms.cache.article.recent) {
+                    $.getJSON(ms.s.top_art_path + '?t=' + ms.f.rand(), function (data) {
+                        ms.cache.article.recent = [];
+                        data.forEach(function (e) {
+                            ms.cache.article.recent.push({
+                                title: filterXSS(ms.f.base64_to_utf8(e.title)),
+                                mtime: ms.f.YMD(e.mtime),
+                                ctime: ms.f.YMD(e.ctime),
+                                id: e.id,
+                                type: ms.uset.atypes[(e.type < ms.uset.atypes.length ? e.type : 0)],
+                                name: filterXSS(e.name),
+                                content: filterXSS(ms.f.base64_to_utf8(e.content)),
+                                top: e.top === 0 ? false : true,
+                                lock: e.lock === 0 ? false : true
+                            });
+                        });
+                        o.objs[0].innerHTML = Mustache.render($('#tp-article-summary-container').html(), ms.cache.article);
+                    }).fail(function () {
+                        o.objs[0].innerHTML = "<font color=red>无数据</font>";
+                    });
+                } else {
+                    o.objs[0].innerHTML = Mustache.render($('#tp-article-summary-container').html(), ms.cache.article);
+                }
             }
         }
 
@@ -1341,6 +1378,8 @@ ms.o.ART_list = {
             }
         };
 
+
+
         o.show_article = function (idx) {
             if (o.out_put) {
                 var data = {recent: [ms.cache.mpsearch.data[ms.cache.mpsearch.result[idx]]]};
@@ -1349,9 +1388,14 @@ ms.o.ART_list = {
                 o.out_put.html(Mustache.render($('#tp-article-summary-container').html(), data));
                 var obj = document.getElementsByName('article-content');
                 if (obj && obj[0]) {
-                    obj[0].setAttribute('style', "font-size: 15px;width: 100%;text-align: left; ");
+                    obj[0].setAttribute('style', "font-size: 15px;width: 100%;text-align: left;color:#000; ");
                 }
-                //                console.log(obj);
+                var d = data.recent[0];
+                ms.f.set_url_param('index.html', {
+                    'y': d.ctime.substr(0, 4),
+                    'm': parseInt(d.ctime.substr(5, 2)),
+                    'id': d.id
+                });
             } else {
                 console.log('没容器可以用来输出选中的文章！');
             }
