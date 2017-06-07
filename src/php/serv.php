@@ -1,16 +1,5 @@
 <?php
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/**
- * Description of serv
- *
- * @author luke2
- */
 require_once 'usermgr.php';
 
 class Serv extends UserMgr {
@@ -89,9 +78,16 @@ class Serv extends UserMgr {
         if ($year > 0 && $month > 0 && $month < 13) {
             $sql = 'select title,mtime,ctime,id,name,content,type,`top`,`lock` from article where year(ctime)=? and month(ctime)=?';
             $articles = CommLib::fetch_assoc($sql, 'ii', [$year, $month]);
-            if ($articles !== false ) {
+            if ($articles !== false) {
                 CommLib::mkdir(ARTICLE_PATH . $year);
                 file_put_contents(ARTICLE_PATH . $year . '/' . $month . '.json', $this->article_array_to_json($articles));
+                //gen files.json
+                $files = [];
+                if (file_exists(FILE_PATH)) {
+                    $files = json_decode(file_get_contents(FILE_PATH), true);
+                }
+                $files["$year$month"] = true;
+                file_put_contents(FILE_PATH, json_encode($files));
             }
         }
     }
@@ -366,7 +362,7 @@ class Serv extends UserMgr {
         $this->haste($r !== false);
         if ($t !== false) {
             $this->export_article($t[0]['y'], $t[0]['m']);
-        } 
+        }
     }
 
     public function post_article($raw_data) {

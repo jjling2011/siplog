@@ -14,6 +14,9 @@ var ms = CardJS.cNew({
     atypes_path: 'upload/json/atypes.json',
     msg_path: 'upload/json/msg.json',
     article_path: 'upload/json/',
+    // 记录json文件是否存在，由serv.php生成。
+    // {'20176':true,'201612':true}
+    files_path: 'upload/json/files.json',
     uset_path: 'upload/json/uset.json'
 });
 
@@ -22,20 +25,6 @@ ms.f.get_offset = function (el) {
     return {
         left: el.left + window.scrollX + el.width,
         top: el.top + window.scrollY + el.height
-    };
-};
-
-ms.f.bak_get_offset = function (element) {
-    var top = 0, left = 0;
-    do {
-        top += element.offsetTop || 0;
-        left += element.offsetLeft || 0;
-        element = element.offsetParent;
-    } while (element);
-
-    return {
-        top: top,
-        left: left
     };
 };
 
@@ -53,6 +42,8 @@ ms.uset = {
 };
 
 ms.cache = {
+    // 记录有哪些json文件夹下导出的每月数据文件名。
+    files: null,
     mpsearch: {
         data: null,
         result: [],
@@ -551,6 +542,7 @@ ms.o.UMA_editor = {
                     // clean cache
                     ms.cache.article.recent = null;
                     ms.cache.mpsearch.data = null;
+                    ms.cache.files = null;
 
                     o.objs[5].innerHTML = '正在提交数据 ...';
                     o.f.fetch('post_article', data, function () {
@@ -590,6 +582,7 @@ ms.o.UMA_editor = {
                     // clean cache
                     ms.cache.article.recent = null;
                     ms.cache.mpsearch.data = null;
+                    ms.cache.files = null;
 
                     o.f.fetch('delete_article', ms.cache.article.cache_id,
                             function () {
@@ -1411,8 +1404,19 @@ ms.o.ART_search_box = {
 
         o.child = null;
 
-        function get_article(path) {
+        function get_article(year, month) {
             //console.log('get_article:'+path);
+            if (year < 2017 || month < 0 || month > 11) {
+                return;
+            }
+            var key = '' + year + (month + 1);
+            if (!(key in ms.cache.files) || !(ms.cache.files[key])) {
+                //console.log('key [' + key + '] not exist!');
+                return;
+            }
+            //console.log('fetch file key [' + key + '] ');
+            var path = ms.s.article_path + (year) + '/' + (month + 1) + '.json';
+
             $.getJSON(path + '?t=' + ms.f.rand(), function (data) {
                 //ms.cache.mpsearch.data = [];
                 //console.log('got '+data.length+' record!');
@@ -1438,16 +1442,15 @@ ms.o.ART_search_box = {
                 //focus in search box
                 function () {
                     if (!ms.cache.mpsearch.data) {
-                        console.log('准备加载数据!');
-                        var d = new Date();
-                        var year = d.getUTCFullYear(),
-                                month = d.getUTCMonth(),
-                                dir = ms.s.article_path,
-                                path = "";
+                        //console.log('准备加载数据!');
+
+                        var year = new Date().getUTCFullYear(),
+                                month = new Date().getUTCMonth();
+
                         ms.cache.mpsearch.data = [];
                         for (var i = 0; i < 6; i++) {
-                            path = dir + (year) + '/' + (month + 1) + '.json';
-                            get_article(path);
+                            //path = dir + (year) + '/' + (month + 1) + '.json';
+                            get_article(year, month);
                             month--;
                             if (month < 0) {
                                 month += 12;
@@ -1504,6 +1507,17 @@ ms.o.ART_search_box = {
                 }
             ];
         };
+
+        o.after_add_event = function () {
+            if (!ms.cache.files) {
+                // fetch json.
+                $.getJSON(ms.s.files_path + '?t=' + ms.f.rand(), function (data) {
+                    ms.cache.files = data;
+                    //console.log("files:", ms.cache.files);
+                });
+            }
+        };
+
         o.clean_up = function () {
             o.child && o.child.destroy();
         };
@@ -1513,8 +1527,8 @@ ms.o.ART_search_box = {
         };
         o.add_event = function () {
             //o.f.on('focus', 0, 0);
-            o.f.on('mouseover',0,0);
-            o.f.on('mouseover',1,0);
+            o.f.on('mouseover', 0, 0);
+            o.f.on('mouseover', 1, 0);
             o.f.on('keyup', 0, 1);
             o.f.on('click', 1, 2);
         };

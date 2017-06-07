@@ -7,6 +7,7 @@ define('ATYPES_PATH', '../upload/json/atypes.json');
 define('MSG_PATH', '../upload/json/msg.json');
 define('USET_PATH', '../upload/json/uset.json');
 define('ARTICLE_PATH', '../upload/json/');
+define('FILE_PATH','../upload/json/files.json');
 define('UPLOAD_PATH','../upload/pics/');
 
 define('MSG_KEEP', 5);
