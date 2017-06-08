@@ -132,13 +132,24 @@ var CardJS = {
                 url = url.substring(url.lastIndexOf("/") + 1, url.length);
                 return url;
             },
+            set_url_param: function (page, params) {
+                params=params|{};
+                if (history.pushState) {
+                    var pstr = '', dl = '?';
+                    for (var key in params) {
+                        pstr += dl + key + '=' + params[key];
+                        dl = '&';
+                    }
+                    history.pushState({}, null, page + pstr);
+                }
+            },
             get_url_param: function (name, url) {
                 url = url || window.location.href;
                 name = name.replace(/[\[\]]/g, "\\$&");
                 var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
                         results = regex.exec(url);
                 if (!results || !results[2]) {
-                    return '';
+                    return false;
                 }
                 return decodeURIComponent(results[2].replace(/\+/g, " "));
             },

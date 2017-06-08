@@ -13,7 +13,10 @@ var ms = CardJS.cNew({
     // 文章分类
     atypes_path: 'upload/json/atypes.json',
     msg_path: 'upload/json/msg.json',
-    article_path: 'upload/json/article.json',
+    article_path: 'upload/json/',
+    // 记录json文件是否存在，由serv.php生成。
+    // {'20176':true,'201612':true}
+    files_path: 'upload/json/files.json',
     uset_path: 'upload/json/uset.json'
 });
 
@@ -22,20 +25,6 @@ ms.f.get_offset = function (el) {
     return {
         left: el.left + window.scrollX + el.width,
         top: el.top + window.scrollY + el.height
-    };
-};
-
-ms.f.bak_get_offset = function (element) {
-    var top = 0, left = 0;
-    do {
-        top += element.offsetTop || 0;
-        left += element.offsetLeft || 0;
-        element = element.offsetParent;
-    } while (element);
-
-    return {
-        top: top,
-        left: left
     };
 };
 
@@ -53,6 +42,8 @@ ms.uset = {
 };
 
 ms.cache = {
+    // 记录有哪些json文件夹下导出的每月数据文件名。
+    files: null,
     mpsearch: {
         data: null,
         result: [],
@@ -68,7 +59,6 @@ ms.cache = {
         recent: null,
         cache_id: null,
         selected_id: null
-
     },
     search: {
         'current_kw': '',
@@ -187,7 +177,6 @@ ms.o.Main_wrap = {
                         o.objs[4].value = '管理页面';
                         show_main_page();
                     }
-
                 }
             ];
         };
@@ -221,28 +210,65 @@ ms.o.Main_wrap = {
                 }
             }
 
-            if (!ms.cache.article.recent) {
-                $.getJSON(ms.s.top_art_path + '?t=' + ms.f.rand(), function (data) {
-                    ms.cache.article.recent = [];
-                    data.forEach(function (e) {
-                        ms.cache.article.recent.push({
-                            title: filterXSS(ms.f.base64_to_utf8(e.title)),
-                            mtime: ms.f.YMD(e.mtime),
-                            ctime: ms.f.YMD(e.ctime),
-                            id: e.id,
-                            type: ms.uset.atypes[(e.type < ms.uset.atypes.length ? e.type : 0)],
-                            name: filterXSS(e.name),
-                            content: filterXSS(ms.f.base64_to_utf8(e.content)),
-                            top: e.top === 0 ? false : true,
-                            lock: e.lock === 0 ? false : true
-                        });
-                    });
-                    o.objs[0].innerHTML = Mustache.render($('#tp-article-summary-container').html(), ms.cache.article);
-                }).fail(function () {
-                    o.objs[0].innerHTML = "<font color=red>无数据</font>";
+            var y = ms.f.get_url_param('y'),
+                    m = ms.f.get_url_param('m'),
+                    id = parseInt(ms.f.get_url_param('id'));
+            if (y && m && id) {
+                $.getJSON('upload/json/' + y + '/' + m + '.json', function (data) {
+                    //console.log(data,tid);
+                    for (var i = 0; i < data.length; i++) {
+                        if (data[i].id === id) {
+                            break;
+                        }
+                    }
+                    //console.log(data[i]);
+                    if (data[i]) {
+                        var e = data[i];
+                        //console.log(e);
+                        var d = {
+                            recent: [{
+                                    title: filterXSS(ms.f.base64_to_utf8(e.title)),
+                                    mtime: ms.f.YMD(e.mtime),
+                                    ctime: ms.f.YMD(e.ctime),
+                                    id: e.id,
+                                    type: ms.uset.atypes[(e.type < ms.uset.atypes.length ? e.type : 0)],
+                                    name: filterXSS(e.name),
+                                    content: filterXSS(ms.f.base64_to_utf8(e.content)),
+                                    top: e.top === 0 ? false : true,
+                                    lock: e.lock === 0 ? false : true
+                                }]
+                        };
+                        o.objs[0].innerHTML = Mustache.render($('#tp-article-summary-container').html(), d);
+                        var obj = document.getElementsByName('article-content');
+                        if (obj && obj[0]) {
+                            obj[0].setAttribute('style', "font-size: 15px;width: 100%;text-align: left;color:#000; ");
+                        }
+                    }
                 });
             } else {
-                o.objs[0].innerHTML = Mustache.render($('#tp-article-summary-container').html(), ms.cache.article);
+                if (!ms.cache.article.recent) {
+                    $.getJSON(ms.s.top_art_path + '?t=' + ms.f.rand(), function (data) {
+                        ms.cache.article.recent = [];
+                        data.forEach(function (e) {
+                            ms.cache.article.recent.push({
+                                title: filterXSS(ms.f.base64_to_utf8(e.title)),
+                                mtime: ms.f.YMD(e.mtime),
+                                ctime: ms.f.YMD(e.ctime),
+                                id: e.id,
+                                type: ms.uset.atypes[(e.type < ms.uset.atypes.length ? e.type : 0)],
+                                name: filterXSS(e.name),
+                                content: filterXSS(ms.f.base64_to_utf8(e.content)),
+                                top: e.top === 0 ? false : true,
+                                lock: e.lock === 0 ? false : true
+                            });
+                        });
+                        o.objs[0].innerHTML = Mustache.render($('#tp-article-summary-container').html(), ms.cache.article);
+                    }).fail(function () {
+                        o.objs[0].innerHTML = "<font color=red>无数据</font>";
+                    });
+                } else {
+                    o.objs[0].innerHTML = Mustache.render($('#tp-article-summary-container').html(), ms.cache.article);
+                }
             }
         }
 
@@ -272,13 +298,7 @@ ms.o.Main_wrap = {
                     o.show_user_panel();
                 });
             }
-            if (!o.timer) {
-                o.timer = setTimeout(function () {
-                    o.f.fetch('wakeup', function () {
-                        ms.cache.mpsearch.data = null;
-                    });
-                }, 6000);
-            }
+
         }
 
         o.add_event = function () {
@@ -299,12 +319,10 @@ ms.o.Main_wrap = {
             for (var i = 0; i < 4; i++) {
                 o.objs[i].innerHTML = '';
             }
-            clearTimeout(o.timer);
-            o.timer = null;
         }
 
         o.refresh = function () {
-            console.log('call main_page.refresh()');
+            //console.log('call main_page.refresh()');
             ms.cache.um.all_user_info = null;
             ms.cache.um.user_info = null;
             clear_contents();
@@ -558,6 +576,8 @@ ms.o.UMA_editor = {
 
                     // clean cache
                     ms.cache.article.recent = null;
+                    ms.cache.mpsearch.data = null;
+                    ms.cache.files = null;
 
                     o.objs[5].innerHTML = '正在提交数据 ...';
                     o.f.fetch('post_article', data, function () {
@@ -596,6 +616,8 @@ ms.o.UMA_editor = {
 
                     // clean cache
                     ms.cache.article.recent = null;
+                    ms.cache.mpsearch.data = null;
+                    ms.cache.files = null;
 
                     o.f.fetch('delete_article', ms.cache.article.cache_id,
                             function () {
@@ -644,9 +666,14 @@ ms.o.UMA_editor = {
             //console.log(ms.cache.article);
 
             //读取缓存
-            var sid, cid;
+            var sid, cid, uid;
             cid = ms.cache.article.cache_id;
             sid = ms.cache.article.selected_id;
+            uid = parseInt(ms.f.get_url_param('id'));
+            if (!sid && uid > 0) {
+                sid = uid;
+            }
+
             if (ms.cache.article.html && ms.cache.article.html.length > 0) {
                 if (cid === sid || !(sid)) {
                     //console.log('load_cache');
@@ -808,6 +835,7 @@ ms.o.UMA_wrap = {
                     //['分类', ['UMA_types']],
                     ['图片管理', ['UMA_list_orphan_img']],
                     ['设置', ['UMA_set_wrap']],
+                    ['备份', ['UMA_backup']],
                     ['说明', ['UMA_help']]
                 ],
                 {
@@ -1154,29 +1182,11 @@ ms.o.UMA_help = {
     cNew: function (cid) {
         var o = ms.CARD.cNew(cid);
         o.f.merge({
-            id_num: 1,
-            id_header: 'at_help',
-            add_event: true
+            id_header: 'at_help'
         });
 
         o.gen_html = function () {
-            return Mustache.render($('#tp-uma-help').html(), o);
-        };
-
-        o.gen_ev_handler = function () {
-            o.ev_handler = [
-                function () {
-                    o.f.fetch('update_all_article', function () {
-                        // force update mp_search_box cache
-                        ms.cache.mpsearch.data = null;
-                    });
-                    alert('更新请求已发送，处理需要点时间，可以玩去咯。');
-                }
-            ];
-        };
-
-        o.add_event = function () {
-            o.f.on('click', 0);
+            return Mustache.render($('#tp-uma-help').html());
         };
 
         return o;
@@ -1379,9 +1389,15 @@ ms.o.ART_list = {
                 o.out_put.html(Mustache.render($('#tp-article-summary-container').html(), data));
                 var obj = document.getElementsByName('article-content');
                 if (obj && obj[0]) {
-                    obj[0].setAttribute('style', "font-size: 15px;width: 100%;text-align: left; ");
+                    obj[0].setAttribute('style', "font-size: 15px;width: 100%;text-align: left;color:#000; ");
                 }
-                //                console.log(obj);
+                var d = data.recent[0];
+                ms.f.set_url_param('index.html', {
+                    'y': d.ctime.substr(0, 4),
+                    'm': parseInt(d.ctime.substr(5, 2)),
+                    'id': d.id
+                });
+                ms.cache.article.selected_id=d.id;
             } else {
                 console.log('没容器可以用来输出选中的文章！');
             }
@@ -1435,29 +1451,59 @@ ms.o.ART_search_box = {
 
         o.child = null;
 
+        function get_article(year, month) {
+            //console.log('get_article:'+path);
+            if (year < 2017 || month < 0 || month > 11) {
+                return;
+            }
+            var key = '' + year + (month + 1);
+            if (!(key in ms.cache.files) || !(ms.cache.files[key])) {
+                //console.log('key [' + key + '] not exist!');
+                return;
+            }
+            //console.log('fetch file key [' + key + '] ');
+            var path = ms.s.article_path + (year) + '/' + (month + 1) + '.json';
+
+            $.getJSON(path + '?t=' + ms.f.rand(), function (data) {
+                //ms.cache.mpsearch.data = [];
+                //console.log('got '+data.length+' record!');
+                data.forEach(function (e) {
+                    ms.cache.mpsearch.data.push({
+                        title: filterXSS(ms.f.base64_to_utf8(e.title)),
+                        mtime: ms.f.YMD(e.mtime),
+                        ctime: ms.f.YMD(e.ctime),
+                        id: e.id,
+                        type: ms.uset.atypes[(e.type < ms.uset.atypes.length ? e.type : 0)],
+                        name: filterXSS(e.name),
+                        content: filterXSS(ms.f.base64_to_utf8(e.content)),
+                        top: e.top === 0 ? false : true,
+                        lock: e.lock === 0 ? false : true
+                    });
+                });
+            });
+        }
+
         o.gen_ev_handler = function () {
             o.ev_handler = [
 
                 //focus in search box
                 function () {
                     if (!ms.cache.mpsearch.data) {
-                        //console.log('忘了搬服务器的文章,偷偷加载数据中 ...');
-                        $.getJSON(ms.s.article_path + '?t=' + ms.f.rand(), function (data) {
-                            ms.cache.mpsearch.data = [];
-                            data.forEach(function (e) {
-                                ms.cache.mpsearch.data.push({
-                                    id: e.id,
-                                    content: filterXSS(e.content),
-                                    mtime: ms.f.YMD(e.mtime),
-                                    name: filterXSS(e.name),
-                                    title: filterXSS(e.title),
-                                    type: ms.uset.atypes[(e.type < ms.uset.atypes.length ? e.type : 0)]
-                                });
-                            });
-                            //console.log('终于搬完了。呼~~');
-                        }).fail(function () {
-                            o.objs[2].innerHTML = '<font color="red">加载文章数据失败！</font>';
-                        });
+                        //console.log('准备加载数据!');
+
+                        var year = new Date().getUTCFullYear(),
+                                month = new Date().getUTCMonth();
+
+                        ms.cache.mpsearch.data = [];
+                        for (var i = 0; i < 6; i++) {
+                            //path = dir + (year) + '/' + (month + 1) + '.json';
+                            get_article(year, month);
+                            month--;
+                            if (month < 0) {
+                                month += 12;
+                                year--;
+                            }
+                        }
                     }
                 },
                 //keyup
@@ -1508,6 +1554,17 @@ ms.o.ART_search_box = {
                 }
             ];
         };
+
+        o.after_add_event = function () {
+            if (!ms.cache.files) {
+                // fetch json.
+                $.getJSON(ms.s.files_path + '?t=' + ms.f.rand(), function (data) {
+                    ms.cache.files = data;
+                    //console.log("files:", ms.cache.files);
+                });
+            }
+        };
+
         o.clean_up = function () {
             o.child && o.child.destroy();
         };
@@ -1516,10 +1573,59 @@ ms.o.ART_search_box = {
             return ms.f.add_frame('tp-frame-tag-card', content, '搜索', 'margin:0px;margin-top:5px;');
         };
         o.add_event = function () {
-            o.f.on('focus', 0, 0);
+            //o.f.on('focus', 0, 0);
+            o.f.on('mouseover', 0, 0);
+            o.f.on('mouseover', 1, 0);
             o.f.on('keyup', 0, 1);
             o.f.on('click', 1, 2);
         };
+        return o;
+    }
+};
+
+ms.o.UMA_backup = {
+    cNew: function (cid) {
+        var o = ms.CARD.cNew(cid);
+        o.f.merge({
+            id_header: 'uma_backup',
+            id_num: 3,
+            add_event: true
+        });
+
+        o.gen_html = function () {
+            return Mustache.render($('#tp-uma-backup').html(), o);
+        };
+
+        o.gen_ev_handler = function () {
+            o.ev_handler = [
+                function () {
+                    o.f.fetch('export_picdb', function (r) {
+                        alert(r);
+                    }, function (r) {
+                        alert(r);
+                    });
+                },
+                function () {
+                    if (confirm('现有数据将被清除，确定要导入数据？')) {
+                        o.f.fetch('import_from_json', function (r) {
+                            alert(r);
+                            ms.f.set_url_param('index.html',{});
+                            window.location.reload(true);
+                        }, function (r) {
+                            alert(r);
+                            ms.f.set_url_param('index.html',{});
+                            window.location.reload(true);
+                        });
+                    }
+                }
+            ];
+        };
+
+        o.add_event = function () {
+            o.f.on('click', 1, 0);
+            o.f.on('click', 2, 1);
+        };
+
         return o;
     }
 };

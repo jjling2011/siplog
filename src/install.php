@@ -20,7 +20,7 @@ function install() {
     del_file('upload/json/top.json');
     del_file('upload/json/msg.json');
     del_file('upload/json/uset.json');
-    del_file('upload/json/article.json');
+    del_file('upload/json/files.json');
     del_file('upload/config/settings.php');
 
     make_dir('upload');
@@ -29,7 +29,7 @@ function install() {
     make_dir('upload/pics');
 
     copy('res/settings.skeleton.php', 'upload/config/settings.php');
-    copy('res/article.json', 'upload/json/article.json');
+    copy('res/files.json', 'upload/json/files.json');
     copy('res/uset.json', 'upload/json/uset.json');
     copy('res/top.json', 'upload/json/top.json');
     copy('res/msg.json', 'upload/json/msg.json');
@@ -39,7 +39,7 @@ function install() {
     set('DB_PASS', $param['dbpass1']);
     set('DB_NAME', $param['dbname']);
 
-    $tables = ['article', 'ip', 'log', 'msg', 'sys', 'user', 'pics'];
+    $tables = ['article', 'ip', 'log', 'msg',  'user', 'pics'];
     $sql = gen_sql();
 
     foreach ($tables as $t) {
@@ -47,7 +47,7 @@ function install() {
         query($sql[$t]);
     }
 
-    query('insert into sys set utime=utc_timestamp(),id=1');
+    # query('insert into sys set utime=utc_timestamp(),id=1');
     $salt = rand_str();
     $token = rand_str();
     $pass = hash('md5', $salt . hash('md5', $param['pass1']));
@@ -112,13 +112,7 @@ function gen_sql() {
   UNIQUE KEY `user` (`user`),
   KEY `token` (`token`),
   KEY `id` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='user info';";
-
-    $sql['sys'] = "CREATE TABLE IF NOT EXISTS `sys` (
-  `utime` timestamp NULL DEFAULT NULL,
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  UNIQUE KEY `id` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统信息'";
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='user info';"; 
 
     $sql['msg'] = "CREATE TABLE IF NOT EXISTS `msg` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -231,17 +225,17 @@ function check_param() {
             <input type="text" name="dbname" value="<?= $param['dbname'] ?>"><br>
             用户名:<br>
             <input type="text" name="dbuser" value="<?= $param['dbuser'] ?>"><br>
-            密码;<br>
+            密码:<br>
             <input type="password" name="dbpass1" value=""><br>
-            重复密码;<br>
+            重复密码:<br>
             <input type="password" name="dbpass2" value=""><br><br>
 
             <b>网页管理员</b><br>
             账号:<br>
             <input type="text" name="user" value="<?= $param['user'] ?>"><br>
-            密码;<br>
+            密码:<br>
             <input type="password" name="pass1" value=""><br>
-            重复密码;<br>
+            重复密码:<br>
             <input type="password" name="pass2" value=""><br>
             显示名字:<br>
             <input type="text" name="name" value="<?= $param['name'] ?>"><br><br>
