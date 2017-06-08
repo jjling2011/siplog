@@ -668,9 +668,14 @@ ms.o.UMA_editor = {
             //console.log(ms.cache.article);
 
             //读取缓存
-            var sid, cid;
+            var sid, cid, uid;
             cid = ms.cache.article.cache_id;
             sid = ms.cache.article.selected_id;
+            uid = parseInt(ms.f.get_url_param('id'));
+            if (!sid && uid > 0) {
+                sid = uid;
+            }
+
             if (ms.cache.article.html && ms.cache.article.html.length > 0) {
                 if (cid === sid || !(sid)) {
                     //console.log('load_cache');
@@ -1378,8 +1383,6 @@ ms.o.ART_list = {
             }
         };
 
-
-
         o.show_article = function (idx) {
             if (o.out_put) {
                 var data = {recent: [ms.cache.mpsearch.data[ms.cache.mpsearch.result[idx]]]};
@@ -1396,6 +1399,7 @@ ms.o.ART_list = {
                     'm': parseInt(d.ctime.substr(5, 2)),
                     'id': d.id
                 });
+                ms.cache.article.selected_id=d.id;
             } else {
                 console.log('没容器可以用来输出选中的文章！');
             }
