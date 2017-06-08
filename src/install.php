@@ -47,7 +47,7 @@ function install() {
         query($sql[$t]);
     }
 
-    query('insert into sys set utime=utc_timestamp(),id=1');
+    # query('insert into sys set utime=utc_timestamp(),id=1');
     $salt = rand_str();
     $token = rand_str();
     $pass = hash('md5', $salt . hash('md5', $param['pass1']));
@@ -225,17 +225,17 @@ function check_param() {
             <input type="text" name="dbname" value="<?= $param['dbname'] ?>"><br>
             用户名:<br>
             <input type="text" name="dbuser" value="<?= $param['dbuser'] ?>"><br>
-            密码;<br>
+            密码:<br>
             <input type="password" name="dbpass1" value=""><br>
-            重复密码;<br>
+            重复密码:<br>
             <input type="password" name="dbpass2" value=""><br><br>
 
             <b>网页管理员</b><br>
             账号:<br>
             <input type="text" name="user" value="<?= $param['user'] ?>"><br>
-            密码;<br>
+            密码:<br>
             <input type="password" name="pass1" value=""><br>
-            重复密码;<br>
+            重复密码:<br>
             <input type="password" name="pass2" value=""><br>
             显示名字:<br>
             <input type="text" name="name" value="<?= $param['name'] ?>"><br><br>

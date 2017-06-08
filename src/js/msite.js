@@ -59,7 +59,6 @@ ms.cache = {
         recent: null,
         cache_id: null,
         selected_id: null
-
     },
     search: {
         'current_kw': '',
@@ -178,7 +177,6 @@ ms.o.Main_wrap = {
                         o.objs[4].value = '管理页面';
                         show_main_page();
                     }
-
                 }
             ];
         };
@@ -1611,8 +1609,12 @@ ms.o.UMA_backup = {
                     if (confirm('现有数据将被清除，确定要导入数据？')) {
                         o.f.fetch('import_from_json', function (r) {
                             alert(r);
+                            ms.f.set_url_param('index.html',{});
+                            window.location.reload(true);
                         }, function (r) {
                             alert(r);
+                            ms.f.set_url_param('index.html',{});
+                            window.location.reload(true);
                         });
                     }
                 }

@@ -67,7 +67,10 @@ class Serv extends UserMgr {
             $this->fail('无权操作!');
             return;
         }
-
+        
+        ignore_user_abort(true);
+        ini_set('max_execution_time', 300);
+        
         CommLib::query('truncate pics');
         if (file_exists(PICDB_PATH)) {
             $datas = json_decode(file_get_contents(PICDB_PATH), true);

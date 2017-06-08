@@ -133,6 +133,7 @@ var CardJS = {
                 return url;
             },
             set_url_param: function (page, params) {
+                params=params|{};
                 if (history.pushState) {
                     var pstr = '', dl = '?';
                     for (var key in params) {
