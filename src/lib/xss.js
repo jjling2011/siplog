@@ -1172,8 +1172,8 @@ function getDefaultWhiteList () {
   whiteList['flex-grow'] = false; // default: 0
   whiteList['flex-shrink'] = false; // default: 1
   whiteList['flex-wrap'] = false; // default: nowrap
-  whiteList['float'] = false; // default: none
-  whiteList['float-offset'] = false; // default: 0 0
+  whiteList['float'] = true; // default: none
+  whiteList['float-offset'] = true; // default: 0 0
   whiteList['flood-color'] = false; // default: black
   whiteList['flood-opacity'] = false; // default: 1
   whiteList['flow-from'] = false; // default: none
