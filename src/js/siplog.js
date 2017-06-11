@@ -94,7 +94,7 @@ sip.f.add_frame = function (frame_id, content, tag, style) {
 
 sip.o.main.msg = function (cid) {
     var o = new CardJS.Card(cid);
-    o.f('merge', {
+    o.f.merge( {
         id_num: 2,
         add_event: true
     });
@@ -109,7 +109,7 @@ sip.o.main.msg = function (cid) {
     };
 
     o.gen_ev_handler = function () {
-        o.ev_handler = [
+        return [
             //enter
             function (e) {
                 var k = e || window.event;
@@ -122,7 +122,7 @@ sip.o.main.msg = function (cid) {
             function () {
                 var d = o.objs[0].value;
                 if (d.length > 0) {
-                    o.f('fetch', 'post_msg', d, function () {
+                    o.f.fetch( 'post_msg', d, function () {
                         if (!sip.cache.msg) {
                             sip.cache.msg = [];
                         }
@@ -144,8 +144,8 @@ sip.o.main.msg = function (cid) {
     };
 
     o.add_event = function () {
-        o.f('on', 'click', 1);
-        o.f('on', 'keyup', 0);
+        o.f.on( 'click', 1);
+        o.f.on( 'keyup', 0);
     };
 
     o.after_add_event = function () {
@@ -157,14 +157,14 @@ sip.o.main.msg = function (cid) {
 
 sip.o.Main_wrap = function (cid) {
     var o = new CardJS.Card(cid);
-    o.f('merge', {
+    o.f.merge( {
         id_num: 5,
         id_header: 'main_wrap',
         add_event: true
     });
 
     o.gen_ev_handler = function () {
-        o.ev_handler = [
+        return( [
             function () {
                 if (o.objs[4].value === '管理页面') {
                     //switch to admin
@@ -177,7 +177,7 @@ sip.o.Main_wrap = function (cid) {
                     show_main_page();
                 }
             }
-        ];
+        ]);
     };
 
     function show_main_page() {
@@ -292,7 +292,7 @@ sip.o.Main_wrap = function (cid) {
             //console.log('using cache');
             o.show_user_panel();
         } else {
-            o.f('fetch', 'fetch_user_info', null, function (info) {
+            o.f.fetch( 'fetch_user_info', null, function (info) {
                 sip.cache.um.user_info = info;
                 this.show_user_panel();
             });
@@ -301,7 +301,7 @@ sip.o.Main_wrap = function (cid) {
     }
 
     o.add_event = function () {
-        o.f('on', 'click', 4, 0);
+        o.f.on( 'click', 4, 0);
     };
 
     o.gen_html = function () {
@@ -311,6 +311,8 @@ sip.o.Main_wrap = function (cid) {
     function clear_contents() {
         if (o.contents && o.contents.length > 0) {
             o.contents.forEach(function (e) {
+                //console.log('main:',o);
+                //console.log('contents:',e);
                 e.destroy();
             });
         }
@@ -340,7 +342,7 @@ sip.o.Main_wrap = function (cid) {
 
 sip.o.art.search_result = function (cid) {
     var o = new CardJS.Card(cid);
-    o.f('merge', {
+    o.f.merge( {
         id_num: 0,
         id_header: 'at_search_result',
         add_event: true
@@ -363,7 +365,7 @@ sip.o.art.search_result = function (cid) {
 
         o.d.num = sip.cache.search.content.length;
         o.d.page_num = Math.ceil(sip.cache.search.total / sip.cache.search.page_size);
-        o.f('merge', {id_num: 2 + Math.min(o.d.page_num, 9) + o.d.num});
+        o.f.merge( {id_num: 2 + Math.min(o.d.page_num, 9) + o.d.num});
         o.d['first'] = Math.max(sip.cache.search.pn - 5, 0);
         o.d['last'] = Math.min(o.d['first'] + 9, o.d.page_num);
     };
@@ -374,7 +376,7 @@ sip.o.art.search_result = function (cid) {
             return;
         }
         sip.cache.search.pn = pn;
-        o.f('fetch', 'search', {'kw': sip.cache.search.current_kw, 'pn': pn, 'get_total': false, 'page_size': sip.cache.search.page_size},
+        o.f.fetch( 'search', {'kw': sip.cache.search.current_kw, 'pn': pn, 'get_total': false, 'page_size': sip.cache.search.page_size},
                 function (data) {
                     sip.cache.search.content = data.data;
                     this.show();
@@ -382,19 +384,19 @@ sip.o.art.search_result = function (cid) {
     };
 
     o.gen_ev_handler = function () {
-        o.ev_handler = [];
+        var evs = [];
         if (o.d.num <= 0) {
-            return;
+            return evs;
         }
-        o.ev_handler[0] = function () {
+        evs[0] = function () {
             o.show_page(0);
         };
-        o.ev_handler[1 + o.d.last - o.d.first] = function () {
+        evs[1 + o.d.last - o.d.first] = function () {
             o.show_page(o.d.page_num - 1);
         };
         var i;
         for (i = 1; i < o.d.last - o.d.first + 1; i++) {
-            o.ev_handler[i] = (function () {
+            evs[i] = (function () {
                 var idx = i - 1;
                 return function () {
                     o.show_page(idx);
@@ -405,7 +407,7 @@ sip.o.art.search_result = function (cid) {
         start = o.d.last - o.d.first + 2;
         end = o.ids.length;
         for (i = start; i < end; i++) {
-            o.ev_handler[i] = (function () {
+            evs[i] = (function () {
                 var s = start, e = end, idx = i;
                 //console.log(sip.cache.search.content);
                 var id = (sip.cache.search.content[i - s].id);
@@ -419,6 +421,7 @@ sip.o.art.search_result = function (cid) {
                 });
             }());
         }
+        return evs;
     };
 
     o.add_event = function () {
@@ -426,7 +429,7 @@ sip.o.art.search_result = function (cid) {
             return;
         }
         for (var i = 0; i < o.ids.length; i++) {
-            o.f('on', 'click', i);
+            o.f.on( 'click', i);
         }
     };
 
@@ -474,7 +477,7 @@ sip.o.art.search_result = function (cid) {
 sip.o.art.list_orphan_img = function (cid) {
     var o = new CardJS.Card(cid);
 
-    o.f('merge', {
+    o.f.merge( {
         id_header: 'uma_loi',
         id_num: 2,
         add_event: true
@@ -483,9 +486,9 @@ sip.o.art.list_orphan_img = function (cid) {
     o.data = [];
 
     o.gen_ev_handler = function () {
-        o.ev_handler = [
+        return [
             function () {
-                o.f('fetch', 'list_orphan_img', function (data) {
+                o.f.fetch( 'list_orphan_img', function (data) {
                     this.data = [];
                     data.forEach(function (e) {
                         this.data.push({
@@ -503,7 +506,7 @@ sip.o.art.list_orphan_img = function (cid) {
             },
             function () {
                 if (confirm('删除所有孤儿图片？')) {
-                    o.f('fetch', 'delete_all_orphan_img', function (r) {
+                    o.f.fetch( 'delete_all_orphan_img', function (r) {
                         alert(r);
                         this.objs[0].click();
                     }, function (r) {
@@ -516,8 +519,8 @@ sip.o.art.list_orphan_img = function (cid) {
     };
 
     o.add_event = function () {
-        o.f('on', 'click', 0);
-        o.f('on', 'click', 1);
+        o.f.on( 'click', 0);
+        o.f.on( 'click', 1);
     };
 
     o.gen_html = function () {
@@ -530,7 +533,7 @@ sip.o.art.list_orphan_img = function (cid) {
 
 sip.o.art.editor = function (cid) {
     var o = new CardJS.Card(cid);
-    o.f('merge', {
+    o.f.merge( {
         id_num: 11,
         id_header: 'edt',
         add_event: true
@@ -550,7 +553,7 @@ sip.o.art.editor = function (cid) {
     };
 
     o.gen_ev_handler = function () {
-        o.ev_handler = [
+        return [
             function () {
                 var content = o.editor.$txt.html();
                 var data = {
@@ -573,7 +576,7 @@ sip.o.art.editor = function (cid) {
                 sip.cache.files = null;
 
                 o.objs[5].innerHTML = '正在提交数据 ...';
-                o.f('fetch', 'post_article', data, function () {
+                o.f.fetch( 'post_article', data, function () {
                     alert('提交成功!');
                     this.objs[4].click();
                     //console.log(r);
@@ -612,7 +615,7 @@ sip.o.art.editor = function (cid) {
                 sip.cache.mpsearch.data = null;
                 sip.cache.files = null;
 
-                o.f('fetch', 'delete_article', sip.cache.article.cache_id,
+                o.f.fetch( 'delete_article', sip.cache.article.cache_id,
                         function () {
                             alert('删除成功！');
                             sip.cache.search.content = null;
@@ -636,10 +639,10 @@ sip.o.art.editor = function (cid) {
     };
 
     o.add_event = function () {
-        o.f('on', 'click', 3, 0);
-        o.f('on', 'click', 4, 1);
-        o.f('on', 'click', 6, 2);
-        o.f('on', 'click', 7, 3);
+        o.f.on( 'click', 3, 0);
+        o.f.on( 'click', 4, 1);
+        o.f.on( 'click', 6, 2);
+        o.f.on( 'click', 7, 3);
     };
 
     o.gen_html = function () {
@@ -677,7 +680,7 @@ sip.o.art.editor = function (cid) {
 
         if (sid > 0) {
             o.editor.$txt.html('读取数据中 ...');
-            o.f('fetch', 'fetch_article', {'id': sid}, function (data) {
+            o.f.fetch( 'fetch_article', {'id': sid}, function (data) {
                 //$this->ok(array('id'=>$id,'type'=>$type,'title'=>$title,'content'=>$content));
                 sip.cache.article.cache_id = data.id;
                 sip.cache.article.title = CardJS.Lib.base64_to_utf8(data.title);
@@ -743,7 +746,7 @@ sip.o.art.editor = function (cid) {
 
 sip.o.mgr.types = function (cid) {
     var o = new CardJS.Card(cid);
-    o.f('merge', {
+    o.f.merge( {
         id_header: 'at_types',
         add_event: true,
         id_num: 3
@@ -751,7 +754,7 @@ sip.o.mgr.types = function (cid) {
 
     o.gen_ev_handler = function () {
 
-        o.ev_handler = [
+        return [
             //click submit
             function () {
                 var types = [];
@@ -762,7 +765,7 @@ sip.o.mgr.types = function (cid) {
                 });
                 //console.log(types);
                 sip.uset.atypes = types;
-                o.f('fetch', 'update_uset', sip.uset, function () {
+                o.f.fetch( 'update_uset', sip.uset, function () {
                     alert('分类信息修改成功！');
                     this.show();
                 });
@@ -786,8 +789,8 @@ sip.o.mgr.types = function (cid) {
     };
 
     o.add_event = function () {
-        o.f('on', 'click', 2, 0);
-        o.f('on', 'keyup', 1);
+        o.f.on( 'click', 2, 0);
+        o.f.on( 'keyup', 1);
     };
 
     o.gen_html = function () {
@@ -836,7 +839,7 @@ sip.o.art.art_wrap = function (cid) {
 
 sip.o.mgr.logout = function (cid) {
     var o = new CardJS.Card(cid);
-    o.f('merge', {
+    o.f.merge( {
         id_num: 3,
         add_event: true,
         id_header: 'um_logout'
@@ -849,14 +852,14 @@ sip.o.mgr.logout = function (cid) {
     };
 
     o.gen_ev_handler = function () {
-        o.ev_handler = [
+        return [
             //change password
             function () {
                 o.child = sip.o.mgr.change_psw(o.ids[2]).show();
             },
             // logout
             function () {
-                o.f('fetch', 'logout', function (r) {
+                o.f.fetch( 'logout', function (r) {
                     console.log(r);
                     sip.cache.um.user_info = null;
                     sip.cache.um.all_user_info = null;
@@ -871,8 +874,8 @@ sip.o.mgr.logout = function (cid) {
     };
 
     o.add_event = function () {
-        o.f('on', 'click', 0);
-        o.f('on', 'click', 1);
+        o.f.on( 'click', 0);
+        o.f.on( 'click', 1);
     };
 
     return o;
@@ -882,7 +885,7 @@ sip.o.mgr.logout = function (cid) {
 sip.o.mgr.change_psw = function (cid) {
     var o = new CardJS.Card(cid);
 
-    o.f('merge', {
+    o.f.merge( {
         id_num: 6,
         id_header: 'um_chpsw',
         add_event: true
@@ -896,7 +899,7 @@ sip.o.mgr.change_psw = function (cid) {
     };
 
     o.gen_ev_handler = function () {
-        o.ev_handler = [
+        return [
             function () {
                 //console.log('hello');
                 var name = "" + o.objs[0].value;
@@ -915,7 +918,7 @@ sip.o.mgr.change_psw = function (cid) {
                 }
                 // console.log(new_psw, org_psw, name);
                 var data = {'name': name, 'opsw': md5(org_psw), 'npsw': md5(new_psw)};
-                o.f('fetch', 'user_modify', data, function (r) {
+                o.f.fetch( 'user_modify', data, function (r) {
                     this.objs[5].innerHTML = CardJS.Lib.html_escape(r);
                     sip.cache.um.user_info = null;
                     sip.cache.um.all_user_info = null;
@@ -929,8 +932,8 @@ sip.o.mgr.change_psw = function (cid) {
 
     o.add_event = function () {
         //console.log(o.ids[4]);
-        o.f('on', 'click', 4, 0);
-        //o.f('on','click',1,0);
+        o.f.on( 'click', 4, 0);
+        //o.f.on('click',1,0);
     };
 
     return o;
@@ -940,7 +943,7 @@ sip.o.mgr.change_psw = function (cid) {
 sip.o.mgr.management = function (cid) {
     var o = new CardJS.Card(cid);
 
-    o.f('merge', {
+    o.f.merge( {
         id_num: 9,
         id_header: "um_mod",
         add_event: false
@@ -948,7 +951,7 @@ sip.o.mgr.management = function (cid) {
 
     o.refresh = function () {
         sip.cache.um.all_user_info = null;
-        o.f('fetch', 'fetch_all_user_info', function (data) {
+        o.f.fetch( 'fetch_all_user_info', function (data) {
             sip.cache.um.all_user_info = data;
             this.show();
         }, function (r) {
@@ -960,21 +963,21 @@ sip.o.mgr.management = function (cid) {
         if (!sip.cache.um.all_user_info) {
             o.refresh();
         } else {
-            o.ev_handler[0]();
+            o.f.trigger(0);
         }
     };
 
     o.data_parser = function () {
 
         if (sip.cache.um.all_user_info) {
-            o.f('merge', {add_event: true});
+            o.f.merge( {add_event: true});
         } else {
-            o.f('merge', {add_event: false});
+            o.f.merge( {add_event: false});
         }
     };
 
     o.gen_ev_handler = function () {
-        o.ev_handler = [
+        return [
             // select change
             function () {
                 var id = o.objs[0].value,
@@ -995,7 +998,7 @@ sip.o.mgr.management = function (cid) {
             // reset psw
             function () {
                 var id = o.objs[0].value;
-                o.f('fetch', 'user_reset', id, function (d) {
+                o.f.fetch( 'user_reset', id, function (d) {
                     //console.log(d);
                     sip.cache.um.all_user_info = null;
                     alert(d);
@@ -1007,7 +1010,7 @@ sip.o.mgr.management = function (cid) {
             //ban
             function () {
                 var id = o.objs[0].value;
-                o.f('fetch', 'user_ban', id, function (d) {
+                o.f.fetch( 'user_ban', id, function (d) {
                     alert(d);
                     this.refresh();
                 }, function (r) {
@@ -1026,7 +1029,7 @@ sip.o.mgr.management = function (cid) {
                         p.push(sip.cache.um.all_user_info.prv_list[i]);
                     }
                 }
-                o.f('fetch', 'user_management', {'id': id, 'name': name, 'user': user, 'prv_list': p},
+                o.f.fetch( 'user_management', {'id': id, 'name': name, 'user': user, 'prv_list': p},
                         function (r) {
                             alert(r);
                             this.refresh();
@@ -1049,7 +1052,7 @@ sip.o.mgr.management = function (cid) {
                     }
                 }
                 //console.log(param);
-                o.f('fetch', 'user_add', param, function (r) {
+                o.f.fetch( 'user_add', param, function (r) {
                     alert(r);
                     this.refresh();
                 }, function (r) {
@@ -1060,11 +1063,11 @@ sip.o.mgr.management = function (cid) {
     };
 
     o.add_event = function () {
-        o.f('on', 'change', 0);
-        o.f('on', 'click', 5, 1);
-        o.f('on', 'click', 6, 2);
-        o.f('on', 'click', 4, 3);
-        o.f('on', 'click', 7, 4);
+        o.f.on( 'change', 0);
+        o.f.on( 'click', 5, 1);
+        o.f.on( 'click', 6, 2);
+        o.f.on( 'click', 4, 3);
+        o.f.on( 'click', 7, 4);
     };
 
     o.gen_html = function () {
@@ -1084,7 +1087,7 @@ sip.o.mgr.management = function (cid) {
 
 sip.o.mgr.set_wrap = function (cid) {
     var o = new CardJS.Card(cid);
-    o.f('merge', {
+    o.f.merge( {
         id_num: 2,
         id_header: 'uma_swrap'
     });
@@ -1109,7 +1112,7 @@ sip.o.mgr.set_wrap = function (cid) {
 sip.o.mgr.settings = function (cid) {
     var o = new CardJS.Card(cid);
 
-    o.f('merge', {
+    o.f.merge( {
         id_header: "uma_uset",
         id_num: 2,
         add_event: true
@@ -1131,15 +1134,15 @@ sip.o.mgr.settings = function (cid) {
     };
 
     o.gen_ev_handler = function () {
-        o.ev_handler = [
+        return [
             function () {
                 var uset = $('[name=' + o.ids[0] + ']');
                 for (var i = 0; i < o.fn_name.length; i++) {
                     sip.uset[o.fn_name[i]] = uset[i].checked;
                 }
                 //console.log(sip.uset);
-                o.f('fetch', 'set_upload_support', sip.uset.upload ? 1 : 0);
-                o.f('fetch', 'update_uset', sip.uset, function (r) {
+                o.f.fetch( 'set_upload_support', sip.uset.upload ? 1 : 0);
+                o.f.fetch( 'update_uset', sip.uset, function (r) {
                     alert(r);
                 });
             }
@@ -1147,7 +1150,7 @@ sip.o.mgr.settings = function (cid) {
     };
 
     o.add_event = function () {
-        o.f('on', 'click', 1, 0);
+        o.f.on( 'click', 1, 0);
     };
 
     return o;
@@ -1156,7 +1159,7 @@ sip.o.mgr.settings = function (cid) {
 
 sip.o.mgr.help = function (cid) {
     var o = new CardJS.Card(cid);
-    o.f('merge', {
+    o.f.merge( {
         id_header: 'at_help'
     });
 
@@ -1170,7 +1173,7 @@ sip.o.mgr.help = function (cid) {
 
 sip.o.art.search_box = function (cid) {
     var o = new CardJS.Card(cid);
-    o.f('merge', {
+    o.f.merge( {
         id_num: 3,
         id_header: 'at_search',
         add_event: true
@@ -1183,7 +1186,7 @@ sip.o.art.search_box = function (cid) {
     o.child = null;
 
     o.gen_ev_handler = function () {
-        o.ev_handler = [
+        return [
             function () {
                 //console.log('fire');
                 var kw = o.objs[0].value;
@@ -1195,7 +1198,7 @@ sip.o.art.search_box = function (cid) {
                     sip.cache.search.pn = 0;
                     o.child && o.child.destroy();
                     o.objs[2].innerHTML = "搜索中 ...";
-                    o.f('fetch', 'search', {'kw': kw, 'pn': 0, 'get_total': true, 'page_size': sip.cache.search.page_size},
+                    o.f.fetch( 'search', {'kw': kw, 'pn': 0, 'get_total': true, 'page_size': sip.cache.search.page_size},
                             function (data) {
                                 sip.cache.search.cache_kw = kw;
                                 sip.cache.search.total = data.total;
@@ -1242,8 +1245,8 @@ sip.o.art.search_box = function (cid) {
 
     o.add_event = function () {
         //console.log('add event');
-        o.f('on', 'keyup', 0, 1);
-        o.f('on', 'click', 1, 0);
+        o.f.on( 'keyup', 0, 1);
+        o.f.on( 'click', 1, 0);
     };
 
     return o;
@@ -1251,22 +1254,22 @@ sip.o.art.search_box = function (cid) {
 
 sip.o.AATest = function (cid) {
     var o = new CardJS.Card(cid);
-    o.f('merge', {
+    o.f.merge( {
         id_num: 10,
         id_header: 'test',
         add_event: true
     });
 
     o.gen_ev_handler = function () {
-        o.ev_handler = [
+        return [
             function () {
-                o.f('fetch', 'test');
+                o.f.fetch( 'test');
             }
         ];
     };
 
     o.add_event = function () {
-        o.f('on', 'click', 0);
+        o.f.on( 'click', 0);
     };
 
     o.gen_html = function () {
@@ -1284,14 +1287,14 @@ sip.o.AATest = function (cid) {
 sip.o.mgr.login = function (container_id) {
     var um = new CardJS.Card(container_id);
 
-    um.f('merge', {
+    um.f.merge( {
         id_num: 5,
         id_header: 'um_login',
         add_event: true
     });
 
     um.gen_ev_handler = function () {
-        um.ev_handler = [
+        return [
             function () {
                 um.objs[0].value = '';
                 um.objs[1].value = '';
@@ -1302,7 +1305,7 @@ sip.o.mgr.login = function (container_id) {
                     psw: md5(um.objs[1].value)
                 };
                 //console.log(user_info);
-                um.f('fetch', 'login', user_info,
+                um.f.fetch( 'login', user_info,
                         function () {
                             sip.cache.um.user_info = null;
                             sip.cache.um.all_user_info = null;
@@ -1323,9 +1326,9 @@ sip.o.mgr.login = function (container_id) {
     };
 
     um.add_event = function () {
-        um.f('on', 'click', 2, 1);
-        um.f('on', 'click', 3, 0);
-        um.f('on', 'keyup', 1, 2);
+        um.f.on( 'click', 2, 1);
+        um.f.on( 'click', 3, 0);
+        um.f.on( 'keyup', 1, 2);
     };
 
     um.gen_html = function () {
@@ -1339,7 +1342,7 @@ sip.o.mgr.login = function (container_id) {
 
 sip.o.main.art_list = function (cid) {
     var o = new CardJS.Card(cid);
-    o.f('merge', {
+    o.f.merge( {
         id_header: 'art_list'
     });
 
@@ -1376,9 +1379,9 @@ sip.o.main.art_list = function (cid) {
     };
 
     o.gen_ev_handler = function () {
-        o.ev_handler = [];
+        var evs = [];
         for (var i = 0; i < o.ids.length; i++) {
-            o.ev_handler.push((function () {
+            evs.push((function () {
                 var idx = i;
                 return(function () {
                     //console.log('idx:', idx, ' fire!');
@@ -1386,11 +1389,12 @@ sip.o.main.art_list = function (cid) {
                 });
             })());
         }
+        return evs;
     };
 
     o.add_event = function () {
         for (var i = 0; i < o.ids.length; i++) {
-            o.f('on', 'click', i);
+            o.f.on( 'click', i);
         }
     };
 
@@ -1414,7 +1418,7 @@ sip.o.main.art_list = function (cid) {
 
 sip.o.main.search_box = function (cid) {
     var o = new CardJS.Card(cid);
-    o.f('merge', {
+    o.f.merge( {
         id_header: 'art_sbox',
         id_num: 3,
         add_event: true
@@ -1455,7 +1459,7 @@ sip.o.main.search_box = function (cid) {
     }
 
     o.gen_ev_handler = function () {
-        o.ev_handler = [
+        return [
 
             //focus in search box
             function () {
@@ -1544,11 +1548,11 @@ sip.o.main.search_box = function (cid) {
         return sip.f.add_frame('tp-frame-tag-card', content, '搜索', 'margin:0px;margin-top:5px;');
     };
     o.add_event = function () {
-        //o.f('on','focus', 0, 0);
-        o.f('on', 'mouseover', 0, 0);
-        o.f('on', 'mouseover', 1, 0);
-        o.f('on', 'keyup', 0, 1);
-        o.f('on', 'click', 1, 2);
+        //o.f.on('focus', 0, 0);
+        o.f.on( 'mouseover', 0, 0);
+        o.f.on( 'mouseover', 1, 0);
+        o.f.on( 'keyup', 0, 1);
+        o.f.on( 'click', 1, 2);
     };
     return o;
 
@@ -1556,7 +1560,7 @@ sip.o.main.search_box = function (cid) {
 
 sip.o.mgr.backup = function (cid) {
     var o = new CardJS.Card(cid);
-    o.f('merge', {
+    o.f.merge( {
         id_header: 'uma_backup',
         id_num: 3,
         add_event: true
@@ -1567,9 +1571,9 @@ sip.o.mgr.backup = function (cid) {
     };
 
     o.gen_ev_handler = function () {
-        o.ev_handler = [
+        return [
             function () {
-                o.f('fetch', 'export_picdb', function (r) {
+                o.f.fetch( 'export_picdb', function (r) {
                     alert(r);
                 }, function (r) {
                     alert(r);
@@ -1577,7 +1581,7 @@ sip.o.mgr.backup = function (cid) {
             },
             function () {
                 if (confirm('现有数据将被清除，确定要导入数据？')) {
-                    o.f('fetch', 'import_from_json', function (r) {
+                    o.f.fetch( 'import_from_json', function (r) {
                         alert(r);
                         CardJS.Lib.url_set_param('index.html', {});
                         window.location.reload(true);
@@ -1592,8 +1596,8 @@ sip.o.mgr.backup = function (cid) {
     };
 
     o.add_event = function () {
-        o.f('on', 'click', 1, 0);
-        o.f('on', 'click', 2, 1);
+        o.f.on( 'click', 1, 0);
+        o.f.on( 'click', 2, 1);
     };
 
     return o;
