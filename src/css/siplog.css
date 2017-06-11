@@ -8,6 +8,28 @@ and open the template in the editor.
     Author     : luke2
 */
 
+.tag-normal{
+    font-size:15px;
+    border:none;
+    color: lightgrey;
+    background-color: transparent;
+}
+
+.tag-active{
+    color: black;
+    border-radius: 5px 5px 0px 0px;
+    padding: 3px 15px 4px 15px;
+    /*margin-bottom: -1px;*/
+    background: #ddd;
+    border: 1px solid #ddd;
+}
+
+.page{
+    border:1px solid #ddd;
+    border-radius: 5px 5px 5px 5px;
+    padding: 5px;
+}
+
 body {
     text-align: center;
 }
