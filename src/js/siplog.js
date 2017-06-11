@@ -828,7 +828,7 @@ sip.o.art.art_wrap = function (cid) {
                 '设置': [sip.o.mgr.set_wrap],
                 '备份': [sip.o.mgr.backup],
                 '说明': [sip.o.mgr.help]
-            }, {'tags':' ', 'tag_active': 'tag-active', 'tag_normal':'tag-normal', 'page': 'page', 'card': ' '}
+            }, {'tags': ' ', 'tag_active': 'tag-active', 'tag_normal': 'tag-normal', 'page': 'page', 'card': ' '}
     );
     return pn;
 
@@ -998,17 +998,20 @@ sip.o.mgr.management = function (cid) {
                 o.f('fetch', 'user_reset', id, function (d) {
                     //console.log(d);
                     sip.cache.um.all_user_info = null;
+                    alert(d);
                     this.refresh();
+                }, function (r) {
+                    alert(r);
                 });
             },
             //ban
             function () {
                 var id = o.objs[0].value;
                 o.f('fetch', 'user_ban', id, function (d) {
-                    console.log(d);
+                    alert(d);
                     this.refresh();
                 }, function (r) {
-                    console.log(r);
+                    alert(r);
                 });
             },
             //modify user
@@ -1025,10 +1028,10 @@ sip.o.mgr.management = function (cid) {
                 }
                 o.f('fetch', 'user_management', {'id': id, 'name': name, 'user': user, 'prv_list': p},
                         function (r) {
-                            console.log(r);
+                            alert(r);
                             this.refresh();
-                        }, false, function (r) {
-                    console.log(r);
+                        }, function (r) {
+                    alert(r);
                 });
                 //console.log(p);
             },
@@ -1047,10 +1050,10 @@ sip.o.mgr.management = function (cid) {
                 }
                 //console.log(param);
                 o.f('fetch', 'user_add', param, function (r) {
-                    console.log(r);
+                    alert(r);
                     this.refresh();
-                }, false, function (r) {
-                    console.log(r);
+                }, function (r) {
+                    alert(r);
                 });
             }
         ];
@@ -1301,6 +1304,8 @@ sip.o.mgr.login = function (container_id) {
                 //console.log(user_info);
                 um.f('fetch', 'login', user_info,
                         function () {
+                            sip.cache.um.user_info = null;
+                            sip.cache.um.all_user_info = null;
                             sip.cache.um.wrap && sip.cache.um.wrap.refresh();
                         },
                         false,
