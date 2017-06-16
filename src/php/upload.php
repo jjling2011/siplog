@@ -10,6 +10,7 @@ if (file_exists(UPLOAD_PATH . 'lock')) {
 
 $um = new UserMgr();
 
+// 待解决：跨域无法验证用户登录情况。 20170616
 !$um->check_login() && err("未登录不可上传文件！");
 
 !($_FILES['upload']) && err('没有文件名！');

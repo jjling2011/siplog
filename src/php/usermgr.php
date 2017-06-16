@@ -36,7 +36,7 @@ class UserMgr extends Reply {
             $this->fail('请先登录！');
             return;
         }
-        $token = CommLib::get_token();
+        $token = $this->utk;
         $info = json_decode($raw_info, true);
         $db = CommLib::open_db();
         $sql = 'select salt,psw,name from user where token=?';
@@ -167,7 +167,7 @@ class UserMgr extends Reply {
         //{login:bool,token:string,prv:{userm:true,artm:false},name:string,id:int}
         $user = [
             'login' => $this->check_login(),
-            'token' => CommLib::get_token()
+            'token' => $this->utk
         ];
         if ($user['login']) {
             $db = CommLib::open_db();
@@ -207,7 +207,8 @@ class UserMgr extends Reply {
     }
 
     public function check_login() {
-        $token = CommLib::get_token();
+        $token = $this->utk;
+        
         $r = CommLib::query('select id from user where token=?', 's', [&$token]);
 
         if ($r['status'] && $r['count'] > 0) {
@@ -233,7 +234,7 @@ class UserMgr extends Reply {
 
     public function logout() {
         if ($this->check_login()) {
-            $token = CommLib::get_token();
+            $token = $this->utk;
             $new = CommLib::rand_str(48);
             $r = CommLib::query('update user set token=?,tk_update=utc_timestamp() where token=?', 'ss', [&$new, &$token]);
             $this->haste($r['status']);
@@ -258,18 +259,18 @@ class UserMgr extends Reply {
         $ip = CommLib::get_ip();
         $user = $user_info['user'];
         $token = CommLib::rand_str(48);
-        setcookie('token', $token, time() + COOKIE_EXPIRED);
+        $this->token=$token;
         CommLib::query('update user set last=utc_timestamp(),ip=?,token=? where user=?', 'sss', [&$ip, &$token, &$user]);
         $this->ok("欢迎！");
         return true;
     }
 
-    private static function update_cookie() {
-        $token = CommLib::get_token();
+    private function update_cookie() {
+        $token = $this->utk;
         $new = CommLib::rand_str(48);
         $r = CommLib::query('update user set token=?,tk_update=utc_timestamp() where token=?', 'ss', [&$new, &$token]);
         if ($r['status']) {
-            setcookie('token', $new, time() + COOKIE_EXPIRED);
+            $this->token=$new;
         }
         return $r['status'];
     }
@@ -280,7 +281,7 @@ class UserMgr extends Reply {
             return false;
         }
 
-        $token = CommLib::get_token();
+        $token = $this->utk;
         $sql = 'select prv from user where token=?';
         $db = CommLib::open_db();
         $stmt = $db->prepare($sql);

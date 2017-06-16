@@ -172,7 +172,7 @@ class Serv extends UserMgr {
                 $files["$year$month"] = true;
                 file_put_contents(FILE_PATH, json_encode($files));
             } else {
-                error_log('query fail!');
+                error_log('Error: serv.php.export_article() query fail!');
             }
         }
     }

@@ -77,7 +77,7 @@ and open the template in the editor.
                 julia.show(1);
                 //change_val();
                 $("#templates").load("res/template.html", function () {
-                    $.getJSON(sip.s.uset_path + '?t=' + CardJS.Lib.rand(), function (data) {
+                    $.getJSON(sip.s.uset_path + '?t=' + cardjs.lib.rand(), function (data) {
                         sip.f.merge_uset(data);
                     }).always(function () {
                         main_page = sip.o.Main_wrap("main-page-container").show();
