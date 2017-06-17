@@ -67,10 +67,10 @@ class Serv extends UserMgr {
             $this->fail('无权操作!');
             return;
         }
-        
+
         ignore_user_abort(true);
         ini_set('max_execution_time', 300);
-        
+
         CommLib::query('truncate pics');
         if (file_exists(PICDB_PATH)) {
             $datas = json_decode(file_get_contents(PICDB_PATH), true);
@@ -357,22 +357,17 @@ class Serv extends UserMgr {
     public function fetch_article($raw_param) {
         $param = json_decode($raw_param, true);
         $aid = $param['id'] + 0;
-        $db = CommLib::open_db();
-        $stmt = $db->prepare('select id,type,title,content,`top`,`lock` from article where id=?');
-        $stmt->bind_param('i', $aid);
-        $stmt->execute();
-        $id = $type = $title = $content = $top = $lock = null;
-        $stmt->store_result();
-        $stmt->bind_result($id, $type, $title, $content, $top, $lock);
-        $stmt->fetch();
-        $this->ok(array(
-            'id' => $id,
-            'type' => $type,
-            'title' => CommLib::utf8_to_base64($title),
-            'content' => CommLib::utf8_to_base64($content),
-            'top' => $top,
-            'lock' => $lock
-        ));
+        $sql = 'select id,type,title,content,`top`,`lock` from article where id=?';
+        $r = CommLib::fetch_assoc($sql, 'i', [$aid]);
+        if($r && count($r)>0){
+            $d=$r[0];
+            $d['title'] = CommLib::utf8_to_base64($d['title']);
+            $d['content'] = CommLib::utf8_to_base64($d['content']);    
+            $this->ok($d);
+            return;
+        }
+        $this->fail('没有数据');
+        return;
     }
 
     public function post_msg($raw_data) {

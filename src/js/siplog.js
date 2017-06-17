@@ -12,6 +12,7 @@ cardjs.set({server_page: 'php/serv.php'});
  * main_article_board_update: 主窗口文章框提供的 update 函数 
  * art_select_id: 搜索结果中缓存的当前选中的文章ID
  * clear_cache: {msbox/asearch/mboard} 相应键为true时清空缓存。
+ * clear_all_user_data: 退出登录时,清除用户设定
  */
 
 var sip = {
@@ -529,7 +530,7 @@ sip.o.art.editor = function (cid) {
                     return;
                 }
 
-                this.clear_cache();
+                this.f.cc_event('clear_cache');
 
                 this.el(5, true).innerHTML = '正在提交数据 ...';
                 o.f.fetch('post_article', data, function () {
@@ -568,7 +569,7 @@ sip.o.art.editor = function (cid) {
                     return;
                 }
 
-                this.clear_cache();
+                this.f.cc_event('clear_cache');
 
                 o.f.fetch('delete_article', cache.cache_id,
                         function () {
@@ -610,16 +611,6 @@ sip.o.art.editor = function (cid) {
         return Mustache.render($('#tp-uma-editor').html(), this);
     };
 
-    o.clear_cache = function () {
-        // clear_cache: {msbox/asearch/mboard} 相应键为true时清空缓存。
-        var name = ['msbox', 'asearch', 'mboard'];
-        var cache = {};
-        for (var i = 0; i < name.length; i++) {
-            cache[name[i]] = true;
-        }
-        this.f.cache(cache, 'clear_cache');
-    };
-
     o.after_add_event = function () {
         this.editor && this.editor.destroy();
         this.editor = new wangEditor(o.ids[1]);
@@ -658,7 +649,8 @@ sip.o.art.editor = function (cid) {
             this.editor.$txt.html('读取数据中 ...');
             this.f.fetch('fetch_article', {'id': sid}, function (data) {
                 //$this->ok(array('id'=>$id,'type'=>$type,'title'=>$title,'content'=>$content));
-                var cache = this.f.restore();
+                
+                var cache = this.f.restore() || {};
                 cache.cache_id = data.id;
                 cache.title = cardjs.lib.base64_to_utf8(data.title);
                 cache.html = cardjs.lib.base64_to_utf8(data.content);
@@ -667,10 +659,11 @@ sip.o.art.editor = function (cid) {
                 cache.top = !(data.top === 0);
 
                 this.f.cache(cache);
+                //console.log('editor fetch (data,cache):',data,cache);
                 //console.log('loadhtml', sip.cache.article.html);
                 this.load_cache();
             }, false, function (r) {
-                this.editor.$txt.html(r);
+                this.editor.$txt.html('<font color="red">'+r+'</font>');
             });
         } else {
             this.f.trigger('new');
@@ -850,6 +843,7 @@ sip.o.mgr.logout = function (cid, parent_update) {
                 },
                 // logout
                 function () {
+                    this.f.cc_event('clear_all_user_data');
                     this.f.fetch('logout', function (r) {
                         console.log(r);
                         this.update();
@@ -934,11 +928,17 @@ sip.o.mgr.user_mgr_wrap = function (cid) {
         },
         update: function () {
             this.el(0, true).innerHTML = '更新数据中 ... ';
+            this.f.cache(null);
             this.after_add_event();
         },
         after_add_event: function () {
-            // dont use cache in this module.
+            this.f.cc_event('clear_all_user_data',true);
             this.clean_up();
+            var cache=this.f.restore();
+            if(cache){
+                this.child = sip.o.mgr.user_mgr(this.el(0), key, this.update.bind(this)).show();
+                return;
+            }
             this.f.fetch('fetch_all_user_info', function (data) {
                 this.f.cache(data);
                 this.child = sip.o.mgr.user_mgr(this.el(0), key, this.update.bind(this)).show();
@@ -946,7 +946,7 @@ sip.o.mgr.user_mgr_wrap = function (cid) {
         },
         clean_up: function () {
             this.child && this.child.destroy();
-            this.f.cache(null);
+            //this.f.cache(null);
         }
     }));
 };
@@ -1002,6 +1002,7 @@ sip.o.mgr.user_mgr = function (cid, key, parent_update) {
                 var id = this.el(0, true).value;
                 o.f.fetch('user_ban', id, function (d) {
                     alert(d);
+                    
                     this.update();
                 }, function (r) {
                     alert(r);
@@ -1238,13 +1239,7 @@ sip.o.art.search_box = function (cid) {
         },
         after_add_event: function () {
             // clear_cache: {msbox/asearch/mboard} 相应键为true时清空缓存。
-            var cc = this.f.restore('clear_cache');
-            if (cc && cc['asearch']) {
-                //console.log('clean cache');
-                this.f.cache(null);
-                delete cc['asearch'];
-                this.f.cache(cc, 'clear_cache');
-            }
+            this.f.cc_event('clear_cache', true);
 
             var cache = this.f.restore();
             this.el(0, true).focus();
@@ -1269,28 +1264,43 @@ sip.o.art.search_box = function (cid) {
 };
 
 sip.o.AATest = function (cid) {
+    var key = cardjs.lib.gen_key();
+
     var o = new cardjs.card(cid);
     o.f.merge({
-        id_num: 10,
-        id_header: 'test',
+        key: key,
+        header: 'test',
         add_event: true
     });
 
     o.gen_ev_handler = function () {
-        return [
-            function () {
-                o.f.fetch('test');
+        return {
+            'test': function () {
+                console.log('test');
+                this.f.cc_debug();
+                this.f.cache('hello');
+                this.f.cc_debug();
+                this.f.cc_event('remove', true);
+                this.f.cc_debug();
+                this.f.cc_event('remove');
+                this.f.cc_debug();
+                this.f.cc_event('remove', false);
+                this.f.cc_debug();
+                this.f.cache('world');
+                this.f.cc_event('remove');
+                this.f.cc_debug();
+
             }
-        ];
+        };
     };
 
     o.add_event = function () {
-        o.f.on('click', 0);
+        o.f.on('click', 'test');
     };
 
     o.gen_html = function () {
         var html = '<div style="margin:10px;">' +
-                '<input type="button" id="' + o.ids[0] + '" class="btn btn-info" value="test">' +
+                '<input type="button" id="' + this.el('test') + '" class="btn btn-info" value="test">' +
                 '</div>';
         return html;
     };
@@ -1533,6 +1543,10 @@ sip.o.main.article_board = function (cid) {
         },
         update: function (data) {
             this.f.cache(data);
+            if(!data){
+                this.el(0, true).innerHTML = "<font color=red>数据不存在</font>";
+                return;
+            }
             if (cardjs.lib.isArray(data)) {
                 this.el(0, true).innerHTML = Mustache.render($('#tp-article-summary-container').html(), {recent: data});
             } else {
@@ -1540,16 +1554,11 @@ sip.o.main.article_board = function (cid) {
             }
         },
         after_add_event: function () {
-            this.f.cache(this.update.bind(this), 'main_article_board_update');
-            // clear_cache: {msbox/asearch/mboard} 相应键为true时清空缓存。
-            var cc = this.f.restore('clear_cache');
-            if (cc && cc['mboard']) {
-                //console.log('clean cache');
-                this.f.cache(null);
-                delete cc['mboard'];
-                this.f.cache(cc, 'clear_cache');
+            // regist a clear_cache event for other module clear this cache;
+            this.f.cc_event('clear_cache', true);
 
-            }
+            //export a function for other function to call;
+            this.f.cache(this.update.bind(this), 'main_article_board_update');
 
             var cache = this.f.restore();
             if (cache) {
@@ -1563,9 +1572,10 @@ sip.o.main.article_board = function (cid) {
                     for (var i = 0; i < data.length; i++) {
                         if (data[i].id === param.id) {
                             this.update(sip.f.parse_json(data[i]));
-                            break;
+                            return;
                         }
                     }
+                    this.update(null);
                 }.bind(this));
                 return;
             }
@@ -1575,9 +1585,13 @@ sip.o.main.article_board = function (cid) {
                 data.forEach(function (e) {
                     d.push(sip.f.parse_json(e));
                 });
-                this.update(d);
+                if (d.length > 0) {
+                    this.update(d);
+                } else {
+                    this.update(null);
+                }
             }.bind(this)).fail(function () {
-                this.el(0, true).innerHTML = "<font color=red>没有数据</font>";
+                this.el(0, true).innerHTML = "<font color=red>获取数据失败</font>";
             }.bind(this));
         }
     }));
@@ -1721,14 +1735,9 @@ sip.o.main.search_box = function (cid) {
 
     o.after_add_event = function () {
         //load files
-        // clear_cache: {msbox/asearch/recent} 相应键为true时清空缓存。
-        var cc = this.f.restore('clear_cache');
-        if (cc && cc['msbox']) {
-            //console.log('clean cache');
-            this.f.cache(null);
-            delete cc['msbox'];
-            this.f.cache(cc, 'clear_cache');
-        }
+
+        this.f.cc_event('clear_cache', true);
+
         var cache = this.f.restore();
         o.cache = cache;
         if (!cache) {
