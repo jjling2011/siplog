@@ -133,7 +133,7 @@ sip.o.main.msg = function (cid) {
                 function () {
                     //console.log('click');
                     var d = this.el(0, true).value;
-                    console.log('msg:', d);
+                    //console.log('msg:', d);
                     if (d.length > 0) {
                         this.f.fetch('post_msg', d, function () {
                             var msg = this.f.restore();
@@ -649,7 +649,7 @@ sip.o.art.editor = function (cid) {
             this.editor.$txt.html('读取数据中 ...');
             this.f.fetch('fetch_article', {'id': sid}, function (data) {
                 //$this->ok(array('id'=>$id,'type'=>$type,'title'=>$title,'content'=>$content));
-                
+
                 var cache = this.f.restore() || {};
                 cache.cache_id = data.id;
                 cache.title = cardjs.lib.base64_to_utf8(data.title);
@@ -663,7 +663,7 @@ sip.o.art.editor = function (cid) {
                 //console.log('loadhtml', sip.cache.article.html);
                 this.load_cache();
             }, false, function (r) {
-                this.editor.$txt.html('<font color="red">'+r+'</font>');
+                this.editor.$txt.html('<font color="red">' + r + '</font>');
             });
         } else {
             this.f.trigger('new');
@@ -932,10 +932,10 @@ sip.o.mgr.user_mgr_wrap = function (cid) {
             this.after_add_event();
         },
         after_add_event: function () {
-            this.f.cc_event('clear_all_user_data',true);
+            this.f.cc_event('clear_all_user_data', true);
             this.clean_up();
-            var cache=this.f.restore();
-            if(cache){
+            var cache = this.f.restore();
+            if (cache) {
                 this.child = sip.o.mgr.user_mgr(this.el(0), key, this.update.bind(this)).show();
                 return;
             }
@@ -1002,7 +1002,7 @@ sip.o.mgr.user_mgr = function (cid, key, parent_update) {
                 var id = this.el(0, true).value;
                 o.f.fetch('user_ban', id, function (d) {
                     alert(d);
-                    
+
                     this.update();
                 }, function (r) {
                     alert(r);
@@ -1263,6 +1263,29 @@ sip.o.art.search_box = function (cid) {
     }));
 };
 
+sip.o.AAChild = function (cid) {
+    var key = cardjs.lib.gen_key();
+    return(cardjs.create({
+        cid: cid,
+        settings: {
+            key: key
+        },
+        func_child: function () {
+            console.log('call child func1:', this.settings.key);
+        },
+        gen_html: function () {
+            return 'child';
+        },
+        after_add_event: function () {
+            this.f.event('hello', this.func_child);
+        },
+        clean_up: function () {
+            this.self.innerHTML = '';
+            this.f.event('hello', this.func_child, false);
+        }
+    }));
+};
+
 sip.o.AATest = function (cid) {
     var key = cardjs.lib.gen_key();
 
@@ -1273,36 +1296,43 @@ sip.o.AATest = function (cid) {
         add_event: true
     });
 
+    o.func1 = function () {
+        console.log('call parent func1:', this.settings.key);
+    };
+
+    o.child = null;
     o.gen_ev_handler = function () {
         return {
             'test': function () {
-                console.log('test');
-                this.f.cc_debug();
-                this.f.cache('hello');
-                this.f.cc_debug();
-                this.f.cc_event('remove', true);
-                this.f.cc_debug();
-                this.f.cc_event('remove');
-                this.f.cc_debug();
-                this.f.cc_event('remove', false);
-                this.f.cc_debug();
-                this.f.cache('world');
-                this.f.cc_event('remove');
-                this.f.cc_debug();
-
+                for (var i = 0; i < 10000; i++) {
+                    //this.f.event('hello', this.func1);
+                    this.clean_up();
+                    this.child = sip.o.AAChild(this.el('child')).show();
+                }
+            },
+            'destroy': function () {
+                this.clean_up();
             }
         };
     };
 
     o.add_event = function () {
         o.f.on('click', 'test');
+        o.f.on('click', 'destroy');
     };
 
     o.gen_html = function () {
         var html = '<div style="margin:10px;">' +
                 '<input type="button" id="' + this.el('test') + '" class="btn btn-info" value="test">' +
+                '<input type="button" id="' + this.el('destroy') + '" class="btn btn-info" value="destroy">' +
+                '<div id="' + this.el('child') + '"></div>' +
                 '</div>';
         return html;
+    };
+
+    o.clean_up = function () {
+        o.child && o.child.destroy();
+        o.child = null;
     };
 
 
@@ -1376,6 +1406,10 @@ sip.o.main.match_list = function (cid, key) {
             || (function () {
                 throw new Error('error: main_article_board_update not exist!');
             }());
+
+    o.clean_up = function () {
+        o.update = null;
+    };
 
     o.data_parser = function () {
         o.cache = this.f.restore();
@@ -1543,7 +1577,7 @@ sip.o.main.article_board = function (cid) {
         },
         update: function (data) {
             this.f.cache(data);
-            if(!data){
+            if (!data) {
                 this.el(0, true).innerHTML = "<font color=red>数据不存在</font>";
                 return;
             }
@@ -1662,7 +1696,7 @@ sip.o.main.search_box = function (cid) {
                     return;
                 }
                 if (!cache.data) {
-                    console.log('准备加载数据!');
+                    //console.log('准备加载数据!');
                     var year = new Date().getUTCFullYear(),
                             month = new Date().getUTCMonth();
                     for (var i = 0; i < 6; i++) {
