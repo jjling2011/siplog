@@ -8,12 +8,12 @@
         <td class="banner" align="center">
             <table style="width:960px;">
 				<tr>
-					<td style="text-align:left;font-size: 30px;/* font-style: italic; */color: ivory;padding-left: 8px;padding-bottom: 8px;">
+					<td style="text-align:left;font-size: 30px;/* font-style: italic; */color: ivory;padding-left: 8px;padding-bottom: 8px;" id="{{ids.5}}">
 					Siplog
 					</td>
 				</tr>
 				<tr>
-					<td style="text-align:left;color: #fff;padding-bottom: 9px;padding-left: 39px;">
+					<td style="text-align:left;color: #fff;padding-bottom: 9px;padding-left: 39px;" id="{{ids.6}}">
 					一个简洁的单页博客
 					</td>
 				</tr>
@@ -29,8 +29,10 @@
         <td align="center">
             <table style="width:960px;">
                 <tr>
+					<!-- left -->
                     <td align="left" id="{{ids.0}}" style="vertical-align: top;padding-top: 12px;"></td>
-                    <td align="right" style="width:200px;vertical-align: top;padding-top:12px;">
+					<!-- right -->
+                    <td align="right" style="width:200px;vertical-align: top;padding-top:12px;padding-left:8px;">
                         <table style="width:100%;">
                             <tr><td  style="text-align: right;width:100%;" id="{{ids.1}}"></td></tr>
                             <tr><td  style="text-align: right;width:100%;" id="{{ids.2}}"></td></tr>
@@ -279,12 +281,22 @@
     </table>
 </script>
 
+<script type="text/template" id="tp-uma-set-banner">
+<table style="width:170px;border-collapse: separate;border-spacing: 5px;">
+    <tr><td style="text-align: left;">标题</td></tr>
+    <tr><td><input type="text" class="form-control" id="{{ids.0}}"></td></tr>
+    <tr><td style="text-align: left;">描述</td></tr>
+    <tr><td><textarea  id="{{ids.1}}" class="form-control"></textarea></td></tr>
+    <tr><td style="text-align:center;"><input type="button" value="提交" id="{{ids.2}}" class="btn btn-sm btn-info"></td></tr>
+</table>
+</script>
 
 <script type="text/template" id="tp-uma-set-wrap">
 <table>
 	<tr>
-		<td id="{{ids.0}}" style="vertical-align:top;"></td>
-		<td id="{{ids.1}}" style="vertical-align:top;"></td>
+		<td id="{{ids.0}}" style="vertical-align:top;padding-right:8px;"></td>
+		<td id="{{ids.1}}" style="vertical-align:top;padding-right:8px;"></td>
+		<td id="{{ids.2}}" style="vertical-align:top;padding-right:8px;"></td>
 	</tr>
 </table>
 </script>

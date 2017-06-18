@@ -21,9 +21,14 @@ and open the template in the editor.
 .tag-normal{
     font-size:15px;
     border:none;
-    color: lightgrey;
+    color: #999;
     background-color: transparent;
 }
+
+.tag-normal:hover {
+    color: #000;
+}
+
 
 .tag-active{
     /*box-shadow: 0px 0px 8px #aaa;*/
@@ -108,7 +113,7 @@ body {
     border: 1px solid #ddd;
     margin-bottom: 8px;
     border-radius: 3px;
-    margin-left:8px;
+    /*margin-left:8px;*/
     text-align: left;
     padding: 6px;
 }

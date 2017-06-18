@@ -9,7 +9,8 @@ cardjs.set({server_page: 'php/serv.php'});
 
 /*
  * cache share keys:
- * main_article_board_update: 主窗口文章框提供的 update 函数 
+ * event('main_article_board_update'): 主窗口文章框提供的 update 函数 
+ * event('main_update_banner'); 更新bannery
  * art_select_id: 搜索结果中缓存的当前选中的文章ID
  * clear_cache('update_article') 更新文章时清理相应缓存
  * clear_cache('clear_art_board') 更新主页文章窗口
@@ -60,8 +61,8 @@ sip.f.add_frame = function (frame_id, content, tag, style) {
         'style': style || "",
         'content': content
     };
-    if(tag && tag.length>0){
-        d['tag']=tag;
+    if (tag && tag.length > 0) {
+        d['tag'] = tag;
     }
     return Mustache.render(cardjs.lib.load_html(frame_id), d);
 };
@@ -207,13 +208,13 @@ sip.o.Main_wrap = function (cid) {
     o.gen_ev_handler = function () {
         return([
             function () {
-                this.el(3,true).className='tag-main-active';
-                this.el(4,true).className='tag-main-normal';
+                this.el(3, true).className = 'tag-main-active';
+                this.el(4, true).className = 'tag-main-normal';
                 this.show_main_page();
             },
-            function(){
-                this.el(4,true).className='tag-main-active';
-                this.el(3,true).className='tag-main-normal';
+            function () {
+                this.el(4, true).className = 'tag-main-active';
+                this.el(3, true).className = 'tag-main-normal';
                 this.show_mgr_page();
             }
         ]);
@@ -245,7 +246,7 @@ sip.o.Main_wrap = function (cid) {
 
     o.gen_html = function () {
         var ids = [];
-        for (var i = 0; i < 5; i++) {
+        for (var i = 0; i < 7; i++) {
             ids.push(this.el(i));
         }
         return Mustache.render(cardjs.lib.load_html('tp-main-wrap'), {ids: ids});
@@ -273,9 +274,27 @@ sip.o.Main_wrap = function (cid) {
         o.show_mgr_page();
     };
 
+    o.update_banner = function (param) {
+        var name, desc;
+
+        param = param || {};
+
+        name = param.name || sip.uset.banner_name;
+        desc = param.desc || sip.uset.banner_desc;
+
+        if (name && desc && name.length > 0 && desc.length > 0) {
+            this.el(5, true).innerHTML = cardjs.lib.html_escape(name);
+            this.el(6, true).innerHTML = cardjs.lib.html_escape(desc);
+        }
+        name = null;
+        desc = null;
+    };
+
     o.after_add_event = function () {
         clear_contents();
         o.show_main_page();
+        this.update_banner();
+        this.f.event('main_update_banner', this.update_banner);
     };
 
     return o;
@@ -847,9 +866,9 @@ sip.o.mgr.logout = function (cid, parent_update, key) {
             var info = this.f.restore();
             var content = Mustache.render(cardjs.lib.load_html('tp-um-logout'), {
                 ids: [this.el(0), this.el(1), this.el(2)],
-                name:info.name
+                name: info.name
             });
-            return sip.f.add_frame('tp-frame-tag-card', content, '', 'margin-left:8px;margin-bottom:8px;');
+            return sip.f.add_frame('tp-frame-tag-card', content, '', 'margin-bottom:8px;');
         },
         clean_up: function () {
             this.child && this.child.destroy();
@@ -1104,12 +1123,18 @@ sip.o.art.set_wrap = function (cid) {
         header: 'art_set_wrap'
     });
     o.gen_html = function () {
-        return Mustache.render(cardjs.lib.load_html('tp-uma-set-wrap'), {ids: [this.el(0), this.el(1)]});
+        return Mustache.render(cardjs.lib.load_html('tp-uma-set-wrap'), {
+            ids: [
+                this.el(0),
+                this.el(1),
+                this.el(2)
+            ]});
     };
     o.child = [];
     o.after_add_event = function () {
         o.child.push(sip.o.art.types(this.el(0)).show());
-        o.child.push(sip.o.art.settings(this.el(1)).show());
+        o.child.push(sip.o.art.set_main_page(this.el(1)).show());
+        o.child.push(sip.o.art.set_banner(this.el(2)).show());
     };
     o.clean_up = function () {
         o.child.forEach(function (e) {
@@ -1121,7 +1146,76 @@ sip.o.art.set_wrap = function (cid) {
 
 };
 
-sip.o.art.settings = function (cid) {
+sip.o.art.set_banner = function (cid) {
+    var o = new cardjs.card(cid);
+
+    o.f.merge({
+        header: "uma_set_banner",
+        add_event: true
+    });
+
+    o.gen_html = function () {
+        var data = {
+            fn_label: this.fn_label,
+            ids: [this.el(0), this.el(1), this.el(2)]
+        };
+        var content = Mustache.render(cardjs.lib.load_html("tp-uma-set-banner"), data);
+        return sip.f.add_frame('tp-frame-tag-card', content, '横幅栏');
+    };
+
+    o.after_add_event = function () {
+        var name = sip.uset['banner_name'];
+        var desc = sip.uset['banner_desc'];
+        if (name && name.length > 0) {
+            this.el(0, true).value = name;
+        }
+        if (desc && desc.length > 0) {
+            this.el(1, true).value = desc;
+        }
+        name = null;
+        desc = null;
+    };
+
+    o.gen_ev_handler = function () {
+        return {
+            'commit': function () {
+                if (!confirm('确定提交修改?')) {
+                    return;
+                }
+                sip.uset['banner_name'] = this.el(0, true).value;
+                sip.uset['banner_desc'] = this.el(1, true).value;
+                this.f.fetch('update_uset', sip.uset, function (r) {
+                    alert(r);
+                }, function (r) {
+                    alert(r);
+                });
+                this.f.event('main_update_banner');
+            },
+            'update_banner': function () {
+                this.f.event('main_update_banner', {
+                    name: this.el(0, true).value,
+                    desc: this.el(1, true).value
+                });
+            }
+
+        };
+    };
+
+    o.add_event = function () {
+        this.f.on('click', 2, 'commit');
+        this.f.on('keyup', 1, 'update_banner');
+        this.f.on('keyup', 0, 'update_banner');
+    };
+
+    o.clean_up = function () {
+        this.f.event('main_update_banner');
+    };
+
+    return o;
+
+};
+
+sip.o.art.set_main_page = function (cid) {
     var o = new cardjs.card(cid);
 
     o.f.merge({
@@ -1385,7 +1479,7 @@ sip.o.mgr.login = function (cid, parent_update) {
                 id.push(this.el(i));
             }
             var content = Mustache.render(cardjs.lib.load_html('tp-um-login'), {ids: id});
-            return(sip.f.add_frame('tp-frame-tag-card', content, "登录", "margin-left:8px;margin-bottom:8px;"));
+            return(sip.f.add_frame('tp-frame-tag-card', content, "登录", "margin-bottom:8px;"));
         },
         add_event: function () {
             this.f.on('click', 2, 1);
@@ -1621,12 +1715,12 @@ sip.o.main.article_board = function (cid) {
             if (cardjs.lib.isArray(data)) {
                 this.el(0, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-article-summary-container'), {
                     recent: data,
-                    style:'article-summary'
+                    style: 'article-summary'
                 });
             } else {
                 this.el(0, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-article-summary-container'), {
                     recent: data,
-                    style:'article-all-content'
+                    style: 'article-all-content'
                 });
             }
         },
@@ -1663,11 +1757,11 @@ sip.o.main.article_board = function (cid) {
                 data.forEach(function (e) {
                     d.push(sip.f.parse_json(e));
                 });
-                if(!this.self){
+                if (!this.self) {
                     console.log('sip.o.main.article_board: Object 已经销毁,取消更新操作');
                     return;
                 }
-                if (d.length > 0 ) {
+                if (d.length > 0) {
                     this.update(d);
                 } else {
                     this.update(null);
