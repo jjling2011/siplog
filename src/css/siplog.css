@@ -8,6 +8,16 @@ and open the template in the editor.
     Author     : luke2
 */
 
+.banner{
+    width: 100%;
+    height: 130px;
+    vertical-align: bottom;
+    background-image: url("../res/banner.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+}
+
 .tag-normal{
     font-size:15px;
     border:none;
@@ -37,7 +47,7 @@ and open the template in the editor.
     padding: 5px;
 }
 
-.tag-main-active{
+.tag-main-active {
     color: #999;
     border: 1px solid ivory;
     border-radius: 5px 5px 0px 0px;
@@ -45,8 +55,12 @@ and open the template in the editor.
     background: ivory;
 }
 
+.tag-main-normal:hover{
+    color:#000;
+}
+
 .tag-main-normal{
-    color: #666;
+    color:ivory;
     border:none;
     background: transparent;
     padding: 3px 15px 3px 15px;
