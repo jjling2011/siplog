@@ -23,38 +23,39 @@ and open the template in the editor.
         <script type="text/javascript" src="js/siplog.js?t=20170518001"></script>
     </head>
     <body >
-        <div id="page-wrap">
-            <div id="banner" style="margin-bottom: 5px;width:960px;height:100px;">
-                <canvas id="mycv" width="960" height="100" ></canvas>
-            </div>
-            <div id="main-page-container"></div>
-            <div id="foot-note"></div>
-            <div style="display:none;">
-                <table>
-                    <tr>
-                        <td>bright</td>
-                        <td><input type="range" min="0" max="100" name="pg_range" value="31"></td>
-                    </tr>
-                    <tr>
-                        <td>red</td>
-                        <td><input type="range" min="0" max="100" name="pg_range" value="87"></td>
-                    </tr>
-                    <tr>
-                        <td>green</td>
-                        <td><input type="range" min="0" max="100" name="pg_range" value="72"></td>
-                    </tr>
-                    <tr>
-                        <td>blue</td>
-                        <td><input type="range" min="0" max="100" name="pg_range" value="33"></td>
-                    </tr>
-                </table>
-            </div>
-        </div>
+        <div style="width:100%;" id="main-page-container"></div>
+        <table>
+            <tr>
+                <td>
+                    <div id="foot-note"></div>
+                    <div style="display:none;">
+                    <table>
+                        <tr>
+                            <td>bright</td>
+                            <td><input type="range" min="0" max="100" name="pg_range" value="31"></td>
+                        </tr>
+                        <tr>
+                            <td>red</td>
+                            <td><input type="range" min="0" max="100" name="pg_range" value="87"></td>
+                        </tr>
+                        <tr>
+                            <td>green</td>
+                            <td><input type="range" min="0" max="100" name="pg_range" value="72"></td>
+                        </tr>
+                        <tr>
+                            <td>blue</td>
+                            <td><input type="range" min="0" max="100" name="pg_range" value="33"></td>
+                        </tr>
+                    </table>
+                    </div>
+                </td>
+            </tr>
+        </table>
         <noscript>对不起你的浏览器不支持JavaScript!<br />Sorry, your browser does not support JavaScript!</noscript>
         <div id="templates" style="display: none;"></div>
         <script>
             var main_page;
-            var julia = namespace_fractal.Julia.createNew(document.getElementById('mycv'), 960, 100);
+            //var julia = namespace_fractal.Julia.createNew(document.getElementById('mycv'), 960, 100);
             //$('[name=pg_range]').change(change_val);
             function change_val() {
                 var rgos = document.getElementsByName('pg_range');
@@ -72,9 +73,9 @@ and open the template in the editor.
             }
             //julia.set_param(-0.13758486607819342,0.5140887009218645,1.6019791613250816);
             $(document).ready(function () {
-                julia.connect();
-                julia.test([60, 1.59, 1.47, 0.72]);
-                julia.show(1);
+                //julia.connect();
+                //julia.test([60, 1.59, 1.47, 0.72]);
+                //julia.show(1);
                 //change_val();
                 $("#templates").load("res/template.html", function () {
                     $.getJSON(sip.s.uset_path + '?t=' + cardjs.lib.rand(), function (data) {

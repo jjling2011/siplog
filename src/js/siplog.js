@@ -11,8 +11,9 @@ cardjs.set({server_page: 'php/serv.php'});
  * cache share keys:
  * main_article_board_update: 主窗口文章框提供的 update 函数 
  * art_select_id: 搜索结果中缓存的当前选中的文章ID
- * clear_cache: {msbox/asearch/mboard} 相应键为true时清空缓存。
- * clear_all_user_data: 退出登录时,清除用户设定
+ * clear_cache('update_article') 更新文章时清理相应缓存
+ * clear_cache('clear_art_board') 更新主页文章窗口
+ * clear_cache('clear_all_user_data') 退出登录时,清除用户设定
  */
 
 var sip = {
@@ -56,11 +57,13 @@ sip.f.merge_uset = function (settings) {
 
 sip.f.add_frame = function (frame_id, content, tag, style) {
     var d = {
-        'tag': tag,
         'style': style || "",
         'content': content
     };
-    return Mustache.render($('#' + frame_id).html(), d);
+    if(tag && tag.length>0){
+        d['tag']=tag;
+    }
+    return Mustache.render(cardjs.lib.load_html(frame_id), d);
 };
 
 sip.f.parse_json = function (e) {
@@ -114,8 +117,8 @@ sip.o.main.msg = function (cid) {
             add_event: true
         },
         gen_html: function () {
-            var content = Mustache.render($('#tp-mp-msg').html(), {ids: [this.el(0), this.el(1), this.el(2)]});
-            return sip.f.add_frame('tp-frame-tag-card', content, "留言板", 'margin:0px;margin-top:5px;');
+            var content = Mustache.render(cardjs.lib.load_html('tp-mp-msg'), {ids: [this.el(0), this.el(1), this.el(2)]});
+            return sip.f.add_frame('tp-frame-tag-card', content, "", 'margin-bottom:8px;margin-top:0px;');
         },
 
         gen_ev_handler: function () {
@@ -166,7 +169,7 @@ sip.o.main.msg = function (cid) {
             var msg = this.f.restore();
             if (msg && msg.length > 0) {
                 //console.log('using cache.');
-                this.el(2, true).innerHTML = Mustache.render($('#tp-mp-msg-list').html(), {msg: msg});
+                this.el(2, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-mp-msg-list'), {msg: msg});
                 return;
             }
             $.getJSON(sip.s.msg_path + '?t=' + cardjs.lib.rand(8), function (data) {
@@ -184,7 +187,7 @@ sip.o.main.msg = function (cid) {
             }).always(function () {
                 if (sip.uset.show_mbox) {
                     var msg = this.f.restore();
-                    this.el(2, true).innerHTML = Mustache.render($('#tp-mp-msg-list').html(), {msg: msg});
+                    this.el(2, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-mp-msg-list'), {msg: msg});
                 }
             }.bind(this));
         }
@@ -204,16 +207,14 @@ sip.o.Main_wrap = function (cid) {
     o.gen_ev_handler = function () {
         return([
             function () {
-                if (this.el(4, true).value === '管理页面') {
-                    //switch to admin
-                    //console.log('switch to admin');
-                    this.el(4, true).value = '返回主页';
-                    o.show_mgr_page();
-                } else {
-                    //console.log('switch back to main_page');
-                    this.el(4, true).value = '管理页面';
-                    o.show_main_page();
-                }
+                this.el(3,true).className='tag-main-active';
+                this.el(4,true).className='tag-main-normal';
+                this.show_main_page();
+            },
+            function(){
+                this.el(4,true).className='tag-main-active';
+                this.el(3,true).className='tag-main-normal';
+                this.show_mgr_page();
             }
         ]);
     };
@@ -238,7 +239,8 @@ sip.o.Main_wrap = function (cid) {
     };
 
     o.add_event = function () {
-        o.f.on('click', 4, 0);
+        o.f.on('click', 3, 0);
+        o.f.on('click', 4, 1);
     };
 
     o.gen_html = function () {
@@ -246,7 +248,7 @@ sip.o.Main_wrap = function (cid) {
         for (var i = 0; i < 5; i++) {
             ids.push(this.el(i));
         }
-        return Mustache.render($('#tp-main-wrap').html(), {ids: ids});
+        return Mustache.render(cardjs.lib.load_html('tp-main-wrap'), {ids: ids});
     };
 
     function clear_contents() {
@@ -417,7 +419,7 @@ sip.o.art.search_result = function (cid, key) {
                 lock: c.lock === 0 ? false : true
             });
         }
-        return (Mustache.render($('#tp-uma-search-result').html(), this.d));
+        return (Mustache.render(cardjs.lib.load_html('tp-uma-search-result'), this.d));
     };
 
     return o;
@@ -478,7 +480,7 @@ sip.o.art.list_orphan_img = function (cid) {
 
     o.gen_html = function () {
         this.ids = [this.el(0), this.el(1)];
-        return Mustache.render($('#tp-uma-loi').html(), this);
+        return Mustache.render(cardjs.lib.load_html('tp-uma-loi'), this);
     };
 
     return o;
@@ -530,7 +532,8 @@ sip.o.art.editor = function (cid) {
                     return;
                 }
 
-                this.f.cc_event('clear_cache');
+                this.f.clear_cache('update_article');
+                cardjs.lib.url_set_params('index.html');
 
                 this.el(5, true).innerHTML = '正在提交数据 ...';
                 o.f.fetch('post_article', data, function () {
@@ -556,6 +559,8 @@ sip.o.art.editor = function (cid) {
                 this.el(2, true).options[0].selected = true;
                 o.editor.$txt.html('<p><br></p>');
                 this.el(5, true).innerHTML = "新文章";
+                this.f.clear_cache('clear_art_board');
+                cardjs.lib.url_set_params('index.html');
             },
             'del': function () {
                 var cache = this.f.restore();
@@ -569,7 +574,8 @@ sip.o.art.editor = function (cid) {
                     return;
                 }
 
-                this.f.cc_event('clear_cache');
+                this.f.clear_cache('update_article');
+                cardjs.lib.url_set_params('index.html');
 
                 o.f.fetch('delete_article', cache.cache_id,
                         function () {
@@ -608,7 +614,7 @@ sip.o.art.editor = function (cid) {
         for (var i = 0; i < 11; i++) {
             this.ids.push(this.el(i));
         }
-        return Mustache.render($('#tp-uma-editor').html(), this);
+        return Mustache.render(cardjs.lib.load_html('tp-uma-editor'), this);
     };
 
     o.after_add_event = function () {
@@ -732,13 +738,18 @@ sip.o.art.types = function (cid) {
             //click submit
             function () {
                 var types = [];
-                $('[name="' + this.el(0) + '"]').each(function () {
-                    if (this.value.length > 0) {
-                        types.push(this.value);
+                var els = cardjs.lib.get_elsbyname(this.el(0));
+                for (var i = 0; i < els.length; i++) {
+                    var t = els[i].value.trim();
+
+                    if (t.length > 0) {
+                        types.push(t);
                     }
-                });
+                }
+                els = null;
                 //console.log(types);
                 sip.uset.atypes = types;
+                types = null;
                 o.f.fetch('update_uset', sip.uset, function () {
                     alert('分类信息修改成功！');
                     this.refresh();
@@ -751,12 +762,18 @@ sip.o.art.types = function (cid) {
                     return;
                 }
                 var types = [];
-                $('[name="' + this.el(0) + '"]').each(function () {
-                    if (this.value.length > 0) {
-                        types.push(this.value);
+                var els = cardjs.lib.get_elsbyname(this.el(0));
+                for (var i = 0; i < els.length; i++) {
+                    var t = els[i].value.trim();
+                    //console.log(t,els[i]);
+                    if (t.length > 0) {
+                        types.push(t);
                     }
-                });
+                }
+                els = null;
+                //console.log(types);
                 sip.uset.atypes = types;
+                types = null;
                 this.refresh();
             }
         ];
@@ -782,7 +799,7 @@ sip.o.art.types = function (cid) {
             }
         };
         // create data view
-        var content = Mustache.render($('#tp-uma-atypes').html(), d);
+        var content = Mustache.render(cardjs.lib.load_html('tp-uma-atypes'), d);
         return sip.f.add_frame('tp-frame-tag-card', content, '分类管理');
     };
 
@@ -816,17 +833,23 @@ sip.o.art.art_wrap = function (cid) {
     }));
 };
 
-sip.o.mgr.logout = function (cid, parent_update) {
+sip.o.mgr.logout = function (cid, parent_update, key) {
     return(cardjs.create({
         cid: cid,
         update: parent_update,
         child: null,
         settings: {
+            key: key,
             header: 'mgr_logout',
             add_event: true
         },
         gen_html: function () {
-            return Mustache.render($('#tp-um-logout').html(), {ids: [this.el(0), this.el(1), this.el(2)]});
+            var info = this.f.restore();
+            var content = Mustache.render(cardjs.lib.load_html('tp-um-logout'), {
+                ids: [this.el(0), this.el(1), this.el(2)],
+                name:info.name
+            });
+            return sip.f.add_frame('tp-frame-tag-card', content, '', 'margin-left:8px;margin-bottom:8px;');
         },
         clean_up: function () {
             this.child && this.child.destroy();
@@ -843,7 +866,7 @@ sip.o.mgr.logout = function (cid, parent_update) {
                 },
                 // logout
                 function () {
-                    this.f.cc_event('clear_all_user_data');
+                    this.f.clear_cache('clear_all_user_data');
                     this.f.fetch('logout', function (r) {
                         console.log(r);
                         this.update();
@@ -869,8 +892,8 @@ sip.o.mgr.change_psw = function (cid, parent_update) {
         for (var i = 0; i < 6; i++) {
             id.push(this.el(i));
         }
-        var content = Mustache.render($('#tp-um-change-password').html(), {ids: id});
-        return sip.f.add_frame('tp-frame-tag-card', content, '修改信息');
+        return Mustache.render(cardjs.lib.load_html('tp-um-change-password'), {ids: id});
+        //return sip.f.add_frame('tp-frame-tag-card', content, '修改信息', 'margin-top:8px;');
     };
 
     o.gen_ev_handler = function () {
@@ -932,7 +955,7 @@ sip.o.mgr.user_mgr_wrap = function (cid) {
             this.after_add_event();
         },
         after_add_event: function () {
-            this.f.cc_event('clear_all_user_data', true);
+            this.f.clear_cache('clear_all_user_data', true);
             this.clean_up();
             var cache = this.f.restore();
             if (cache) {
@@ -981,7 +1004,7 @@ sip.o.mgr.user_mgr = function (cid, key, parent_update) {
                 } else {
                     this.el(8, true).style.backgroundColor = 'transparent';
                 }
-                var pv = $('[name=' + this.el(3) + ']');
+                var pv = cardjs.lib.get_elsbyname(this.el(3));
                 for (var i = 0; i < pv.length; i++) {
                     pv[i].checked = uinfo.user_prv[id][uinfo.prv_list[i]];
                 }
@@ -1014,7 +1037,7 @@ sip.o.mgr.user_mgr = function (cid, key, parent_update) {
                 var id = this.el(0, true).value,
                         name = this.el(1, true).value,
                         user = this.el(8, true).value,
-                        pv = $('[name=' + this.el(3) + ']'),
+                        pv = cardjs.lib.get_elsbyname(this.el(3)),
                         p = [];
                 for (var i = 0; i < pv.length; i++) {
                     if (pv[i].checked) {
@@ -1038,7 +1061,7 @@ sip.o.mgr.user_mgr = function (cid, key, parent_update) {
                     prv: []
                 };
                 var cache = this.f.restore();
-                var pv = $('[name=' + this.el(3) + ']');
+                var pv = cardjs.lib.get_elsbyname(this.el(3));
                 for (var i = 0; i < pv.length; i++) {
                     if (pv[i].checked) {
                         param.prv.push(cache.prv_list[i]);
@@ -1069,7 +1092,7 @@ sip.o.mgr.user_mgr = function (cid, key, parent_update) {
         for (var i = 0; i < 9; i++) {
             cache.ids.push(this.el(i));
         }
-        return Mustache.render($("#tp-um-modify").html(), cache);
+        return Mustache.render(cardjs.lib.load_html("tp-um-modify"), cache);
     };
 
     return o;
@@ -1081,7 +1104,7 @@ sip.o.art.set_wrap = function (cid) {
         header: 'art_set_wrap'
     });
     o.gen_html = function () {
-        return Mustache.render($('#tp-uma-set-wrap').html(), {ids: [this.el(0), this.el(1)]});
+        return Mustache.render(cardjs.lib.load_html('tp-uma-set-wrap'), {ids: [this.el(0), this.el(1)]});
     };
     o.child = [];
     o.after_add_event = function () {
@@ -1114,12 +1137,12 @@ sip.o.art.settings = function (cid) {
             fn_label: this.fn_label,
             ids: [this.el(0), this.el(1)]
         };
-        var content = Mustache.render($('#tp-uma-settings').html(), data);
+        var content = Mustache.render(cardjs.lib.load_html('tp-uma-settings'), data);
         return sip.f.add_frame('tp-frame-tag-card', content, '界面设置');
     };
 
     o.after_add_event = function () {
-        var uset = $('[name=' + this.el(0) + ']');
+        var uset = cardjs.lib.get_elsbyname(this.el(0));
         for (var i = 0; i < o.fn_name.length; i++) {
             uset[i].checked = sip.uset[o.fn_name[i]];
         }
@@ -1128,7 +1151,7 @@ sip.o.art.settings = function (cid) {
     o.gen_ev_handler = function () {
         return [
             function () {
-                var uset = $('[name=' + this.el(0) + ']');
+                var uset = cardjs.lib.get_elsbyname(this.el(0));
                 for (var i = 0; i < this.fn_name.length; i++) {
                     sip.uset[this.fn_name[i]] = uset[i].checked;
                 }
@@ -1158,7 +1181,7 @@ sip.o.art.help = function (cid) {
     });
 
     o.gen_html = function () {
-        return Mustache.render($('#tp-uma-help').html());
+        return Mustache.render(cardjs.lib.load_html('tp-uma-help'));
     };
 
     return o;
@@ -1178,7 +1201,7 @@ sip.o.art.search_box = function (cid) {
             key: key
         },
         gen_html: function () {
-            return Mustache.render($('#tp-uma-search-box').html(), {ids: [this.el(0), this.el(1), this.el(2)]});
+            return Mustache.render(cardjs.lib.load_html('tp-uma-search-box'), {ids: [this.el(0), this.el(1), this.el(2)]});
         },
         gen_ev_handler: function () {
             return [
@@ -1239,7 +1262,7 @@ sip.o.art.search_box = function (cid) {
         },
         after_add_event: function () {
             // clear_cache: {msbox/asearch/mboard} 相应键为true时清空缓存。
-            this.f.cc_event('clear_cache', true);
+            this.f.clear_cache('update_article', true);
 
             var cache = this.f.restore();
             this.el(0, true).focus();
@@ -1270,18 +1293,22 @@ sip.o.AAChild = function (cid) {
         settings: {
             key: key
         },
-        func_child: function () {
-            console.log('call child func1:', this.settings.key);
+        func1_child: function (p) {
+            console.log('call child func1(' + p + ')');
+        },
+        func2_child: function (p) {
+            console.log('call child func2(' + p + ')');
         },
         gen_html: function () {
             return 'child';
         },
         after_add_event: function () {
-            this.f.event('hello', this.func_child);
+            this.f.event('hello', this.func1_child);
+            this.f.event('world', this.func2_child);
         },
         clean_up: function () {
             this.self.innerHTML = '';
-            this.f.event('hello', this.func_child, false);
+            //this.f.event('hello', this.func_child, false);
         }
     }));
 };
@@ -1304,11 +1331,15 @@ sip.o.AATest = function (cid) {
     o.gen_ev_handler = function () {
         return {
             'test': function () {
-                for (var i = 0; i < 10000; i++) {
+                for (var i = 0; i < 1; i++) {
                     //this.f.event('hello', this.func1);
                     this.clean_up();
                     this.child = sip.o.AAChild(this.el('child')).show();
                 }
+                this.f.event('hello', true);
+                this.f.event('world', 'not hello.');
+                this.f.event('hello', );
+                this.f.event('world');
             },
             'destroy': function () {
                 this.clean_up();
@@ -1353,8 +1384,8 @@ sip.o.mgr.login = function (cid, parent_update) {
             for (var i = 0; i < 5; i++) {
                 id.push(this.el(i));
             }
-            var content = Mustache.render($('#tp-um-login').html(), {ids: id});
-            return(sip.f.add_frame('tp-frame-tag-card', content, "登录", "width:185px;margin:8px;"));
+            var content = Mustache.render(cardjs.lib.load_html('tp-um-login'), {ids: id});
+            return(sip.f.add_frame('tp-frame-tag-card', content, "登录", "margin-left:8px;margin-bottom:8px;"));
         },
         add_event: function () {
             this.f.on('click', 2, 1);
@@ -1402,14 +1433,10 @@ sip.o.main.match_list = function (cid, key) {
         header: 'match_list'
     });
 
-    o.update = o.f.restore('main_article_board_update')
-            || (function () {
-                throw new Error('error: main_article_board_update not exist!');
-            }());
-
-    o.clean_up = function () {
-        o.update = null;
-    };
+//    o.update = o.f.restore('main_article_board_update')
+//            || (function () {
+//                throw new Error('error: main_article_board_update not exist!');
+//            }());
 
     o.data_parser = function () {
         o.cache = this.f.restore();
@@ -1420,7 +1447,7 @@ sip.o.main.match_list = function (cid, key) {
     };
 
     o.updata_url = function (data) {
-        cardjs.lib.url_set_param('index.html', {
+        cardjs.lib.url_set_params('index.html', {
             'y': data.ctime.substr(0, 4),
             'm': parseInt(data.ctime.substr(5, 2)),
             'id': data.id
@@ -1428,8 +1455,12 @@ sip.o.main.match_list = function (cid, key) {
     };
 
     o.show_article = function (idx) {
+        if (idx < 0 || idx >= this.cache.result.length) {
+            console.log('Error: index out of range!');
+            return;
+        }
         var data = this.cache.data[this.cache.result[idx]];
-        this.update(data);
+        this.f.event('main_article_board_update', data);
         this.updata_url(data);
         this.f.cache(data.id, 'art_select_id');
     };
@@ -1466,7 +1497,7 @@ sip.o.main.match_list = function (cid, key) {
             });
         }
         //console.log(data);
-        return Mustache.render($('#tp-art-list').html(), {d: data});
+        return Mustache.render(cardjs.lib.load_html('tp-art-list'), {d: data});
     };
 
     return o;
@@ -1513,12 +1544,14 @@ sip.o.mgr.user_panel = function (cid) {
         var current_id = 0;
         if (info && info.login) {
             //window.setTimeout(function () {
-            this.el(current_id++, true).innerHTML = Mustache.render($('#tp-um-welcome').html(), info);
+            //this.el(current_id++, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-um-welcome'), info);
             //}.bind(this), 0);
+            this.children.push(sip.o.mgr.logout(o.el(current_id++), o.update, this.settings.key).show());
+
             if (info.prv['USERM']) {
                 this.children.push(sip.o.mgr.user_mgr_wrap(o.el(current_id++)).show());
             }
-            this.children.push(sip.o.mgr.logout(o.el(current_id++), o.update).show());
+
         } else {
             this.children.push(sip.o.mgr.login(o.el(current_id++), o.update).show());
         }
@@ -1576,23 +1609,34 @@ sip.o.main.article_board = function (cid) {
             return '<div id="' + this.el(0) + '"></div>';
         },
         update: function (data) {
+            if (data === undefined) {
+                data = null;
+            }
+            //console.log('call main_art_board_update:', data);
             this.f.cache(data);
             if (!data) {
                 this.el(0, true).innerHTML = "<font color=red>数据不存在</font>";
                 return;
             }
             if (cardjs.lib.isArray(data)) {
-                this.el(0, true).innerHTML = Mustache.render($('#tp-article-summary-container').html(), {recent: data});
+                this.el(0, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-article-summary-container'), {
+                    recent: data,
+                    style:'article-summary'
+                });
             } else {
-                this.el(0, true).innerHTML = Mustache.render($('#tp-single-article-container').html(), data);
+                this.el(0, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-article-summary-container'), {
+                    recent: data,
+                    style:'article-all-content'
+                });
             }
         },
         after_add_event: function () {
             // regist a clear_cache event for other module clear this cache;
-            this.f.cc_event('clear_cache', true);
+            this.f.clear_cache('update_article', true);
+            this.f.clear_cache('clear_art_board', true);
 
             //export a function for other function to call;
-            this.f.cache(this.update.bind(this), 'main_article_board_update');
+            this.f.event('main_article_board_update', this.update, true);
 
             var cache = this.f.restore();
             if (cache) {
@@ -1619,7 +1663,11 @@ sip.o.main.article_board = function (cid) {
                 data.forEach(function (e) {
                     d.push(sip.f.parse_json(e));
                 });
-                if (d.length > 0) {
+                if(!this.self){
+                    console.log('sip.o.main.article_board: Object 已经销毁,取消更新操作');
+                    return;
+                }
+                if (d.length > 0 ) {
                     this.update(d);
                 } else {
                     this.update(null);
@@ -1770,7 +1818,7 @@ sip.o.main.search_box = function (cid) {
     o.after_add_event = function () {
         //load files
 
-        this.f.cc_event('clear_cache', true);
+        this.f.clear_cache('update_article', true);
 
         var cache = this.f.restore();
         o.cache = cache;
@@ -1798,8 +1846,8 @@ sip.o.main.search_box = function (cid) {
         for (var i = 0; i < 3; i++) {
             id.push(this.el(i));
         }
-        var content = Mustache.render($('#tp-art-search-box').html(), {ids: id});
-        return sip.f.add_frame('tp-frame-tag-card', content, '搜索', 'margin:0px;margin-top:5px;');
+        var content = Mustache.render(cardjs.lib.load_html('tp-art-search-box'), {ids: id});
+        return sip.f.add_frame('tp-frame-tag-card', content, '', 'margin-bottom:8px;margin-top:0px;');
     };
 
     o.add_event = function () {
@@ -1821,7 +1869,7 @@ sip.o.art.backup = function (cid) {
     });
 
     o.gen_html = function () {
-        return Mustache.render($('#tp-uma-backup').html(), {ids: [this.el(0), this.el(1)]});
+        return Mustache.render(cardjs.lib.load_html('tp-uma-backup'), {ids: [this.el(0), this.el(1)]});
     };
 
     o.gen_ev_handler = function () {
@@ -1837,11 +1885,11 @@ sip.o.art.backup = function (cid) {
                 if (confirm('现有数据将被清除，确定要导入数据？')) {
                     o.f.fetch('import_from_json', function (r) {
                         alert(r);
-                        cardjs.lib.url_set_param('index.html', {});
+                        cardjs.lib.url_set_params('index.html', {});
                         window.location.reload(true);
                     }, function (r) {
                         alert(r);
-                        cardjs.lib.url_set_param('index.html', {});
+                        cardjs.lib.url_set_params('index.html', {});
                         window.location.reload(true);
                     });
                 }
