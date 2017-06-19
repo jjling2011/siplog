@@ -22,7 +22,8 @@ var sip = {
     o: {
         main: {},
         mgr: {},
-        art: {}
+        art: {},
+        package: {}
     },
     s: {
         //最近文章数据的位置
@@ -47,7 +48,8 @@ var sip = {
         atypes: ['默认分类'],
 
         msg_keep: 5
-    }
+    },
+    pkg: {}
 };
 
 sip.f.merge_uset = function (settings) {
@@ -107,6 +109,190 @@ sip.f.parse_json = function (e) {
 
     return d;
 };
+
+sip.o.package.article = function () {
+    var key = cardjs.lib.gen_key();
+    var o = new cardjs.package(key);
+
+    o.pack = function (param) {
+        param = param || {};
+        if (!(param.data && param.key)) {
+            console.log('error:sip.p.articles({key:k,data:d}) ');
+            return;
+        }
+        var cache = this.f.restore() || {};
+        cache[param.key] = param.data;
+        this.f.cache(cache);
+    };
+
+    o.peek = function () {
+        console.log('package content:', this.f.restore());
+    };
+
+    o.search = function (raw_keywords) {
+        var cache = this.f.restore();
+        if (!cache || !cache.data) {
+            return null;
+        }
+        //search
+
+        var keywords = raw_keywords.split(' ').filter(function (e) {
+            return (e.length > 0);
+        });
+
+        var key, id, result = [], e, count = 0, mark, kw_idx;
+
+        for (key in cache.data) {
+            for (id in cache.data[key]) {
+                mark = 0;
+                e = cache.data[key][id];
+                for (kw_idx in keywords) {
+                    if (e.title.indexOf(keywords[kw_idx]) >= 0
+                            || e.text.indexOf(keywords[kw_idx]) >= 0) {
+                        mark++;
+                    }
+                    //console.log('mark:',mark,' kw:',keywords[kw_idx],'e:',e);
+                }
+
+                if (keywords.length <= 0 || mark === keywords.length) {
+                    result.push({
+                        key: key,
+                        id: id,
+                        title: e.title,
+                        data: e
+                    });
+                    count++;
+                }
+                e = null;
+                if (count >= 15) {
+                    break;
+                }
+            }
+            if (count >= 15) {
+                break;
+            }
+        }
+        cache = null;
+        return(result);
+    };
+
+    o.get = function (key) {
+        var cache = this.f.restore();
+        if (cache) {
+            if (key in cache) {
+                return cache[key];
+            }
+            if (cache.data && (key in cache.data)) {
+                return cache.data[key];
+            }
+        }
+        return null;
+    };
+
+    o.check_cache = function () {
+        var cache = this.f.restore();
+        if (cache && cache.history && cache.history.length <= 0) {
+            var year = new Date().getUTCFullYear(),
+                    month = new Date().getUTCMonth() + 1;
+            for (var i = 0; i < 6; i++) {
+                this.load_json('' + year + month);
+                month--;
+                if (month < 1) {
+                    month = 12;
+                    year--;
+                }
+            }
+        }
+        cache = null;
+    };
+
+    o.load_json = function (key) {
+        var cache = this.f.restore();
+        if (!(cache && cache.files)) {
+            console.log('no file info.');
+            return;
+        }
+        var y = key.substr(0, 4),
+                m = key.substr(4);
+
+
+        if (!(key in cache.files)) {
+            //console.log('file:' + key + '.json not exist!');
+            return;
+        }
+        if (key in cache.data) {
+            //console.log('data already loaded in cache! ' + key + '.json');
+            return;
+        }
+        var path = sip.s.article_path + (y) + '/' + (m) + '.json';
+
+        console.log('getjson:' + path);
+
+        $.getJSON(path + '?t=' + cardjs.lib.rand(8), this.got_json.bind(this, key));
+        cache = null;
+    };
+
+    o.got_json = function (key, data) {
+
+        /* cache.data={
+         *   201706:{
+         *      id1: content,id,txt, ... 
+         *      id2: content,id,txt, ...
+         *      ...
+         *   },
+         *   201707:{
+         *     ...
+         *   }
+         * }
+         */
+
+        var cache = this.f.restore();
+        if (!cache || !cache.data) {
+            throw new Error('not cache');
+        }
+        // keep 5 history.
+        while (cache.history.length > 5) {
+            delete cache.data[cache.history.shift()];
+        }
+
+        var d = {}, e, i, div = document.createElement("div");
+        for (i = 0; i < data.length; i++) {
+            e = sip.f.parse_json(data[i]);
+            div.innerHTML = e.content;
+            e.text = div.textContent || div.innerText || "";
+            d[e.id] = e;
+        }
+        div = null;
+
+
+        cache.history.push(key);
+        cache.data[key] = d;
+        this.f.cache(cache);
+        cache = null;
+    };
+
+
+    $.getJSON(sip.s.files_path + '?t=' + cardjs.lib.rand(8), function (data) {
+
+        var cache = {
+            files: data,
+            data: {},
+            history: [],
+            selected: null,
+            type: -1
+
+        };
+        this.f.cache(cache);
+        //console.log(cache);
+        cache = null;
+        //this.f.load_recent_data();
+    }.bind(o));
+
+
+    return o;
+};
+
+sip.pkg.articles = sip.o.package.article();
 
 sip.o.main.msg = function (cid) {
     var key = cardjs.lib.gen_key();
@@ -1424,32 +1610,24 @@ sip.o.AATest = function (cid) {
     o.child = null;
     o.gen_ev_handler = function () {
         return {
-            'test': function () {
-                for (var i = 0; i < 1; i++) {
-                    //this.f.event('hello', this.func1);
-                    this.clean_up();
-                    this.child = sip.o.AAChild(this.el('child')).show();
-                }
-                this.f.event('hello', true);
-                this.f.event('world', 'not hello.');
-                this.f.event('hello', );
-                this.f.event('world');
+            't1': function () {
+                sip.pkg.articles.check_cache();
             },
-            'destroy': function () {
-                this.clean_up();
+            't2': function () {
+                sip.pkg.articles.peek();
             }
         };
     };
 
     o.add_event = function () {
-        o.f.on('click', 'test');
-        o.f.on('click', 'destroy');
+        o.f.on('click', 't1');
+        o.f.on('click', 't2');
     };
 
     o.gen_html = function () {
         var html = '<div style="margin:10px;">' +
-                '<input type="button" id="' + this.el('test') + '" class="btn btn-info" value="test">' +
-                '<input type="button" id="' + this.el('destroy') + '" class="btn btn-info" value="destroy">' +
+                '<input type="button" id="' + this.el('t1') + '" class="btn btn-info" value="test">' +
+                '<input type="button" id="' + this.el('t2') + '" class="btn btn-info" value="destroy">' +
                 '<div id="' + this.el('child') + '"></div>' +
                 '</div>';
         return html;
@@ -1534,34 +1712,37 @@ sip.o.main.match_list = function (cid, key) {
 
     o.data_parser = function () {
         o.cache = this.f.restore();
+        o.count = 0;
         o.settings.add_event = false;
-        if (o.cache.result && o.cache.result.length > 0) {
-            o.settings.add_event = true;
+        if (o.cache.result) {
+            o.count = o.cache.result.length;
+            if (o.count > 0) {
+                o.settings.add_event = true;
+            }
         }
     };
 
-    o.updata_url = function (data) {
-        cardjs.lib.url_set_params('index.html', {
-            'y': data.ctime.substr(0, 4),
-            'm': parseInt(data.ctime.substr(5, 2)),
-            'id': data.id
-        });
-    };
 
     o.show_article = function (idx) {
         if (idx < 0 || idx >= this.cache.result.length) {
             console.log('Error: index out of range!');
             return;
         }
-        var data = this.cache.data[this.cache.result[idx]];
-        this.f.event('main_article_board_update', data);
-        this.updata_url(data);
-        this.f.cache(data.id, 'art_select_id');
+        var cache = this.f.restore();
+        this.f.event('main_article_board_update', cache.result[idx].data);
+        cardjs.lib.url_set_params('index.html', {key: cache.result[idx].key, id: cache.result[idx].id});
+        this.f.cache(cache.result[idx].id, 'art_select_id');
+        cache = null;
     };
 
     o.gen_ev_handler = function () {
+        var cache = this.f.restore();
+        if (!cache || cache.result.length <= 0) {
+            cache = null;
+            return [];
+        }
         var evs = [];
-        for (var i = 0; i < this.cache.result.length; i++) {
+        for (var i = 0; i < cache.result.length; i++) {
             evs.push((function () {
                 var idx = i;
                 return(function () {
@@ -1580,17 +1761,21 @@ sip.o.main.match_list = function (cid, key) {
     };
 
     o.gen_html = function () {
-        var data = [];
+
         var cache = this.f.restore();
-        //console.log('main_search:',main_search);
-        //console.log('from list:', sip.cache.mpsearch.list);
-        for (var i = 0; i < this.cache.result.length; i++) {
+        if (!cache || cache.result.length <= 0) {
+            cache = null;
+            return('<font color="red">没有找到相应数据</font>');
+        }
+        var data = [];
+        for (var i = 0; i < cache.result.length; i++) {
             data.push({
                 id: this.el(i),
-                title: cache.data[this.cache.result[i]].title
+                title: cache.result[i].title
             });
         }
         //console.log(data);
+        cache = null;
         return Mustache.render(cardjs.lib.load_html('tp-art-list'), {d: data});
     };
 
@@ -1677,6 +1862,93 @@ sip.o.mgr.user_panel = function (cid) {
     return o;
 };
 
+sip.o.main.group_view = function (cid) {
+    var key = cardjs.lib.gen_key();
+    var o = new cardjs.card(cid);
+    o.f.merge({
+        header: 'gview',
+        key: key
+    });
+
+    o.data = null;
+
+    o.data_parser = function () {
+        this.settings.add_event = false;
+
+        if (this.data) {
+            this.settings.add_event = true;
+        }
+
+    };
+    o.gen_html = function () {
+        var content = '<div style="color:red;">无数据</div>';
+        if (this.data && this.data.group && this.data.y && this.data.m) {
+            var y, m, cur_id = 12;
+            content = '<div>';
+            for (y in this.data.group) {
+                content += '<input type="button" value="' + y
+                        + '" id="' + this.el(cur_id)
+                        + '" class="btn btn-xs btn-default"> &nbsp;';
+            }
+            content += '</div><div>';
+            for (m = 1; m < 13; m++) {
+                content += '<input type="button" value="' + m
+                        + '" id="' + this.el(m - 1)
+                        + '" class="btn btn-xs btn-info" ';
+                if (!(m in this.data.group[y])) {
+                    content += ' style="display:none;" ';
+                }
+                content += ' > &nbsp;';
+
+            }
+            content += '</div>';
+        }
+        console.log(content);
+        return(sip.f.add_frame('tp-frame-tag-card', content, '按日期查询', 'margin-bottom:8px;'));
+    };
+
+    o.gen_ev_handler = function () {
+        return [];
+    };
+
+    o.add_event = function () {
+
+    };
+
+    o.after_add_event = function () {
+        if (this.data) {
+            return;
+        }
+        this.data = this.f.restore();
+        if (this.data && this.data.group && this.data.y && this.data.m) {
+            this.refresh();
+            return;
+        }
+        $.getJSON(sip.s.files_path + '?t=' + cardjs.lib.rand(8), function (data) {
+            var group = {}, y, m;
+            for (var key in data) {
+                y = key.substr(0, 4);
+                m = key.substr(4);
+                if (!(y in group)) {
+                    group[y] = {};
+                }
+                group[y][m] = true;
+            }
+            if (!group) {
+                console.log('no data!');
+                return;
+            }
+            this.data = {group: group, y: y, m: m};
+            this.f.cache(this.data);
+            console.log(this.data);
+            group = null;
+            this.refresh();
+        }.bind(this));
+    };
+
+    return o;
+};
+
 sip.o.main.article_board = function (cid) {
 
     var key = cardjs.lib.gen_key();
@@ -1685,12 +1957,15 @@ sip.o.main.article_board = function (cid) {
      * };
      */
 
-    function get_url_ymid() {
-        return({
-            y: cardjs.lib.url_get_param('y'),
-            m: cardjs.lib.url_get_param('m'),
-            id: parseInt(cardjs.lib.url_get_param('id'))
-        });
+    function get_url_keyid() {
+        var y = null, m = null,
+                key = cardjs.lib.url_get_param('key'),
+                id = parseInt(cardjs.lib.url_get_param('id'));
+        if (key.length > 4) {
+            y = key.substr(0, 4);
+            m = key.substr(4);
+        }
+        return({y: y, m: m, id: id});
     }
 
     return (cardjs.create({
@@ -1729,7 +2004,7 @@ sip.o.main.article_board = function (cid) {
             this.f.clear_cache('update_article', true);
             this.f.clear_cache('clear_art_board', true);
 
-            //export a function for other function to call;
+            //export a function for other module
             this.f.event('main_article_board_update', this.update, true);
 
             var cache = this.f.restore();
@@ -1737,7 +2012,7 @@ sip.o.main.article_board = function (cid) {
                 this.update(cache);
                 return;
             }
-            var param = get_url_ymid();
+            var param = get_url_keyid();
             if (param.y && param.m && param.id) {
                 $.getJSON('upload/json/' + param.y + '/' + param.m + '.json', function (data) {
                     //console.log(data,tid);
@@ -1795,62 +2070,12 @@ sip.o.main.search_box = function (cid) {
     });
 
     o.child = null;
-    o.cache = null;
-
-    function get_article(year, month) {
-        //console.log('get_article:'+path);
-        if (year < 2017 || month < 0 || month > 11) {
-            return;
-        }
-        var key = '' + year + (month + 1);
-        var cache = o.f.restore();
-        //console.log('main_search:',files);
-        if (!(key in cache.files) || !(cache.files[key])) {
-            //console.log('key [' + key + '] not exist!');
-            return;
-        }
-        //console.log('fetch file key [' + key + '] ');
-
-        var path = sip.s.article_path + (year) + '/' + (month + 1) + '.json';
-
-        $.getJSON(path + '?t=' + cardjs.lib.rand(8), function (data) {
-            var cache = this.f.restore();
-            cache.data = cache.data || {};
-            data.forEach(function (e) {
-                var d = sip.f.parse_json(e);
-                var div = document.createElement("div");
-                div.innerHTML = d.content;
-                d.text = div.textContent || div.innerText || "";
-                cache.data[d.id] = d;
-            });
-            o.f.cache(cache);
-            //console.log('cache:',o.f.restore());
-        }.bind(o));
-    }
 
     o.gen_ev_handler = function () {
         return [
             //mouse over search box or search button
             function () {
-                var cache = this.f.restore();
-                if (!cache) {
-                    console.log('请等文件列表加载完成再搜索!');
-                    return;
-                }
-                if (!cache.data) {
-                    //console.log('准备加载数据!');
-                    var year = new Date().getUTCFullYear(),
-                            month = new Date().getUTCMonth();
-                    for (var i = 0; i < 6; i++) {
-                        //path = dir + (year) + '/' + (month + 1) + '.json';
-                        get_article(year, month);
-                        month--;
-                        if (month < 0) {
-                            month += 12;
-                            year--;
-                        }
-                    }
-                }
+                sip.pkg.articles.check_cache();
             },
             //keyup
             function (e) {
@@ -1863,72 +2088,38 @@ sip.o.main.search_box = function (cid) {
             },
             // click
             function () {
+                //search()
+                this.clean_up();
+                var kw = this.el(0, true).value;
                 var cache = this.f.restore();
-                if (!cache || !cache.data) {
-                    this.el(2, true).innerHTML = '<font color="red">没有数据</font>';
+                if (cache && cache.result && cache.kw !== undefined && cache.kw === kw) {
+                    //console.log('using cache');
+                    this.child = sip.o.main.match_list(this.el(2), this.settings.key).show();
+                    cache = null;
                     return;
                 }
-                //search
-                cache.kw = this.el(0, true).value;
-                var kw = cache.kw.split(' ').filter(function (e) {
-                    return (e.length > 0);
-                });
-
-                var key = Object.keys(cache.data), result = [], td;
-                var i = key.length - 1, j, mark, count = 0;
-                while (count < 15 && i >= 0) {
-                    if (kw.length <= 0) {
-                        result.push(key[i--]);
-                        count++;
-                        continue;
-                    }
-                    td = cache.data[key[i]];
-                    mark = 0;
-                    for (j = 0; j < kw.length; j++) {
-                        if (td.title.indexOf(kw[j]) >= 0 || td.text.indexOf(kw[j]) >= 0) {
-                            mark++;
-                        }
-                    }
-                    if (mark === kw.length) {
-                        result.push(key[i]);
-                        count++;
-                    }
-                    i--;
-                }
-
-                cache.result = result;
+                cache.kw = kw;
+                cache.result = sip.pkg.articles.search(cache.kw);
                 this.f.cache(cache);
-
-                if (result.length > 0) {
-                    this.clean_up();
-                    this.child = sip.o.main.match_list(this.el(2), this.settings.key).show();
-                } else {
-                    this.el(2, true).innerHTML = '<font color="red">搜索不到符合条件的记录</font>';
-                }
+                cache = null;
+                this.child = sip.o.main.match_list(this.el(2), this.settings.key).show();
             }
         ];
     };
 
     o.after_add_event = function () {
         //load files
-
         this.f.clear_cache('update_article', true);
-
         var cache = this.f.restore();
-        o.cache = cache;
-        if (!cache) {
-            //console.log('main_sbox: get new files');
-            $.getJSON(sip.s.files_path + '?t=' + cardjs.lib.rand(8), function (data) {
-                cache = {
-                    files: data,
-                    data: null,
-                    kw: null,
-                    result: null
-                };
-                this.f.cache(cache);
-                o.cache = cache;
-            }.bind(this));
+        if (cache && cache.kw !== undefined && cache.result) {
+            this.el(0, true).value = cache.kw;
+            this.f.trigger(2);
+            cache = null;
+            return;
         }
+        cache = cache || {};
+        this.f.cache(cache);
+        cache = null;
     };
 
     o.clean_up = function () {
