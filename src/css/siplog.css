@@ -8,30 +8,72 @@ and open the template in the editor.
     Author     : luke2
 */
 
+.banner{
+    width: 100%;
+    height: 130px;
+    vertical-align: bottom;
+    background-image: url("../res/banner.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+}
+
 .tag-normal{
     font-size:15px;
     border:none;
-    color: lightgrey;
+    color: #999;
     background-color: transparent;
 }
 
+.tag-normal:hover {
+    color: #000;
+}
+
+
 .tag-active{
+    /*box-shadow: 0px 0px 8px #aaa;*/
     color: black;
     border-radius: 5px 5px 0px 0px;
     padding: 3px 15px 4px 15px;
     /*margin-bottom: -1px;*/
-    background: #ddd;
-    border: 1px solid #ddd;
+    background: white;
+    margin-bottom: -1px;
+    border-top: 1px solid #ddd;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    border-bottom: none;
 }
 
 .page{
+    /*box-shadow: 0px 1px 8px #aaa;*/
     border:1px solid #ddd;
-    border-radius: 5px 5px 5px 5px;
+    background: white;
+    border-radius: 3px;
     padding: 5px;
+}
+
+.tag-main-active {
+    color: #999;
+    border: 1px solid ivory;
+    border-radius: 5px 5px 0px 0px;
+    padding: 3px 15px 3px 15px;
+    background: ivory;
+}
+
+.tag-main-normal:hover{
+    color:#000;
+}
+
+.tag-main-normal{
+    color:ivory;
+    border:none;
+    background: transparent;
+    padding: 3px 15px 3px 15px;
 }
 
 body {
     text-align: center;
+    background: ivory;
 }
 #main-page-container{
     width:100%;
@@ -56,8 +98,8 @@ body {
     /*border: 1px solid #ddd;*/
 }
 #page-wrap {
-    text-align: left;
-    width: 960px;
+    text-align: center;
+    width: 100%;
     margin: 0 auto;
 }
 .sm-box{
@@ -66,23 +108,23 @@ body {
 }
 .frame-tag-card{
     /*float: right;*/
-    margin-right:  8px;
-    margin-bottom: 8px;
-    margin-left: 8px;
-    text-align: right;
-
-}
-.frame-tag-card-tag{
-    background:#ddd;
+    /*box-shadow: 0px 0px 8px #aaa;*/
+    background: white;
     border: 1px solid #ddd;
-    width: 85px;
-    margin-bottom: -1px;
-    padding: 3px 10px 0px 10px;
-    text-align: center;
-    border-radius: 5px 5px 0px 0px;
+    margin-bottom: 8px;
+    border-radius: 3px;
+    /*margin-left:8px;*/
+    text-align: left;
+    padding: 6px;
 }
 
-.article-content{
+.frame-tag-card-tag{
+    width: 85px;
+    padding-left: 5px;
+    color:#aaa;
+}
+
+.article-summary{
     color:#999;
     font-size:15px;
     max-height: 300px;
@@ -91,7 +133,21 @@ body {
     overflow:hidden;
     width:100%;
     text-align: left;   
+    padding-top: 8px;
 }
+
+.article-all-content{
+    padding-top: 8px;
+    color:#000;
+    font-size:15px;
+    /*max-height: 300px;*/
+    /*text-overflow: ellipsis;*/
+    display:block;
+    /*overflow:hidden;*/
+    width:100%;
+    text-align: left;   
+}
+
 
 .msg-content{
     max-width: 193px;

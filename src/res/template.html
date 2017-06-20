@@ -1,22 +1,59 @@
 <script type="text/template" id="tp-um-welcome">
-    <div style="margin: 5px;text-align: right;padding-right:4px;color:#aaa;"> {{name}},你好！</div>
+    <div style="margin: 5px;text-align: left;padding-right:4px;color:#aaa;"> {{name}},你好！</div>
 </script>
 
 <script type="text/template" id="tp-main-wrap">
-    <table style="width:100%;">
+<table style="width:100%;">
     <tr>
-    <td style="vertical-align: top;" id="{{ids.0}}">
-    </td>
-    <td align="right" style="width:200px;vertical-align: top;">
-    <table style="width:100%;">
-	<tr><td  style="text-align: right;width:100%;padding-top:5px;" ><input class="btn btn-xs " type="button" id="{{ids.4}}" value="管理页面"></td></tr>
-    <tr><td  style="text-align: right;width:100%;" id="{{ids.1}}"></td></tr>
-    <tr><td  style="text-align: right;width:100%;" id="{{ids.2}}"></td></tr>
-    <tr><td  style="text-align: right;width:100%;" id="{{ids.3}}"></td></tr>
-    </table>
-    </td>
+        <td class="banner" align="center">
+            <table style="width:960px;">
+				<tr>
+					<td style="text-align:left;font-size: 30px;/* font-style: italic; */color: ivory;padding-left: 8px;padding-bottom: 8px;" id="{{ids.2}}">
+					Siplog
+					</td>
+				</tr>
+				<tr>
+					<td style="text-align:left;color: #fff;padding-bottom: 9px;padding-left: 39px;" id="{{ids.3}}">
+					一个简洁的单页博客
+					</td>
+				</tr>
+                <tr>
+                    <td style="text-align: right;">
+						<input class="tag-main-active" type="button" id="{{ids.0}}" value="首页"><input class="tag-main-normal" type="button" id="{{ids.1}}" value="管理页面">
+                    </td>
+                </tr>
+            </table>
+        </td>
     </tr>
-    </table>
+    <tr>
+        <td align="center">
+            <table style="width:960px;">
+                <tr>
+					<!-- left -->
+                    <td align="left" id="{{ids.4}}" style="vertical-align: top;padding-top: 12px;"></td>
+					<!-- right -->
+                    <td align="right" style="width:200px;vertical-align: top;padding-top:12px;padding-left:8px;">
+                        <table style="width:100%;">
+                            <tr><td  style="text-align: right;width:100%;" id="{{ids.5}}"></td></tr>
+                            <tr><td  style="text-align: right;width:100%;" id="{{ids.6}}"></td></tr>
+							<tr><td  style="text-align: right;width:100%;" id="{{ids.7}}"></td></tr>
+							<tr><td  style="text-align: right;width:100%;" id="{{ids.8}}"></td></tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+	<tr>
+		<td align="center">
+			<div style="width:960px;text-align:right;padding-right:8px;color:#aaa;margin-top: 8px;border-top: 1px solid #ddd;">
+			<a href="https://github.com/jjling2011/siplog" >Siplog</a>&nbsp;
+			&copy;&nbsp;2017&nbsp;Power&nbsp;by&nbsp; 
+			<a href="mailto:jjling2011@gmail.com?Subject=Siplog" target="_top" style="color:#aaa;">jjling</a>
+			</div>
+		</td>
+	</tr>
+</table>
 </script>
 
 <script type="text/template" id="tp-um-login">
@@ -42,8 +79,8 @@
 
 <script type="text/template" id="tp-frame-tag-card">
     <div class="frame-tag-card" style="{{style}}">
-    <div class="frame-tag-card-tag">{{tag}}</div>
-    <div style="border:1px solid #ddd;padding: 5px;border-radius: 0px 5px 5px 5px;">{{{content}}}</div>
+    {{#tag}}<div class="frame-tag-card-tag">{{.}}</div>{{/tag}}
+    <div style="">{{{content}}}</div>
     </div>
 </script>
 
@@ -55,23 +92,24 @@
     <tr><td style="text-align: center;">重复</td><td><input id="{{ids.3}}" type="password" value="" class="form-control sm-box"></td></tr>
     <tr><td id="{{ids.5}}" colspan="2" style="text-align: left;color: red;"></td></tr>
     <tr>
-    <td colspan="2" style="text-align: right;">
-    <input id="{{ids.4}}" type="button" class="btn btn-xs btn-info" value="&nbsp;修改&nbsp;" >
+    <td colspan="2" style="text-align: right;padding-right:3px;">
+    <input id="{{ids.4}}" type="button" class="btn btn-xs btn-info" value="&nbsp;修改信息&nbsp;" >
     </td>
     </tr>
     </table>
 </script>
 
 <script type="text/template" id="tp-um-logout">
-    <table style="width:100%;margin-bottom:8px;">
-    <tr><td id="{{ids.2}}" style="text-align: right;"></td></tr>
-    <tr>
-    <td style="text-align: right;padding-right:8px;">
-    <input type="button" id="{{ids.0}}" value="更改密码" class="btn btn-xs btn-info" >
-    &nbsp;
-    <input type="button" id="{{ids.1}}" value="退出" class="btn btn-xs btn-warning" >
-    </td>
-    </tr>
+    <table style="width:100%;">
+		<tr><td style='color:#aaa;text-align:right;padding-right:5px;padding-bottom:5px;'>{{name}}，你好！</td></tr>
+		<tr><td id="{{ids.2}}" style="text-align: right;"></td></tr>
+		<tr>
+			<td style="text-align: right;padding-right:8px;">
+				<input type="button" id="{{ids.0}}" value="&nbsp;更改密码&nbsp;" class="btn btn-xs btn-info" >
+				&nbsp;
+				<input type="button" id="{{ids.1}}" value="&nbsp;退出登录&nbsp;" class="btn btn-xs btn-warning" >
+			</td>
+		</tr>
     </table>
 </script>
 
@@ -89,7 +127,7 @@
     <td style="text-align: center;" ><input type="text" class="form-control" id="{{ids.8}}" style="height: 25px;padding:3px;"></td>
     </tr>
     <tr>
-    <td colspan="2" style="text-align: left" id="{{ids.2}}">
+    <td colspan="2" style="text-align: left;padding:5px;" id="{{ids.2}}">
     {{#prv_list}}
     <label><input name="{{ids.3}}" type="checkbox" value="{{.}}" >{{.}}</label>&nbsp;
     {{/prv_list}}
@@ -221,7 +259,28 @@
     </tr>
 </table>
 </script>
-
+<script type="text/template" id="tp-group-view">
+<table>
+	<tr><td style="text-align:left;color:#ccc;">日期</td></tr>
+    <!-- tag -->
+    <tr>
+        <td>
+            {{#tag}}
+            <input type="button" value="{{v}}" id="{{id}}" class="btn btn-xs btn-default" style="margin-bottom:5px;">
+            {{/tag}}
+        </td>
+    </tr>
+    <!-- type -->
+	<tr><td style="text-align:left;color:#ccc;">类别</td></tr>
+    <tr>
+        <td>
+			{{#cat}}
+			<input type="button" value="{{v}}" id="{{id}}" class="btn btn-xs btn-default" style="margin-bottom:5px;">
+			{{/cat}}
+		</td>
+    </tr>
+</table>
+</script>
 <script type="text/template" id="tp-art-list">
 <table style="width:100%;border-collapse: separate;border-spacing: 0px 5px;">
 {{#d}}<tr>
@@ -245,12 +304,22 @@
     </table>
 </script>
 
+<script type="text/template" id="tp-uma-set-banner">
+<table style="width:170px;border-collapse: separate;border-spacing: 5px;">
+    <tr><td style="text-align: left;">标题</td></tr>
+    <tr><td><input type="text" class="form-control" id="{{ids.0}}"></td></tr>
+    <tr><td style="text-align: left;">描述</td></tr>
+    <tr><td><textarea  id="{{ids.1}}" class="form-control"></textarea></td></tr>
+    <tr><td style="text-align:center;"><input type="button" value="提交" id="{{ids.2}}" class="btn btn-sm btn-info"></td></tr>
+</table>
+</script>
 
 <script type="text/template" id="tp-uma-set-wrap">
 <table>
 	<tr>
-		<td id="{{ids.0}}" style="vertical-align:top;"></td>
-		<td id="{{ids.1}}" style="vertical-align:top;"></td>
+		<td id="{{ids.0}}" style="vertical-align:top;padding-right:8px;"></td>
+		<td id="{{ids.1}}" style="vertical-align:top;padding-right:8px;"></td>
+		<td id="{{ids.2}}" style="vertical-align:top;padding-right:8px;"></td>
 	</tr>
 </table>
 </script>
@@ -299,38 +368,28 @@
 <table style="width:100%;">
     {{#recent}}
     <tr>
-        <td style="width:100%;text-align:center;padding-left:10px;padding-right:10px;padding-bottom:16px;">
+        <td style="width:100%;text-align:center;padding:0px 0px 8px 0px;">
+			<div style="width:100%;padding:8px;border-radius:3px;border: 1px solid #ddd;background:white;">
             <table style="width:100%;">
                 <tr>
-                    <td >
-                        <div style="text-align: center;font-size: 20px;text-overflow:ellipsis;"></div>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="text-align:left;padding-left:8px;padding-right:8px;padding-bottom:5px;">
-					<table style="width:100%;">
-						<tr>
-						<td style="text-align:left;vertical-align:center;white-space:nowrap;width:1%;">
-                        {{#top}}<input type="button" class="btn btn-xs " style="background:lightblue;color:#999;" value="📌">&nbsp;{{/top}}
-						</td>
-						<td style="text-align:left;font-size:23px;width:1%;white-space:nowrap;">{{title}}</td>
-						<td style="text-align:left;vertical-align:center;white-space:nowrap;width:1%;">
+					<td style="text-align:left;font-size:23px;width:1%;white-space:nowrap;">
+						{{title}}
+						{{#top}}&nbsp;<input type="button" class="btn btn-xs " style="background:lightblue;color:#999;" value="📌">{{/top}}
 						{{#lock}}&nbsp;<input type="button" class="btn btn-xs " style="background:bisque;color:#999;" value="🔒">{{/lock}}
-						</td>
-						<td style="text-align:right;vertical-align:bottom;white-space:nowrap;">
-						&nbsp;<input type="button" class="btn btn-xs" style="background:bisque;background-color:#ccc;color:#999;" value="{{type}}">
-						&nbsp;{{mtime}}
-						</td>
-						</tr>
-						</table>
+					</td>
+				</tr>
+				<tr>
+					<td style="text-align:left;color:#aaa;">
+						| {{type}} | {{mtime}} |
                     </td>
                 </tr>
                 <tr>
-                    <td style="border-top:1px solid #ddd;padding:8px; ">
-                        <div class="article-content" name="article-content" >{{{content}}}</div>
+                    <td style="">
+                        <div class="{{style}}" onclick="this.className='article-all-content';">{{{content}}}</div>
                     </td>
                 </tr>
             </table>
+			</div>
         </td>
     </tr>
     {{/recent}}
@@ -376,26 +435,23 @@
             </table>
         </td>
     </tr>
-    {{#msg}}
-    <tr>
-        <td style="padding: 0px 5px 0px 5px;">
-            <div class="msg-content" >{{text}}</div>
-            <div style="text-align: right;font-size: 12px;width: 100%;color: #ccc;">{{name}} @ {{ctime}}</div>
-        </td>
-    </tr>
-    {{/msg}}
+    <tr><td id="{{ids.2}}"></td></tr>
 </table>
 </script>
-    
+<script type="text/template" id="tp-mp-msg-list">
+	{{#msg}}
+	<div style="padding: 0px 5px 0px 5px;width:100%;">
+		<div class="msg-content" >{{text}}</div>
+		<div style="text-align: right;font-size: 12px;width: 100%;color: #ccc;">{{name}} @ {{ctime}}</div>
+	</div>
+	{{/msg}}
+</script>    
 <script type="text/template" id="tp-uma-backup">
 <table style="width:100%;text-align: left;">
-    <tr><td style="padding: 8px;" id="{{ids.0}}"></td></tr>
-    <tr><td style="padding: 8px;"><input type="button" id="{{ids.1}}" value="导出图片数据库" class="btn btn-info btn-sm"></td></tr>
-    <tr><td style="padding: 8px;"><input type="button" id="{{ids.2}}" value="从upload目录导入数据" class="btn btn-info btn-sm"></td></tr>
     <tr>
         <td>备份过程：<br>
             <ul>
-                <li>点击上面的[导出图片数据库]</li>
+                <li>点击 <input type="button" id="{{ids.0}}" value="导出图片数据库" class="btn btn-info btn-sm"></li>
                 <li>下载upload目录下的pic及json两个文件夹</li>
             </ul>
         </td>
@@ -404,7 +460,7 @@
         <td>还原过程：<br>
             <ul>
                 <li>上载pic及json两个文件夹到upload目录中</li>
-                <li>点击上面的[从upload目录导入数据]</li>
+                <li>点击 <input type="button" id="{{ids.1}}" value="从upload目录导入数据" class="btn btn-info btn-sm"></li>
             </ul>
         </td>
     </tr>

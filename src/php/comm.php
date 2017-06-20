@@ -81,10 +81,6 @@ class CommLib {
         return filter_var(substr($s, 0, $len), FILTER_SANITIZE_MAGIC_QUOTES);
     }
 
-    public static function get_token() {
-        return substr(filter_input(INPUT_COOKIE, "token", FILTER_SANITIZE_STRING), 0, 48);
-    }
-
     public static function rand_str($length = 48) {
         $result = uniqid(date('YmdHis', time()));
         $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -184,23 +180,41 @@ class CommLib {
 }
 
 class Reply {
+    
+    /*
+     * cookie:
+     * CommLib::get_tokne()
+     * setcookie
+     * getcookie
+     */
 
     protected $fn;
 
     function __construct() {
         $this->fn = [];
+        $this->token = false;
+        
+        // 记录当前用户提交过来的token
+        $this->utk = '';
     }
 
-    protected static function ok($data) {
+    protected function ok($data) {
+        //$token=$this->token;
+        //error_log('set token:'.$this->token);
         echo(json_encode(array(
             'status' => true,
-            'data' => $data)));
+            'data' => $data,
+            'tk' => $this->token
+        )));
     }
 
-    protected static function fail($msg) {
+    protected function fail($msg) {
+        //error_log('set token:'.$this->token);
         echo(json_encode(array(
             'status' => false,
-            'msg' => (string) $msg)));
+            'msg' => (string) $msg,
+            'tk' => $this->token
+        )));
     }
 
     public function haste($status) {
@@ -221,13 +235,15 @@ class Reply {
         }
 
         $func = substr(filter_input(INPUT_POST, 'op', FILTER_SANITIZE_STRING), 0, 32);
+        $this->utk = substr(filter_input(INPUT_POST, 'tk', FILTER_SANITIZE_STRING), 0, 50);
         $data = filter_input(INPUT_POST, "data", FILTER_UNSAFE_RAW);
+        
+        //error_log('user token:'.$this->utk);
 
         if (in_array($func, $this->fn)) {
             $this->$func($data);
         } else {
             //error_log("$func & $data");
-
             self::fail('Operation not supported!');
         }
     }
