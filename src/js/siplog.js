@@ -781,7 +781,6 @@ sip.o.art.editor = function (cid) {
                 }
 
                 this.f.clear_cache('update_article');
-                this.f.event('package_article_init');
                 
                 cardjs.lib.url_set_params('index.html');
 
@@ -789,6 +788,7 @@ sip.o.art.editor = function (cid) {
                 o.f.fetch('post_article', data, function () {
                     alert('提交成功!');
                     this.f.trigger('new');
+                    this.f.event('package_article_init');
                 }, function (r) {
                     this.el(5, true).innerHTML = '提交失败！';
                     alert(r + '\n提交失败！');
@@ -825,16 +825,14 @@ sip.o.art.editor = function (cid) {
                 }
 
                 this.f.clear_cache('update_article');
-                this.f.event('package_article_init');
                 
                 cardjs.lib.url_set_params('index.html');
 
                 o.f.fetch('delete_article', cache.cache_id,
                         function () {
                             alert('删除成功！');
-
-                            //sip.cache.search.content = null;
                             this.f.trigger('new');
+                            this.f.event('package_article_init');
                             //this.el(4,true).click();
                         }, false, function (r) {
                     alert(r);
