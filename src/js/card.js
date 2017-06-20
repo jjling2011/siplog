@@ -39,14 +39,25 @@
         for (key in Database) {
             this.f[key] = Database[key].bind(this);
         }
+        
+        this.self=true;
     };
 
     Package.prototype.destroy = function () {
         call_method.bind(this)('clean_up');
-        for (var key in this.cjsv.cevs) {
+        var key;
+        for ( key in this.cjsv.cevs) {
             this.f.event(key, false);
             delete this.cjsv.cevs[key];
         }
+        for(key in this.f){
+            this.f[key]=null;
+            delete this.f[key];
+        }
+        for(key in this){
+            this[key]=null;
+        }
+        this.self=false;
     };
 
     var Card = function (container_id) {
@@ -958,7 +969,7 @@
                     if (status === false) {
                         //delete func
                         flag = false;
-                        root.console.log('before delete:', f);
+                        //root.console.log('before delete:', f);
                         for (i = f[ev].length - 1; i >= 0; i--) {
                             if (f[ev][i].obj === this && f[ev][i].func === func) {
                                 //console.log('match:', i);
@@ -966,7 +977,7 @@
                                 flag = true;
                             }
                         }
-                        root.console.log('after delete func:', f);
+                        //root.console.log('after delete func:', f);
                         return flag;
                     }
 

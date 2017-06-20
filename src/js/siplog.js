@@ -111,7 +111,9 @@ sip.f.parse_json = function (e) {
 };
 
 sip.o.package.article = function () {
+
     var key = cardjs.lib.gen_key();
+
     var o = new cardjs.package(key);
 
     o.pack = function (param) {
@@ -202,21 +204,21 @@ sip.o.package.article = function () {
         }
 
     };
-    
-    o.show_cache=function(){
-        var cache=this.f.restore();
-        if(!cache ){
+
+    o.show_cache = function () {
+        var cache = this.f.restore();
+        if (!cache) {
             return;
         }
-        var d=[];
-        for(var id in cache.data[cache.key]){
-            if(cache.cat==='全部' || cache.cat==='' ||  cache.data[cache.key][id].type===cache.cat){
+        var d = [];
+        for (var id in cache.data[cache.key]) {
+            if (cache.cat === '全部' || cache.cat === '' || cache.data[cache.key][id].type === cache.cat) {
                 d.push(cache.data[cache.key][id]);
             }
         }
         this.f.event('main_article_board_update', d);
-        d=null;
-        cache=null;
+        d = null;
+        cache = null;
     };
 
     o.check_cache = function () {
@@ -301,23 +303,31 @@ sip.o.package.article = function () {
             callback.bind(this)(data);
         }
     };
+    
 
+    o.init = function () {
+        //console.log('init');
+        
+        $.getJSON(sip.s.files_path + '?t=' + cardjs.lib.rand(8), function (data) {
 
-    $.getJSON(sip.s.files_path + '?t=' + cardjs.lib.rand(8), function (data) {
+            var cache = {
+                files: data,
+                data: {},
+                history: [],
+                selected: null,
+                cat: sip.uset.atypes[0] || '',
+                key: Object.keys(data)[0] || ''
+            };
+            this.f.cache(cache);
+            
+            //this.f.load_recent_data();
+            cache = null;
+        }.bind(o));
+    };
+    
+    o.f.event('package_article_init',o.init);
 
-        var cache = {
-            files: data,
-            data: {},
-            history: [],
-            selected: null,
-            cat: '',
-            key: ''
-        };
-        this.f.cache(cache);
-        //console.log(cache);
-        cache = null;
-        //this.f.load_recent_data();
-    }.bind(o));
+    o.init();
 
 
     return o;
@@ -432,7 +442,7 @@ sip.o.Main_wrap = function (cid) {
             function () {
                 this.el(0, true).className = 'tag-main-normal';
                 this.el(1, true).className = 'tag-main-active';
-                
+
                 this.show_mgr_page();
             }
         ]);
@@ -771,6 +781,8 @@ sip.o.art.editor = function (cid) {
                 }
 
                 this.f.clear_cache('update_article');
+                this.f.event('package_article_init');
+                
                 cardjs.lib.url_set_params('index.html');
 
                 this.el(5, true).innerHTML = '正在提交数据 ...';
@@ -813,6 +825,8 @@ sip.o.art.editor = function (cid) {
                 }
 
                 this.f.clear_cache('update_article');
+                this.f.event('package_article_init');
+                
                 cardjs.lib.url_set_params('index.html');
 
                 o.f.fetch('delete_article', cache.cache_id,
@@ -1942,30 +1956,30 @@ sip.o.main.group_view = function (cid) {
                 var v = value;
                 return (function () {
                     //console.log('clicked :', v);
-                    sip.pkg.articles.set('key',v);
+                    sip.pkg.articles.set('key', v);
                 });
             }()));
         }
-        
+
         evs.push((function () {
             var v = '全部';
             return(function () {
                 //console.log('clicked:', v);
-                sip.pkg.articles.set('cat',v);
+                sip.pkg.articles.set('cat', v);
             });
         }()));
-        
+
         for (j = 0; j < sip.uset.atypes.length; j++) {
             var value = sip.uset.atypes[j];
             evs.push((function () {
                 var v = value;
                 return(function () {
                     //console.log('clicked:', v);
-                    sip.pkg.articles.set('cat',v);
+                    sip.pkg.articles.set('cat', v);
                 });
             }()));
         }
-        
+
         return evs;
     };
 
@@ -1979,7 +1993,6 @@ sip.o.main.group_view = function (cid) {
         if (this.data) {
             return;
         }
-
         $.getJSON(sip.s.files_path + '?t=' + cardjs.lib.rand(8), function (data) {
             this.data = Object.keys(data);
             this.f.cache(this.data);
@@ -2020,7 +2033,7 @@ sip.o.main.article_board = function (cid) {
             return '<div id="' + this.el(0) + '"></div>';
         },
         update: function (data) {
-            if (data === undefined || data.length===0) {
+            if (data === undefined || data.length === 0) {
                 data = null;
             }
             //console.log('call main_art_board_update:', data);
