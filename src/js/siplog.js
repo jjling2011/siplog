@@ -189,6 +189,36 @@ sip.o.package.article = function () {
         return null;
     };
 
+    o.set = function (key, value) {
+        var cache = this.f.restore();
+        if (!cache || !(key in cache)) {
+            console.log('key not exist!');
+            return;
+        }
+        cache[key] = value;
+        this.f.cache(cache);
+        if (key === 'key' || key === 'cat') {
+            this.load_json.bind(this)(cache.key, this.show_cache.bind(this));
+        }
+
+    };
+    
+    o.show_cache=function(){
+        var cache=this.f.restore();
+        if(!cache ){
+            return;
+        }
+        var d=[];
+        for(var id in cache.data[cache.key]){
+            if(cache.cat==='全部' || cache.cat==='' ||  cache.data[cache.key][id].type===cache.cat){
+                d.push(cache.data[cache.key][id]);
+            }
+        }
+        this.f.event('main_article_board_update', d);
+        d=null;
+        cache=null;
+    };
+
     o.check_cache = function () {
         var cache = this.f.restore();
         if (cache && cache.history && cache.history.length <= 0) {
@@ -206,33 +236,31 @@ sip.o.package.article = function () {
         cache = null;
     };
 
-    o.load_json = function (key) {
+    o.load_json = function (key, callback) {
         var cache = this.f.restore();
-        if (!(cache && cache.files)) {
-            console.log('no file info.');
-            return;
-        }
+
         var y = key.substr(0, 4),
                 m = key.substr(4);
 
-
-        if (!(key in cache.files)) {
-            //console.log('file:' + key + '.json not exist!');
-            return;
-        }
-        if (key in cache.data) {
-            //console.log('data already loaded in cache! ' + key + '.json');
+        if (!(cache && cache.files) || !(key in cache.files) || (key in cache.data)) {
+            if (cardjs.lib.isFunction(callback)) {
+                callback.bind(this)();
+            }
             return;
         }
         var path = sip.s.article_path + (y) + '/' + (m) + '.json';
 
-        console.log('getjson:' + path);
+        //console.log('getjson:' + path);
 
-        $.getJSON(path + '?t=' + cardjs.lib.rand(8), this.got_json.bind(this, key));
+        if (cardjs.lib.isFunction(callback)) {
+            $.getJSON(path + '?t=' + cardjs.lib.rand(8), this.got_json.bind(this, callback, key));
+        } else {
+            $.getJSON(path + '?t=' + cardjs.lib.rand(8), this.got_json.bind(this, null, key));
+        }
         cache = null;
     };
 
-    o.got_json = function (key, data) {
+    o.got_json = function (callback, key, data) {
 
         /* cache.data={
          *   201706:{
@@ -269,6 +297,9 @@ sip.o.package.article = function () {
         cache.data[key] = d;
         this.f.cache(cache);
         cache = null;
+        if (cardjs.lib.isFunction(callback)) {
+            callback.bind(this)(data);
+        }
     };
 
 
@@ -279,8 +310,8 @@ sip.o.package.article = function () {
             data: {},
             history: [],
             selected: null,
-            type: -1
-
+            cat: '',
+            key: ''
         };
         this.f.cache(cache);
         //console.log(cache);
@@ -394,13 +425,14 @@ sip.o.Main_wrap = function (cid) {
     o.gen_ev_handler = function () {
         return([
             function () {
-                this.el(3, true).className = 'tag-main-active';
-                this.el(4, true).className = 'tag-main-normal';
+                this.el(0, true).className = 'tag-main-active';
+                this.el(1, true).className = 'tag-main-normal';
                 this.show_main_page();
             },
             function () {
-                this.el(4, true).className = 'tag-main-active';
-                this.el(3, true).className = 'tag-main-normal';
+                this.el(0, true).className = 'tag-main-normal';
+                this.el(1, true).className = 'tag-main-active';
+                
                 this.show_mgr_page();
             }
         ]);
@@ -409,9 +441,10 @@ sip.o.Main_wrap = function (cid) {
     o.show_main_page = function () {
         //console.log('show_main_page:',this);
         clear_contents();
-        var cnum = 0;
+        var cnum = 4;
         o.contents.push(sip.o.main.article_board(o.el(cnum++)).show());
         o.contents.push(sip.o.main.search_box(o.el(cnum++)).show());
+        o.contents.push(sip.o.main.group_view(o.el(cnum++)).show());
         if (sip.uset.show_mbox) {
             this.contents.push(sip.o.main.msg(o.el(cnum++)).show());
         }
@@ -421,18 +454,18 @@ sip.o.Main_wrap = function (cid) {
         //console.log('show_mgr_page developing');
         //return;
         clear_contents();
-        this.contents.push(sip.o.art.art_wrap(this.el(0)).show());
-        this.contents.push(sip.o.mgr.user_panel(this.el(1)).show());
+        this.contents.push(sip.o.art.art_wrap(this.el(4)).show());
+        this.contents.push(sip.o.mgr.user_panel(this.el(5)).show());
     };
 
     o.add_event = function () {
-        o.f.on('click', 3, 0);
-        o.f.on('click', 4, 1);
+        o.f.on('click', 0);
+        o.f.on('click', 1);
     };
 
     o.gen_html = function () {
         var ids = [];
-        for (var i = 0; i < 7; i++) {
+        for (var i = 0; i < 9; i++) {
             ids.push(this.el(i));
         }
         return Mustache.render(cardjs.lib.load_html('tp-main-wrap'), {ids: ids});
@@ -447,7 +480,7 @@ sip.o.Main_wrap = function (cid) {
             });
         }
         o.contents = [];
-        for (var i = 0; i < 4; i++) {
+        for (var i = 4; i < 9; i++) {
             o.el(i, true).innerHTML = '';
         }
     }
@@ -469,8 +502,8 @@ sip.o.Main_wrap = function (cid) {
         desc = param.desc || sip.uset.banner_desc;
 
         if (name && desc && name.length > 0 && desc.length > 0) {
-            this.el(5, true).innerHTML = cardjs.lib.html_escape(name);
-            this.el(6, true).innerHTML = cardjs.lib.html_escape(desc);
+            this.el(2, true).innerHTML = cardjs.lib.html_escape(name);
+            this.el(3, true).innerHTML = cardjs.lib.html_escape(desc);
         }
         name = null;
         desc = null;
@@ -1863,11 +1896,10 @@ sip.o.mgr.user_panel = function (cid) {
 };
 
 sip.o.main.group_view = function (cid) {
-    var key = cardjs.lib.gen_key();
+
     var o = new cardjs.card(cid);
     o.f.merge({
-        header: 'gview',
-        key: key
+        header: 'gview'
     });
 
     o.data = null;
@@ -1875,73 +1907,83 @@ sip.o.main.group_view = function (cid) {
     o.data_parser = function () {
         this.settings.add_event = false;
 
-        if (this.data) {
+        if (this.data && this.data.length > 0) {
             this.settings.add_event = true;
         }
 
     };
+
     o.gen_html = function () {
         var content = '<div style="color:red;">无数据</div>';
-        if (this.data && this.data.group && this.data.y && this.data.m) {
-            var y, m, cur_id = 12;
-            content = '<div>';
-            for (y in this.data.group) {
-                content += '<input type="button" value="' + y
-                        + '" id="' + this.el(cur_id)
-                        + '" class="btn btn-xs btn-default"> &nbsp;';
+        if (this.data && this.data.length > 0) {
+            var i, tag = [], cat = [], j, types;
+            for (i = 0; i < this.data.length; i++) {
+                tag.push({v: this.data[i], id: this.el(i)});
             }
-            content += '</div><div>';
-            for (m = 1; m < 13; m++) {
-                content += '<input type="button" value="' + m
-                        + '" id="' + this.el(m - 1)
-                        + '" class="btn btn-xs btn-info" ';
-                if (!(m in this.data.group[y])) {
-                    content += ' style="display:none;" ';
-                }
-                content += ' > &nbsp;';
-
+            types = sip.uset.atypes;
+            cat.push({v: '全部', id: this.el(i)});
+            for (j = 0; j < types.length; j++) {
+                cat.push({v: types[j], id: this.el(j + i + 1)});
             }
-            content += '</div>';
+            types = null;
+            content = Mustache.render(cardjs.lib.load_html('tp-group-view'), {tag: tag, cat: cat});
+            tag = null;
+            k = null;
         }
-        console.log(content);
-        return(sip.f.add_frame('tp-frame-tag-card', content, '按日期查询', 'margin-bottom:8px;'));
+        return(sip.f.add_frame('tp-frame-tag-card', content, '分类浏览', 'margin-bottom:8px;'));
     };
 
     o.gen_ev_handler = function () {
-        return [];
+        var evs = [], i, j;
+
+        for (i = 0; i < this.data.length; i++) {
+            var value = this.data[i];
+            evs.push((function () {
+                var v = value;
+                return (function () {
+                    //console.log('clicked :', v);
+                    sip.pkg.articles.set('key',v);
+                });
+            }()));
+        }
+        
+        evs.push((function () {
+            var v = '全部';
+            return(function () {
+                //console.log('clicked:', v);
+                sip.pkg.articles.set('cat',v);
+            });
+        }()));
+        
+        for (j = 0; j < sip.uset.atypes.length; j++) {
+            var value = sip.uset.atypes[j];
+            evs.push((function () {
+                var v = value;
+                return(function () {
+                    //console.log('clicked:', v);
+                    sip.pkg.articles.set('cat',v);
+                });
+            }()));
+        }
+        
+        return evs;
     };
 
     o.add_event = function () {
-
+        for (var i = 0; i < this.el(); i++) {
+            this.f.on('click', i);
+        }
     };
 
     o.after_add_event = function () {
         if (this.data) {
             return;
         }
-        this.data = this.f.restore();
-        if (this.data && this.data.group && this.data.y && this.data.m) {
-            this.refresh();
-            return;
-        }
+
         $.getJSON(sip.s.files_path + '?t=' + cardjs.lib.rand(8), function (data) {
-            var group = {}, y, m;
-            for (var key in data) {
-                y = key.substr(0, 4);
-                m = key.substr(4);
-                if (!(y in group)) {
-                    group[y] = {};
-                }
-                group[y][m] = true;
-            }
-            if (!group) {
-                console.log('no data!');
-                return;
-            }
-            this.data = {group: group, y: y, m: m};
+            this.data = Object.keys(data);
             this.f.cache(this.data);
-            console.log(this.data);
-            group = null;
+            //console.log(this.data);
             this.refresh();
         }.bind(this));
     };
@@ -1978,13 +2020,13 @@ sip.o.main.article_board = function (cid) {
             return '<div id="' + this.el(0) + '"></div>';
         },
         update: function (data) {
-            if (data === undefined) {
+            if (data === undefined || data.length===0) {
                 data = null;
             }
             //console.log('call main_art_board_update:', data);
             this.f.cache(data);
             if (!data) {
-                this.el(0, true).innerHTML = "<font color=red>数据不存在</font>";
+                this.el(0, true).innerHTML = "<font color=red>没有数据</font>";
                 return;
             }
             if (cardjs.lib.isArray(data)) {

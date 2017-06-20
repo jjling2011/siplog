@@ -1,5 +1,5 @@
 <script type="text/template" id="tp-um-welcome">
-    <div style="margin: 5px;text-align: right;padding-right:4px;color:#aaa;"> {{name}},你好！</div>
+    <div style="margin: 5px;text-align: left;padding-right:4px;color:#aaa;"> {{name}},你好！</div>
 </script>
 
 <script type="text/template" id="tp-main-wrap">
@@ -8,18 +8,18 @@
         <td class="banner" align="center">
             <table style="width:960px;">
 				<tr>
-					<td style="text-align:left;font-size: 30px;/* font-style: italic; */color: ivory;padding-left: 8px;padding-bottom: 8px;" id="{{ids.5}}">
+					<td style="text-align:left;font-size: 30px;/* font-style: italic; */color: ivory;padding-left: 8px;padding-bottom: 8px;" id="{{ids.2}}">
 					Siplog
 					</td>
 				</tr>
 				<tr>
-					<td style="text-align:left;color: #fff;padding-bottom: 9px;padding-left: 39px;" id="{{ids.6}}">
+					<td style="text-align:left;color: #fff;padding-bottom: 9px;padding-left: 39px;" id="{{ids.3}}">
 					一个简洁的单页博客
 					</td>
 				</tr>
                 <tr>
                     <td style="text-align: right;">
-						<input class="tag-main-active" type="button" id="{{ids.3}}" value="首页"><input class="tag-main-normal" type="button" id="{{ids.4}}" value="管理页面">
+						<input class="tag-main-active" type="button" id="{{ids.0}}" value="首页"><input class="tag-main-normal" type="button" id="{{ids.1}}" value="管理页面">
                     </td>
                 </tr>
             </table>
@@ -30,12 +30,14 @@
             <table style="width:960px;">
                 <tr>
 					<!-- left -->
-                    <td align="left" id="{{ids.0}}" style="vertical-align: top;padding-top: 12px;"></td>
+                    <td align="left" id="{{ids.4}}" style="vertical-align: top;padding-top: 12px;"></td>
 					<!-- right -->
                     <td align="right" style="width:200px;vertical-align: top;padding-top:12px;padding-left:8px;">
                         <table style="width:100%;">
-                            <tr><td  style="text-align: right;width:100%;" id="{{ids.1}}"></td></tr>
-                            <tr><td  style="text-align: right;width:100%;" id="{{ids.2}}"></td></tr>
+                            <tr><td  style="text-align: right;width:100%;" id="{{ids.5}}"></td></tr>
+                            <tr><td  style="text-align: right;width:100%;" id="{{ids.6}}"></td></tr>
+							<tr><td  style="text-align: right;width:100%;" id="{{ids.7}}"></td></tr>
+							<tr><td  style="text-align: right;width:100%;" id="{{ids.8}}"></td></tr>
                         </table>
                     </td>
                 </tr>
@@ -257,7 +259,28 @@
     </tr>
 </table>
 </script>
-
+<script type="text/template" id="tp-group-view">
+<table>
+	<tr><td style="text-align:left;color:#ccc;">日期</td></tr>
+    <!-- tag -->
+    <tr>
+        <td>
+            {{#tag}}
+            <input type="button" value="{{v}}" id="{{id}}" class="btn btn-xs btn-default" style="margin-bottom:5px;">
+            {{/tag}}
+        </td>
+    </tr>
+    <!-- type -->
+	<tr><td style="text-align:left;color:#ccc;">类别</td></tr>
+    <tr>
+        <td>
+			{{#cat}}
+			<input type="button" value="{{v}}" id="{{id}}" class="btn btn-xs btn-default" style="margin-bottom:5px;">
+			{{/cat}}
+		</td>
+    </tr>
+</table>
+</script>
 <script type="text/template" id="tp-art-list">
 <table style="width:100%;border-collapse: separate;border-spacing: 0px 5px;">
 {{#d}}<tr>
