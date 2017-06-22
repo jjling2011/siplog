@@ -23,7 +23,7 @@ var sip = {
         main: {},
         mgr: {},
         art: {},
-        package: {}
+        db: {}
     },
     s: {
         //最近文章数据的位置
@@ -38,7 +38,12 @@ var sip = {
         uset_path: 'upload/json/uset.json'
     },
     // 这些不太重要的设置，用户可以自己改。
+    // 会被 upload/uset.json 覆盖。
     uset: {
+
+        banner_name: "Siplog",
+        banner_desc: '一个简洁的单面博客',
+
         //显示留言信息
         show_mbox: true,
 
@@ -49,7 +54,7 @@ var sip = {
 
         msg_keep: 5
     },
-    pkg: {}
+    del: {}
 };
 
 sip.f.merge_uset = function (settings) {
@@ -110,33 +115,84 @@ sip.f.parse_json = function (e) {
     return d;
 };
 
-sip.o.package.article = function () {
+sip.o.db.article = function () {
 
-    var key = cardjs.lib.gen_key();
+    var data_key = cardjs.lib.gen_key();
 
-    var o = new cardjs.package(key);
+    var o = new cardjs.package({
+        key: data_key,
+        data: {},
+        top: [],
+        files: [],
+        search_result: [],
+        cur_key: '',
+        filter: '',
+        page_size: 3,
+        total_art: 0,
+        total_top: 0,
+        file_key: [],
+        total_page: 0
 
-    o.pack = function (param) {
-        param = param || {};
-        if (!(param.data && param.key)) {
-            console.log('error:sip.p.articles({key:k,data:d}) ');
-            return;
+    });
+
+    o.set = function (key, value) {
+        this[key] = value;
+        //console.log('set :',key,value);
+        if (key === 'cur_key') {
+            //console.log(this.files,value,value in this.files);
+            if (value in this.files) {
+                //console.log('call by set key = 20176');
+                this.show_page();
+            }
         }
-        var cache = this.f.restore() || {};
-        cache[param.key] = param.data;
-        this.f.cache(cache);
+        if (key === 'filter') {
+            this.show_page();
+        }
+        //console.log(this);
     };
 
-    o.peek = function () {
-        console.log('package content:', this.f.restore());
+    o.show_page = function () {
+        if (this.cur_key in this.data) {
+            this.push_main_art_board();
+        } else {
+            this.load_json.bind(this)(this.cur_key, this.push_main_art_board);
+        }
+    };
+
+    o.push_main_art_board = function () {
+        if (!(this.cur_key in this.data)) {
+            console.log('Error: key not exist!', this.cur_key);
+            return;
+        }
+        var d = [];
+        if (this.cur_key in this.data) {
+            for (var id in this.data[this.cur_key]) {
+                if (this.filter === '全部' || this.filter === '' || this.data[this.cur_key][id].type === this.filter) {
+                    d.push(this.data[this.cur_key][id]);
+                }
+            }
+        }
+        //console.log(this, d);
+        this.f.event('main_article_board_update', d);
+        d = null;
+    };
+
+    o.load_last_six_month = function () {
+        var year = new Date().getUTCFullYear(),
+                month = new Date().getUTCMonth() + 1;
+        for (var i = 0; i < 6; i++) {
+            var key = '' + year + month;
+            this.load_json(key);
+            month--;
+            if (month < 1) {
+                month = 12;
+                year--;
+            }
+        }
+
     };
 
     o.search = function (raw_keywords) {
-        var cache = this.f.restore();
-        if (!cache || !cache.data) {
-            return null;
-        }
-        //search
 
         var keywords = raw_keywords.split(' ').filter(function (e) {
             return (e.length > 0);
@@ -144,10 +200,10 @@ sip.o.package.article = function () {
 
         var key, id, result = [], e, count = 0, mark, kw_idx;
 
-        for (key in cache.data) {
-            for (id in cache.data[key]) {
+        for (key in this.data) {
+            for (id in this.data[key]) {
                 mark = 0;
-                e = cache.data[key][id];
+                e = this.data[key][id];
                 for (kw_idx in keywords) {
                     if (e.title.indexOf(keywords[kw_idx]) >= 0
                             || e.text.indexOf(keywords[kw_idx]) >= 0) {
@@ -174,92 +230,37 @@ sip.o.package.article = function () {
                 break;
             }
         }
-        cache = null;
         return(result);
     };
 
-    o.get = function (key) {
-        var cache = this.f.restore();
-        if (cache) {
-            if (key in cache) {
-                return cache[key];
-            }
-            if (cache.data && (key in cache.data)) {
-                return cache.data[key];
-            }
-        }
-        return null;
-    };
-
-    o.set = function (key, value) {
-        var cache = this.f.restore();
-        if (!cache || !(key in cache)) {
-            console.log('key not exist!');
-            return;
-        }
-        cache[key] = value;
-        this.f.cache(cache);
-        if (key === 'key' || key === 'cat') {
-            this.load_json.bind(this)(cache.key, this.show_cache.bind(this));
-        }
-
-    };
-
-    o.show_cache = function () {
-        var cache = this.f.restore();
-        if (!cache) {
-            return;
-        }
-        var d = [];
-        for (var id in cache.data[cache.key]) {
-            if (cache.cat === '全部' || cache.cat === '' || cache.data[cache.key][id].type === cache.cat) {
-                d.push(cache.data[cache.key][id]);
-            }
-        }
-        this.f.event('main_article_board_update', d);
-        d = null;
-        cache = null;
-    };
-
-    o.check_cache = function () {
-        var cache = this.f.restore();
-        if (cache && cache.history && cache.history.length <= 0) {
-            var year = new Date().getUTCFullYear(),
-                    month = new Date().getUTCMonth() + 1;
-            for (var i = 0; i < 6; i++) {
-                this.load_json('' + year + month);
-                month--;
-                if (month < 1) {
-                    month = 12;
-                    year--;
-                }
-            }
-        }
-        cache = null;
-    };
-
     o.load_json = function (key, callback) {
-        var cache = this.f.restore();
+
+        if (!cardjs.lib.isString(key)) {
+            throw new Error('key muset be string.');
+        }
+
+        if (!(key in this.files)) {
+            //console.log('no such key:', key);
+            return;
+        }
+
+        if (key in this.data) {
+            //console.log('key exist, skip', key);
+            return;
+        }
 
         var y = key.substr(0, 4),
-                m = key.substr(4);
+                m = key.substr(4),
+                path = sip.s.article_path + (y) + '/' + (m) + '.json';
 
-        if (!(cache && cache.files) || !(key in cache.files) || (key in cache.data)) {
-            if (cardjs.lib.isFunction(callback)) {
-                callback.bind(this)();
-            }
-            return;
+        $.getJSON(path + '?t=' + cardjs.lib.rand(8), this.got_json.bind(this, callback, key));
+
+    };
+
+    o.get = function (key) {
+        if (key in o) {
+            return o[key];
         }
-        var path = sip.s.article_path + (y) + '/' + (m) + '.json';
-
-        //console.log('getjson:' + path);
-
-        if (cardjs.lib.isFunction(callback)) {
-            $.getJSON(path + '?t=' + cardjs.lib.rand(8), this.got_json.bind(this, callback, key));
-        } else {
-            $.getJSON(path + '?t=' + cardjs.lib.rand(8), this.got_json.bind(this, null, key));
-        }
-        cache = null;
     };
 
     o.got_json = function (callback, key, data) {
@@ -276,15 +277,6 @@ sip.o.package.article = function () {
          * }
          */
 
-        var cache = this.f.restore();
-        if (!cache || !cache.data) {
-            throw new Error('not cache');
-        }
-        // keep 5 history.
-        while (cache.history.length > 5) {
-            delete cache.data[cache.history.shift()];
-        }
-
         var d = {}, e, i, div = document.createElement("div");
         for (i = 0; i < data.length; i++) {
             e = sip.f.parse_json(data[i]);
@@ -293,47 +285,50 @@ sip.o.package.article = function () {
             d[e.id] = e;
         }
         div = null;
+        this.data[key] = d;
 
-
-        cache.history.push(key);
-        cache.data[key] = d;
-        this.f.cache(cache);
-        cache = null;
         if (cardjs.lib.isFunction(callback)) {
-            callback.bind(this)(data);
+            callback.bind(this)();
         }
     };
-    
 
-    o.init = function () {
-        //console.log('init');
-        
+    o.load_files = function () {
         $.getJSON(sip.s.files_path + '?t=' + cardjs.lib.rand(8), function (data) {
-
-            var cache = {
-                files: data,
-                data: {},
-                history: [],
-                selected: null,
-                cat: sip.uset.atypes[0] || '',
-                key: Object.keys(data)[0] || ''
-            };
-            this.f.cache(cache);
-            
-            //this.f.load_recent_data();
-            cache = null;
-        }.bind(o));
+            // console.log('files.json:', data);
+            if ('files' in data) {
+                this.files = data.files;
+                this.file_key = Object.keys(data.files).sort().reverse();
+                var total = 0;
+                for (var key in this.files) {
+                    total += this.files[key];
+                }
+                this.total_art = total;
+                this.cur_page = 1;
+            }
+            if ('update' in data) {
+                if (data.update in this.data) {
+                    delete this.data[data.update];
+                }
+            }
+            //console.log(this);
+        }.bind(this)).always(function () {
+            $.getJSON(sip.s.top_art_path + '?t=' + cardjs.lib.rand(8), function (data) {
+                for (var i = 0; i < data.length; i++) {
+                    this.top.push(sip.f.parse_json(data[i]));
+                }
+                this.total_top = i;
+            }.bind(this)).always(function () {
+                this.total_page = Math.ceil((this.total_top + this.total_art) / this.page_size);
+            }.bind(this));
+        }.bind(this));
     };
-    
-    o.f.event('package_article_init',o.init);
 
-    o.init();
-
+    o.load_files();
 
     return o;
 };
 
-sip.pkg.articles = sip.o.package.article();
+sip.db = sip.o.db.article();
 
 sip.o.main.msg = function (cid) {
     var key = cardjs.lib.gen_key();
@@ -451,8 +446,8 @@ sip.o.Main_wrap = function (cid) {
     o.show_main_page = function () {
         //console.log('show_main_page:',this);
         clear_contents();
-        var cnum = 4;
-        o.contents.push(sip.o.main.article_board(o.el(cnum++)).show());
+        o.contents.push(sip.o.main.article_board(o.el(4)).show());
+        var cnum = 6;
         o.contents.push(sip.o.main.search_box(o.el(cnum++)).show());
         o.contents.push(sip.o.main.group_view(o.el(cnum++)).show());
         if (sip.uset.show_mbox) {
@@ -465,7 +460,7 @@ sip.o.Main_wrap = function (cid) {
         //return;
         clear_contents();
         this.contents.push(sip.o.art.art_wrap(this.el(4)).show());
-        this.contents.push(sip.o.mgr.user_panel(this.el(5)).show());
+        this.contents.push(sip.o.mgr.user_panel(this.el(6)).show());
     };
 
     o.add_event = function () {
@@ -475,7 +470,7 @@ sip.o.Main_wrap = function (cid) {
 
     o.gen_html = function () {
         var ids = [];
-        for (var i = 0; i < 9; i++) {
+        for (var i = 0; i < 10; i++) {
             ids.push(this.el(i));
         }
         return Mustache.render(cardjs.lib.load_html('tp-main-wrap'), {ids: ids});
@@ -490,7 +485,7 @@ sip.o.Main_wrap = function (cid) {
             });
         }
         o.contents = [];
-        for (var i = 4; i < 9; i++) {
+        for (var i = 4; i < 10; i++) {
             o.el(i, true).innerHTML = '';
         }
     }
@@ -508,13 +503,24 @@ sip.o.Main_wrap = function (cid) {
 
         param = param || {};
 
-        name = param.name || sip.uset.banner_name;
-        desc = param.desc || sip.uset.banner_desc;
 
-        if (name && desc && name.length > 0 && desc.length > 0) {
-            this.el(2, true).innerHTML = cardjs.lib.html_escape(name);
-            this.el(3, true).innerHTML = cardjs.lib.html_escape(desc);
+        name = param.name;
+        desc = param.desc;
+
+        if (name === undefined) {
+            name = sip.uset.banner_name;
         }
+
+        if (desc === undefined) {
+            desc = sip.uset.banner_desc;
+        }
+
+
+        this.el(2, true).innerHTML = cardjs.lib.html_escape(name);
+
+        this.el(3, true).innerHTML = cardjs.lib.html_escape(desc);
+
+
         name = null;
         desc = null;
     };
@@ -522,7 +528,7 @@ sip.o.Main_wrap = function (cid) {
     o.after_add_event = function () {
         clear_contents();
         o.show_main_page();
-        this.update_banner();
+        //this.update_banner();
         this.f.event('main_update_banner', this.update_banner);
     };
 
@@ -781,14 +787,14 @@ sip.o.art.editor = function (cid) {
                 }
 
                 this.f.clear_cache('update_article');
-                
+
                 cardjs.lib.url_set_params('index.html');
 
                 this.el(5, true).innerHTML = '正在提交数据 ...';
                 o.f.fetch('post_article', data, function () {
                     alert('提交成功!');
                     this.f.trigger('new');
-                    this.f.event('package_article_init');
+                    sip.db.load_files();
                 }, function (r) {
                     this.el(5, true).innerHTML = '提交失败！';
                     alert(r + '\n提交失败！');
@@ -825,15 +831,14 @@ sip.o.art.editor = function (cid) {
                 }
 
                 this.f.clear_cache('update_article');
-                
+
                 cardjs.lib.url_set_params('index.html');
 
                 o.f.fetch('delete_article', cache.cache_id,
                         function () {
                             alert('删除成功！');
                             this.f.trigger('new');
-                            this.f.event('package_article_init');
-                            //this.el(4,true).click();
+                            sip.db.load_files();
                         }, false, function (r) {
                     alert(r);
                 });
@@ -1656,10 +1661,11 @@ sip.o.AATest = function (cid) {
     o.gen_ev_handler = function () {
         return {
             't1': function () {
-                sip.pkg.articles.check_cache();
+                //sip.db.load_last_six_month();
             },
             't2': function () {
-                sip.pkg.articles.peek();
+                console.log('click t2');
+                console.log(sip.db);
             }
         };
     };
@@ -1671,8 +1677,8 @@ sip.o.AATest = function (cid) {
 
     o.gen_html = function () {
         var html = '<div style="margin:10px;">' +
-                '<input type="button" id="' + this.el('t1') + '" class="btn btn-info" value="test">' +
-                '<input type="button" id="' + this.el('t2') + '" class="btn btn-info" value="destroy">' +
+                '<input type="button" id="' + this.el('t1') + '" class="btn btn-info" value="t1">' +
+                '<input type="button" id="' + this.el('t2') + '" class="btn btn-info" value="t2">' +
                 '<div id="' + this.el('child') + '"></div>' +
                 '</div>';
         return html;
@@ -1909,9 +1915,13 @@ sip.o.mgr.user_panel = function (cid) {
 
 sip.o.main.group_view = function (cid) {
 
+    var key = cardjs.lib.gen_key();
+
     var o = new cardjs.card(cid);
+
     o.f.merge({
-        header: 'gview'
+        header: 'gview',
+        key: key
     });
 
     o.data = null;
@@ -1953,8 +1963,7 @@ sip.o.main.group_view = function (cid) {
             evs.push((function () {
                 var v = value;
                 return (function () {
-                    //console.log('clicked :', v);
-                    sip.pkg.articles.set('key', v);
+                    sip.db.set('cur_key', v);
                 });
             }()));
         }
@@ -1963,7 +1972,7 @@ sip.o.main.group_view = function (cid) {
             var v = '全部';
             return(function () {
                 //console.log('clicked:', v);
-                sip.pkg.articles.set('cat', v);
+                sip.db.set('filter', v);
             });
         }()));
 
@@ -1973,7 +1982,7 @@ sip.o.main.group_view = function (cid) {
                 var v = value;
                 return(function () {
                     //console.log('clicked:', v);
-                    sip.pkg.articles.set('cat', v);
+                    sip.db.set('filter', v);
                 });
             }()));
         }
@@ -1991,12 +2000,9 @@ sip.o.main.group_view = function (cid) {
         if (this.data) {
             return;
         }
-        $.getJSON(sip.s.files_path + '?t=' + cardjs.lib.rand(8), function (data) {
-            this.data = Object.keys(data);
-            this.f.cache(this.data);
-            //console.log(this.data);
-            this.refresh();
-        }.bind(this));
+        this.data = Object.keys(sip.db.get('files'));
+        this.f.cache(this.data);
+        this.refresh();
     };
 
     return o;
@@ -2128,7 +2134,7 @@ sip.o.main.search_box = function (cid) {
         return [
             //mouse over search box or search button
             function () {
-                sip.pkg.articles.check_cache();
+                sip.db.load_last_six_month();
             },
             //keyup
             function (e) {
@@ -2152,7 +2158,7 @@ sip.o.main.search_box = function (cid) {
                     return;
                 }
                 cache.kw = kw;
-                cache.result = sip.pkg.articles.search(cache.kw);
+                cache.result = sip.db.search(cache.kw);
                 this.f.cache(cache);
                 cache = null;
                 this.child = sip.o.main.match_list(this.el(2), this.settings.key).show();

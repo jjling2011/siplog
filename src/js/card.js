@@ -21,10 +21,19 @@
  })('cardjs', this, */
 (function (root, module_name) {
 
-    var Package = function (data_key) {
+    var Package = function (params) {
+
+        var key;
+        var skip = {'key': true};
+
+        for (key  in params) {
+            if (!(key in skip)) {
+                this[key] = params[key];
+            }
+        }
 
         this.settings = {
-            key: data_key || 'pkgshare'
+            key: params.key || 'pkgshare'
         };
 
         this.cjsv = {
@@ -32,32 +41,30 @@
             cevs: {}
         };
 
-        var key;
-        
-        this.f={};
+        this.f = {};
 
         for (key in Database) {
             this.f[key] = Database[key].bind(this);
         }
-        
-        this.self=true;
+
+        this.self = true;
     };
 
     Package.prototype.destroy = function () {
         call_method.bind(this)('clean_up');
         var key;
-        for ( key in this.cjsv.cevs) {
+        for (key in this.cjsv.cevs) {
             this.f.event(key, false);
             delete this.cjsv.cevs[key];
         }
-        for(key in this.f){
-            this.f[key]=null;
+        for (key in this.f) {
+            this.f[key] = null;
             delete this.f[key];
         }
-        for(key in this){
-            this[key]=null;
+        for (key in this) {
+            this[key] = null;
         }
-        this.self=false;
+        this.self = false;
     };
 
     var Card = function (container_id) {

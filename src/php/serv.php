@@ -93,7 +93,7 @@ class Serv extends UserMgr {
         CommLib::query('truncate article');
         $files = [];
         if (file_exists(FILE_PATH)) {
-            $files = array_keys(json_decode(file_get_contents(FILE_PATH), true));
+            $files = array_keys(json_decode(file_get_contents(FILE_PATH), true)['files']);
         }
         foreach ($files as $file) {
             $filename = '../upload/json/' . substr($file, 0, 4) . '/' . substr($file, 4) . '.json';
@@ -156,7 +156,7 @@ class Serv extends UserMgr {
     private function export_article($year, $month) {
         $top_articles = CommLib::fetch_assoc('select * from article where `top`=1 order by mtime desc ');
         $recent_articles = CommLib::fetch_assoc('select * from article where `top`=0 order by mtime desc limit 15');
-        file_put_contents(EXPORT_PATH, $this->article_array_to_json($top_articles, $recent_articles));
+        file_put_contents(EXPORT_PATH, $this->article_array_to_json($top_articles,$recent_articles));
         //$this->ok('完成!');
         if ($year > 0 && $month > 0 && $month < 13) {
             $sql = 'select * from article where year(ctime)=? and month(ctime)=?';
@@ -166,11 +166,15 @@ class Serv extends UserMgr {
                 file_put_contents(ARTICLE_PATH . $year . '/' . $month . '.json', $this->article_array_to_json($articles));
                 //gen files.json
                 $files = [];
-                if (file_exists(FILE_PATH)) {
-                    $files = json_decode(file_get_contents(FILE_PATH), true);
+                $sql='SELECT count(*) as c,concat(year(ctime),month(ctime)) as k '
+                        . ' FROM `article` '
+                        . ' group by year(ctime),month(ctime) '
+                        . ' order by k desc';
+                $rs= CommLib::fetch_assoc($sql);
+                foreach($rs as $r){
+                    $files[$r['k']]=$r['c'];
                 }
-                $files["$year$month"] = true;
-                file_put_contents(FILE_PATH, json_encode($files));
+                file_put_contents(FILE_PATH, json_encode(['files'=>$files,'update'=>"$year$month"]));
             } else {
                 error_log('Error: serv.php.export_article() query fail!');
             }
