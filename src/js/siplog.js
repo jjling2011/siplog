@@ -12,6 +12,7 @@ cardjs.set({server_page: 'php/serv.php'});
  * event('main_article_board_update'): 主窗口文章框提供的 update 函数 
  * event('main_update_banner'); 更新bannery
  * art_select_id: 搜索结果中缓存的当前选中的文章ID
+ * 'show_main_search_result' 得到搜索结果时,显示搜索结果.
  * clear_cache('update_article') 更新文章时清理相应缓存
  * clear_cache('clear_art_board') 更新主页文章窗口
  * clear_cache('clear_all_user_data') 退出登录时,清除用户设定
@@ -124,6 +125,7 @@ sip.o.db.article = function () {
         data: {},
         top: [],
         files: [],
+        search_keywords: null,
         search_result: [],
         cur_key: '',
         filter: '',
@@ -177,7 +179,7 @@ sip.o.db.article = function () {
         d = null;
     };
 
-    o.load_last_six_month = function () {
+    o.del_load_last_six_month = function () {
         var year = new Date().getUTCFullYear(),
                 month = new Date().getUTCMonth() + 1;
         for (var i = 0; i < 6; i++) {
@@ -193,44 +195,74 @@ sip.o.db.article = function () {
     };
 
     o.search = function (raw_keywords) {
+        
+        if(this.search_keywords===raw_keywords){
+            //console.log('using cache!');
+            this.f.event('show_main_search_result');
+            return;
+        }
+        
+        this.search_keywords=raw_keywords;
 
         var keywords = raw_keywords.split(' ').filter(function (e) {
             return (e.length > 0);
         });
+        
+        this.search_result = [];
+        this.search_recursive.bind(this)(keywords, 0);
+    };
 
-        var key, id, result = [], e, count = 0, mark, kw_idx;
-
-        for (key in this.data) {
-            for (id in this.data[key]) {
-                mark = 0;
-                e = this.data[key][id];
-                for (kw_idx in keywords) {
-                    if (e.title.indexOf(keywords[kw_idx]) >= 0
-                            || e.text.indexOf(keywords[kw_idx]) >= 0) {
-                        mark++;
-                    }
-                    //console.log('mark:',mark,' kw:',keywords[kw_idx],'e:',e);
-                }
-
-                if (keywords.length <= 0 || mark === keywords.length) {
-                    result.push({
-                        key: key,
-                        id: id,
-                        title: e.title,
-                        data: e
-                    });
-                    count++;
-                }
-                e = null;
-                if (count >= 15) {
-                    break;
-                }
+    o.search_recursive = function (keywords, index) {
+        if (index >= this.file_key.length) {
+            this.f.event('show_main_search_result');
+            console.log('search done!');
+            return;
+        }
+        var key = this.file_key[index];
+        if (key in this.data) {
+            this.search_cache.bind(this)(keywords, key);
+            if (this.search_result > 15) {
+                console.log('find 15+ results, abort');
+                return;
             }
-            if (count >= 15) {
+            //console.log('cur_result:',this.search_result);
+            this.f.event('show_main_search_result');
+            this.search_recursive.bind(this)(keywords, index + 1);
+            return;
+        }
+        console.log('load file:', key);
+        this.load_json(key, this.search_recursive.bind(this, keywords, index));
+    };
+
+    o.search_cache = function (keywords, key) {
+
+        var id, e, mark, kw_idx;
+
+        for (id in this.data[key]) {
+            mark = 0;
+            e = this.data[key][id];
+            for (kw_idx in keywords) {
+                if (e.title.indexOf(keywords[kw_idx]) >= 0
+                        || e.text.indexOf(keywords[kw_idx]) >= 0) {
+                    mark++;
+                }
+                //console.log('mark:',mark,' kw:',keywords[kw_idx],'e:',e);
+            }
+
+            if (keywords.length <= 0 || mark === keywords.length) {
+                this.search_result.push({
+                    key: key,
+                    id: id,
+                    title: e.title,
+                    data: e
+                });
+            }
+            e = null;
+            if (this.search_result.length > 15) {
                 break;
             }
         }
-        return(result);
+
     };
 
     o.load_json = function (key, callback) {
@@ -1747,26 +1779,19 @@ sip.o.mgr.login = function (cid, parent_update) {
     }));
 };
 
-sip.o.main.match_list = function (cid, key) {
+sip.o.main.match_list = function (cid) {
 
     var o = new cardjs.card(cid);
 
     o.f.merge({
-        key: key,
         header: 'match_list'
     });
 
-//    o.update = o.f.restore('main_article_board_update')
-//            || (function () {
-//                throw new Error('error: main_article_board_update not exist!');
-//            }());
-
     o.data_parser = function () {
-        o.cache = this.f.restore();
         o.count = 0;
         o.settings.add_event = false;
-        if (o.cache.result) {
-            o.count = o.cache.result.length;
+        if (sip.db.search_result.length>0) {
+            o.count = sip.db.search_result.length;
             if (o.count > 0) {
                 o.settings.add_event = true;
             }
@@ -1775,25 +1800,25 @@ sip.o.main.match_list = function (cid, key) {
 
 
     o.show_article = function (idx) {
-        if (idx < 0 || idx >= this.cache.result.length) {
+        if (idx < 0 || idx >= sip.db.search_result.length) {
             console.log('Error: index out of range!');
             return;
         }
-        var cache = this.f.restore();
-        this.f.event('main_article_board_update', cache.result[idx].data);
-        cardjs.lib.url_set_params('index.html', {key: cache.result[idx].key, id: cache.result[idx].id});
-        this.f.cache(cache.result[idx].id, 'art_select_id');
+        var cache=sip.db.search_result;
+        this.f.event('main_article_board_update', cache[idx].data);
+        cardjs.lib.url_set_params('index.html', {key: cache[idx].key, id: cache[idx].id});
+        this.f.cache(cache[idx].id, 'art_select_id');
         cache = null;
     };
 
     o.gen_ev_handler = function () {
-        var cache = this.f.restore();
-        if (!cache || cache.result.length <= 0) {
+        var cache=sip.db.search_result;
+        if ( cache.length <= 0) {
             cache = null;
             return [];
         }
         var evs = [];
-        for (var i = 0; i < cache.result.length; i++) {
+        for (var i = 0; i < cache.length; i++) {
             evs.push((function () {
                 var idx = i;
                 return(function () {
@@ -1806,23 +1831,23 @@ sip.o.main.match_list = function (cid, key) {
     };
 
     o.add_event = function () {
-        for (var i = 0; i < this.cache.result.length; i++) {
+        for (var i = 0; i < sip.db.search_result.length; i++) {
             this.f.on('click', i);
         }
     };
 
     o.gen_html = function () {
 
-        var cache = this.f.restore();
-        if (!cache || cache.result.length <= 0) {
+        var cache = sip.db.search_result;
+        if (cache.length <= 0) {
             cache = null;
             return('<font color="red">没有找到相应数据</font>');
         }
         var data = [];
-        for (var i = 0; i < cache.result.length; i++) {
+        for (var i = 0; i < cache.length; i++) {
             data.push({
                 id: this.el(i),
-                title: cache.result[i].title
+                title: cache[i].title
             });
         }
         //console.log(data);
@@ -2109,22 +2134,10 @@ sip.o.main.article_board = function (cid) {
 
 sip.o.main.search_box = function (cid) {
 
-    var key = cardjs.lib.gen_key();
-
-    /*
-     * cache={
-     *     files: 文件名列表 upload/json/files.json
-     *     data: 最近6个月的数据.
-     *     kw: 上次的 key_word.
-     *     result: [index1, index2] 上次搜索的结果.
-     * }
-     */
-
     var o = new cardjs.card(cid);
 
     o.f.merge({
         header: 'main_sbox',
-        key: key,
         add_event: true
     });
 
@@ -2132,10 +2145,6 @@ sip.o.main.search_box = function (cid) {
 
     o.gen_ev_handler = function () {
         return [
-            //mouse over search box or search button
-            function () {
-                sip.db.load_last_six_month();
-            },
             //keyup
             function (e) {
                 var k = e || window.event;
@@ -2147,38 +2156,19 @@ sip.o.main.search_box = function (cid) {
             },
             // click
             function () {
-                //search()
-                this.clean_up();
                 var kw = this.el(0, true).value;
-                var cache = this.f.restore();
-                if (cache && cache.result && cache.kw !== undefined && cache.kw === kw) {
-                    //console.log('using cache');
-                    this.child = sip.o.main.match_list(this.el(2), this.settings.key).show();
-                    cache = null;
-                    return;
-                }
-                cache.kw = kw;
-                cache.result = sip.db.search(cache.kw);
-                this.f.cache(cache);
-                cache = null;
-                this.child = sip.o.main.match_list(this.el(2), this.settings.key).show();
+                sip.db.search(kw);
             }
         ];
     };
+    
+    o.show_search_result=function(){
+        this.clean_up();
+        this.child = sip.o.main.match_list(this.el(2)).show();
+    };
 
     o.after_add_event = function () {
-        //load files
-        this.f.clear_cache('update_article', true);
-        var cache = this.f.restore();
-        if (cache && cache.kw !== undefined && cache.result) {
-            this.el(0, true).value = cache.kw;
-            this.f.trigger(2);
-            cache = null;
-            return;
-        }
-        cache = cache || {};
-        this.f.cache(cache);
-        cache = null;
+        this.f.event('show_main_search_result',this.show_search_result);
     };
 
     o.clean_up = function () {
@@ -2195,11 +2185,8 @@ sip.o.main.search_box = function (cid) {
     };
 
     o.add_event = function () {
-        //o.f.on('focus', 0, 0);
-        this.f.on('mouseover', 0, 0);
-        this.f.on('mouseover', 1, 0);
-        this.f.on('keyup', 0, 1);
-        this.f.on('click', 1, 2);
+        this.f.on('keyup', 0);
+        this.f.on('click', 1);
     };
 
     return o;
