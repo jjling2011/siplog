@@ -213,7 +213,7 @@ class Serv extends UserMgr {
 
         $key_words = explode(' ', $this->patch_key_word(CommLib::filter_str($raw_key_words, 200)));
 
-        $sql_head = 'select id,title,name,mtime,type,`top`,`lock` from article ';
+        $sql_head = 'select id,title,name,mtime,ctime,type,`top`,`lock` from article ';
         $sql_total_head = 'select count(*) as total from article ';
         $sql_tail = 'order by mtime desc limit ' . $begin . ',' . $page_size;
 

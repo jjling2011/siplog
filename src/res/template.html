@@ -246,7 +246,7 @@
     <tr>
         <td>
             <table class="table table-striped">
-                <tr><th >标题</th><th style="width:120px;">修改时间</th><th style="width:80px;">修改者</th></tr>  
+                <tr><th >标题</th><th style="width:120px;">创建时间</th><th style="width:120px;">修改时间</th><th style="width:80px;">修改者</th></tr>  
                 {{#tb}}
                 <tr id="{{oid}}">
                     <td>
@@ -255,6 +255,7 @@
                         {{#top}}&nbsp;<input type="button" class="btn btn-xs" style="background:lightblue;" value="置顶">{{/top}}
                         {{#lock}}&nbsp;<input type="button" class="btn btn-xs" style="background:bisque;" value="锁定">{{/lock}}
                     </td>
+					<td>{{ctime}}</td>
                     <td>{{time}}</td>
                     <td>{{author}}</td>
                 </tr>
@@ -264,8 +265,23 @@
     </tr>
 </table>
 </script>
+<script type="text/template" id="tp-main-pager">
+<table style="border-spacing: 5px;border-collapse: separate;">
+    <tr>
+        <td ><input type="button" id="{{first.id}}" value="{{first.value}}" class="btn btn-default btn-xs"></td>
+        {{#v}}
+        <td ><input type="button" id="{{id}}" value="{{value}}" class="btn btn-default btn-xs"></td>
+        {{/v}}
+    </tr>
+</table>
+</script>
 <script type="text/template" id="tp-group-view">
 <table>
+	<tr>
+        <td>
+			<input type="button" value="所有文章" id="{{all}}" class="btn btn-xs btn-default" style="margin-bottom:5px;">
+		</td>
+    </tr>
     <!-- type -->
 	<tr><td style="text-align:left;color:#ccc;">类别</td></tr>
     <tr>
@@ -289,7 +305,7 @@
 <script type="text/template" id="tp-art-list">
 <table style="width:100%;border-collapse: separate;border-spacing: 0px 5px;">
 {{#d}}<tr>
-<td style="text-align: left;padding: 2px 5px 2px 5px;border-left: 1px solid #999;border-right: 1px solid #999;background: antiquewhite;border-radius: 10px;" id="{{id}}">{{title}}</td></tr>{{/d}}
+<td style="text-align: left;padding: 2px 5px 2px 5px;background: antiquewhite;border-radius: 5px;" id="{{id}}">{{title}}</td></tr>{{/d}}
 </table>
 </script>
 

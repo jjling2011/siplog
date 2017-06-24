@@ -10,6 +10,8 @@ cardjs.set({server_page: 'php/serv.php'});
 /*
  * cache share keys:
  * event('main_article_board_update'): 主窗口文章框提供的 update 函数 
+ * event('main_show_pager');
+ * event('main_clear_pager');
  * event('main_update_banner'); 更新bannery
  * art_select_id: 搜索结果中缓存的当前选中的文章ID
  * 'show_main_search_result' 得到搜索结果时,显示搜索结果.
@@ -116,110 +118,236 @@ sip.f.parse_json = function (e) {
     return d;
 };
 
+sip.o.main.pager = function (cid) {
+    var o = new cardjs.card(cid);
+    o.f.merge({
+        header: 'pager',
+        add_event: true
+    });
+
+    o.btn_num = 5;
+
+    o.d = {};
+
+    o.data_parser = function () {
+        var cur = sip.db.d.page.cur_page;
+        var size = sip.db.d.page.size;
+        var max = Math.ceil(sip.db.d.total_article / size);
+        var first = Math.max(0, (cur - Math.floor(this.btn_num / 2)));
+        var last = Math.min(first + this.btn_num, max);
+        first = Math.min(first, last - this.btn_num);
+        first = Math.max(first, 0);
+        if (cur > last) {
+            cur = last;
+        }
+        if (cur < first) {
+            cur = first;
+        }
+        sip.db.d.page.cur_page = cur;
+        this.d.first = first;
+        this.d.last = last;
+        this.d.cur = cur;
+        //console.log('data parser:', this.d);
+    };
+
+    o.gen_html = function () {
+        var v = [];
+        for (var i = this.d.first; i < this.d.last; i++) {
+            v.push({id: this.el(i - this.d.first + 1), value: i + 1});
+        }
+        var first = {id: this.el(0), value: '首页'};
+        return (Mustache.render(cardjs.lib.load_html('tp-main-pager'), {first: first, v: v}));
+    };
+
+    o.show_page = function (num) {
+        //console.log('show page ' + num);
+        //sip.db.d.page.cur_page = num;
+        var min = Math.max(num * sip.db.d.page.size, 0);
+        var first = 0, sum = 0, key = 0, skip = 0, per_sum = 0;
+        var d = sip.db.d;
+
+        while (sum <= min && key < d.file_key.length) {
+            first = key;
+            per_sum = sum;
+            sum += d.files[d.file_key[key]];
+            key++;
+        }
+
+        skip = Math.max(min - per_sum, 0);
+        //var k = d.file_key[first];
+        //console.log('show page: num/min/first/key/skip', num, min, first, k, skip);
+        d = null;
+        this.d.data = [];
+        this.get_data.bind(this)(first, skip);
+    };
+
+    o.get_data = function (key_index, skip) {
+        if (key_index >= sip.db.d.file_key.length) {
+            console.log('Last page!');
+            this.f.event('main_article_board_update', this.d.data);
+            return;
+        }
+        var size = sip.db.d.page.size;
+        var key = sip.db.d.file_key[key_index];
+        //console.log('call get data:key/idx/skip', key, key_index, skip);
+        if (key in sip.db.d.data) {
+            var ids = Object.keys(sip.db.d.data[key]);
+            for (var i = skip; i < ids.length && this.d.data.length < size; i++) {
+                //console.log('push(key,idx)', key, i);
+                this.d.data.push(sip.db.d.data[key][ids[i]]);
+            }
+            if (this.d.data.length < size) {
+                this.get_data.bind(this, key_index + 1, 0)();
+                return;
+            }
+            this.f.event('main_article_board_update', this.d.data);
+        } else {
+            //console.log('load json:', key);
+            sip.db.load_json(key, this.get_data.bind(this, key_index, skip));
+        }
+    };
+
+    o.gen_ev_handler = function () {
+        var evs = [];
+        evs.push(function () {
+            sip.db.d.page.cur_page = 0;
+            this.refresh();
+            //this.show_page(0);
+        });
+
+        for (var i = this.d.first; i < this.d.last; i++) {
+            evs.push((function () {
+                var num = i;
+                return(function () {
+                    sip.db.d.page.cur_page = num;
+                    this.refresh();
+                    //this.show_page(num);
+                }.bind(this));
+            }.bind(this)()));
+        }
+
+        return evs;
+    };
+
+    o.add_event = function () {
+        for (var i = 0; i < this.el(); i++) {
+            this.f.on('click', i);
+        }
+    };
+
+    o.after_add_event = function () {
+        //this.f.trigger(0);
+        this.el(this.d.cur - this.d.first + 1, true).style.backgroundColor = 'skyblue';
+        this.show_page(sip.db.d.page.cur_page);
+    };
+
+    return o;
+};
+
 sip.o.db.article = function () {
 
     var data_key = cardjs.lib.gen_key();
 
     var o = new cardjs.package({
         key: data_key,
-        data: {},
-        top: [],
-        files: [],
-        search_keywords: null,
-        search_result: [],
-        cur_key: '',
-        filter: '',
-        page_size: 3,
-        total_art: 0,
-        total_top: 0,
-        file_key: [],
-        total_page: 0
-
+        d: {
+            data: {},
+            top: [],
+            files: [],
+            search: {
+                kw_cache: null,
+                kw_cur: '',
+                result: []
+            },
+            page: {
+                key: null,
+                filter: '',
+                size: 5,
+                cur_page: 0,
+                cur_key: 0,
+                id_loaded: 0
+            },
+            file_key: [],
+            total_article: 0
+        }
     });
 
     o.set = function (key, value) {
-        this[key] = value;
+        //this[key] = value;
         //console.log('set :',key,value);
-        if (key === 'cur_key') {
+        if (key === 'page_key') {
             //console.log(this.files,value,value in this.files);
-            if (value in this.files) {
-                //console.log('call by set key = 20176');
-                this.show_page();
+            if (value in this.d.files) {
+                this.d.page.key = value;
+                this.f.event('main_clear_pager');
+                this.show_page.bind(this)();
             }
         }
         if (key === 'filter') {
-            this.show_page();
+            //console.log('set filter:', value);
+            this.f.event('main_clear_pager');
+            this.d.page.filter = value;
+            this.show_page.bind(this)();
         }
-        //console.log(this);
     };
 
     o.show_page = function () {
-        if (this.cur_key in this.data) {
-            this.push_main_art_board();
+        //console.log(this);
+        if (this.d.page.key in this.d.data) {
+            this.push_main_art_board.bind(this)();
         } else {
-            this.load_json.bind(this)(this.cur_key, this.push_main_art_board);
+            this.load_json.bind(this)(this.d.page.key, this.push_main_art_board.bind(this));
         }
     };
 
     o.push_main_art_board = function () {
-        if (!(this.cur_key in this.data)) {
-            console.log('Error: key not exist!', this.cur_key);
+        if (!(this.d.page.key in this.d.data)) {
+            console.log('Error: key not exist!', this.d.page.key);
             return;
         }
-        var d = [];
-        if (this.cur_key in this.data) {
-            for (var id in this.data[this.cur_key]) {
-                if (this.filter === '全部' || this.filter === '' || this.data[this.cur_key][id].type === this.filter) {
-                    d.push(this.data[this.cur_key][id]);
+        //console.log(this);
+        var d = [], f = this.d.page.filter, k = this.d.page.key, db = this.d.data;
+        if (k in db) {
+            for (var id in db[k]) {
+                if (f === '全部' || f === '' || db[k][id].type === f) {
+                    d.push(db[k][id]);
                 }
             }
         }
-        //console.log(this, d);
+        //console.log('k/d/f/db' ,k, d,f,db);
         this.f.event('main_article_board_update', d);
         d = null;
-    };
-
-    o.del_load_last_six_month = function () {
-        var year = new Date().getUTCFullYear(),
-                month = new Date().getUTCMonth() + 1;
-        for (var i = 0; i < 6; i++) {
-            var key = '' + year + month;
-            this.load_json(key);
-            month--;
-            if (month < 1) {
-                month = 12;
-                year--;
-            }
-        }
-
+        f = null;
+        k = null;
+        db = null;
     };
 
     o.search = function (raw_keywords) {
-        
-        if(this.search_keywords===raw_keywords){
+
+        if (this.d.search.kw_cache === raw_keywords) {
             //console.log('using cache!');
             this.f.event('show_main_search_result');
             return;
         }
-        
-        this.search_keywords=raw_keywords;
+
+        this.d.search.kw_cache = raw_keywords;
 
         var keywords = raw_keywords.split(' ').filter(function (e) {
             return (e.length > 0);
         });
-        
-        this.search_result = [];
+
+        this.d.search.result = [];
         this.search_recursive.bind(this)(keywords, 0);
     };
 
     o.search_recursive = function (keywords, index) {
-        if (index >= this.file_key.length) {
+        if (index >= this.d.file_key.length) {
             this.f.event('show_main_search_result');
             console.log('search done!');
             return;
         }
-        var key = this.file_key[index];
-        if (key in this.data) {
+        var key = this.d.file_key[index];
+        if (key in this.d.data) {
             this.search_cache.bind(this)(keywords, key);
             if (this.search_result > 15) {
                 console.log('find 15+ results, abort');
@@ -230,7 +358,7 @@ sip.o.db.article = function () {
             this.search_recursive.bind(this)(keywords, index + 1);
             return;
         }
-        console.log('load file:', key);
+        //console.log('load file:', key);
         this.load_json(key, this.search_recursive.bind(this, keywords, index));
     };
 
@@ -238,9 +366,9 @@ sip.o.db.article = function () {
 
         var id, e, mark, kw_idx;
 
-        for (id in this.data[key]) {
+        for (id in this.d.data[key]) {
             mark = 0;
-            e = this.data[key][id];
+            e = this.d.data[key][id];
             for (kw_idx in keywords) {
                 if (e.title.indexOf(keywords[kw_idx]) >= 0
                         || e.text.indexOf(keywords[kw_idx]) >= 0) {
@@ -250,7 +378,7 @@ sip.o.db.article = function () {
             }
 
             if (keywords.length <= 0 || mark === keywords.length) {
-                this.search_result.push({
+                this.d.search.result.push({
                     key: key,
                     id: id,
                     title: e.title,
@@ -258,7 +386,7 @@ sip.o.db.article = function () {
                 });
             }
             e = null;
-            if (this.search_result.length > 15) {
+            if (this.d.search.result.length > 15) {
                 break;
             }
         }
@@ -271,12 +399,12 @@ sip.o.db.article = function () {
             throw new Error('key muset be string.');
         }
 
-        if (!(key in this.files)) {
-            //console.log('no such key:', key);
+        if (!(key in this.d.files)) {
+            console.log('Key not exist:', key);
             return;
         }
 
-        if (key in this.data) {
+        if (key in this.d.data) {
             //console.log('key exist, skip', key);
             return;
         }
@@ -285,13 +413,15 @@ sip.o.db.article = function () {
                 m = key.substr(4),
                 path = sip.s.article_path + (y) + '/' + (m) + '.json';
 
+        console.log('Load data:'+key+'.json');
+
         $.getJSON(path + '?t=' + cardjs.lib.rand(8), this.got_json.bind(this, callback, key));
 
     };
 
     o.get = function (key) {
-        if (key in o) {
-            return o[key];
+        if (key === 'files') {
+            return o.d.files;
         }
     };
 
@@ -317,40 +447,54 @@ sip.o.db.article = function () {
             d[e.id] = e;
         }
         div = null;
-        this.data[key] = d;
+        this.d.data[key] = d;
 
         if (cardjs.lib.isFunction(callback)) {
-            callback.bind(this)();
+            callback();
         }
     };
 
     o.load_files = function () {
+
+        this.d.files = [];
+        this.d.top = [];
+        this.d.search.kw_cache = null;
+        this.d.search.kw_cur = null;
+        this.d.result = [];
+        this.d.page.key = null;
+        this.d.page.filter = '';
+        this.d.page.cur_page = 0;
+        this.d.page.cur_key = 0;
+        this.d.page.id_loaded = 0;
+        this.d.file_key = [];
+        this.d.total_article = 0;
+
         $.getJSON(sip.s.files_path + '?t=' + cardjs.lib.rand(8), function (data) {
             // console.log('files.json:', data);
             if ('files' in data) {
-                this.files = data.files;
-                this.file_key = Object.keys(data.files).sort().reverse();
-                var total = 0;
-                for (var key in this.files) {
-                    total += this.files[key];
+                this.d.files = data.files;
+                //console.log('files', this.d.files);
+                this.d.file_key = Object.keys(data.files).sort().reverse();
+                if (this.d.file_key.length > 0) {
+                    this.d.page.key = this.d.file_key[0];
+                    var sum = 0;
+                    for (var key in this.d.files) {
+                        sum += this.d.files[key];
+                    }
+                    this.d.total_article = sum;
                 }
-                this.total_art = total;
-                this.cur_page = 1;
             }
             if ('update' in data) {
-                if (data.update in this.data) {
-                    delete this.data[data.update];
+                if (data.update in this.d.data) {
+                    delete this.d.data[data.update];
                 }
             }
             //console.log(this);
         }.bind(this)).always(function () {
             $.getJSON(sip.s.top_art_path + '?t=' + cardjs.lib.rand(8), function (data) {
                 for (var i = 0; i < data.length; i++) {
-                    this.top.push(sip.f.parse_json(data[i]));
+                    this.d.top.push(sip.f.parse_json(data[i]));
                 }
-                this.total_top = i;
-            }.bind(this)).always(function () {
-                this.total_page = Math.ceil((this.total_top + this.total_art) / this.page_size);
             }.bind(this));
         }.bind(this));
     };
@@ -459,6 +603,8 @@ sip.o.Main_wrap = function (cid) {
         add_event: true
     });
 
+    o.pager = null;
+
     o.gen_ev_handler = function () {
         return([
             function () {
@@ -478,7 +624,7 @@ sip.o.Main_wrap = function (cid) {
     o.show_main_page = function () {
         //console.log('show_main_page:',this);
         clear_contents();
-        o.contents.push(sip.o.main.article_board(o.el(4)).show());
+        o.contents.push(sip.o.main.article_board(o.el(5)).show());
         var cnum = 6;
         o.contents.push(sip.o.main.search_box(o.el(cnum++)).show());
         o.contents.push(sip.o.main.group_view(o.el(cnum++)).show());
@@ -486,6 +632,8 @@ sip.o.Main_wrap = function (cid) {
             this.contents.push(sip.o.main.msg(o.el(cnum++)).show());
         }
     };
+
+
 
     o.show_mgr_page = function () {
         //console.log('show_mgr_page developing');
@@ -508,7 +656,21 @@ sip.o.Main_wrap = function (cid) {
         return Mustache.render(cardjs.lib.load_html('tp-main-wrap'), {ids: ids});
     };
 
+    o.show_pager = function () {
+        this.clear_pager();
+        this.pager = sip.o.main.pager(this.el(4)).show();
+    };
+
+    o.clear_pager = function () {
+        this.pager && this.pager.destroy();
+        this.pager = null;
+        this.el(4, true).innerHTML = '';
+    };
+
     function clear_contents() {
+
+        o.clear_pager();
+
         if (o.contents && o.contents.length > 0) {
             o.contents.forEach(function (e) {
                 //console.log('main:',o);
@@ -562,6 +724,8 @@ sip.o.Main_wrap = function (cid) {
         o.show_main_page();
         //this.update_banner();
         this.f.event('main_update_banner', this.update_banner);
+        this.f.event('main_clear_pager', this.clear_pager);
+        this.f.event('main_show_pager', this.show_pager);
     };
 
     return o;
@@ -698,6 +862,7 @@ sip.o.art.search_result = function (cid, key) {
             this.d.tb.push({
                 oid: this.el(i),
                 title: filterXSS(c.title),
+                ctime: cardjs.lib.getYMD(c.ctime),
                 time: cardjs.lib.getYMD(c.mtime),
                 author: filterXSS(c.name),
                 type: (c.type < sip.uset.atypes.length) ? sip.uset.atypes[c.type] : '无',
@@ -1790,8 +1955,8 @@ sip.o.main.match_list = function (cid) {
     o.data_parser = function () {
         o.count = 0;
         o.settings.add_event = false;
-        if (sip.db.search_result.length>0) {
-            o.count = sip.db.search_result.length;
+        if (sip.db.d.search.result.length > 0) {
+            o.count = sip.db.d.search.result.length;
             if (o.count > 0) {
                 o.settings.add_event = true;
             }
@@ -1800,11 +1965,11 @@ sip.o.main.match_list = function (cid) {
 
 
     o.show_article = function (idx) {
-        if (idx < 0 || idx >= sip.db.search_result.length) {
+        if (idx < 0 || idx >= sip.db.d.search.result.length) {
             console.log('Error: index out of range!');
             return;
         }
-        var cache=sip.db.search_result;
+        var cache = sip.db.d.search.result;
         this.f.event('main_article_board_update', cache[idx].data);
         cardjs.lib.url_set_params('index.html', {key: cache[idx].key, id: cache[idx].id});
         this.f.cache(cache[idx].id, 'art_select_id');
@@ -1812,8 +1977,8 @@ sip.o.main.match_list = function (cid) {
     };
 
     o.gen_ev_handler = function () {
-        var cache=sip.db.search_result;
-        if ( cache.length <= 0) {
+        var cache = sip.db.d.search.result;
+        if (cache.length <= 0) {
             cache = null;
             return [];
         }
@@ -1831,14 +1996,14 @@ sip.o.main.match_list = function (cid) {
     };
 
     o.add_event = function () {
-        for (var i = 0; i < sip.db.search_result.length; i++) {
+        for (var i = 0; i < sip.db.d.search.result.length; i++) {
             this.f.on('click', i);
         }
     };
 
     o.gen_html = function () {
 
-        var cache = sip.db.search_result;
+        var cache = sip.db.d.search.result;
         if (cache.length <= 0) {
             cache = null;
             return('<font color="red">没有找到相应数据</font>');
@@ -1965,7 +2130,7 @@ sip.o.main.group_view = function (cid) {
         if (this.data && this.data.length > 0) {
             var i, tag = [], cat = [], j, types;
             for (i = 0; i < this.data.length; i++) {
-                tag.push({v: this.data[i], id: this.el(i)});
+                tag.unshift({v: this.data[i], id: this.el(i)});
             }
             types = sip.uset.atypes;
             cat.push({v: '全部', id: this.el(i)});
@@ -1973,33 +2138,51 @@ sip.o.main.group_view = function (cid) {
                 cat.push({v: types[j], id: this.el(j + i + 1)});
             }
             types = null;
-            content = Mustache.render(cardjs.lib.load_html('tp-group-view'), {tag: tag, cat: cat});
+            content = Mustache.render(cardjs.lib.load_html('tp-group-view'), {tag: tag, cat: cat, all: this.el(j + i + 1)});
             tag = null;
-            k = null;
         }
         return(sip.f.add_frame('tp-frame-tag-card', content, '分类浏览', 'margin-bottom:8px;'));
     };
 
+    o.set_btn_bgcolor = function () {
+        var i;
+        for(i=0;i<this.el();i++){
+            this.el(i,true).style.backgroundColor='white';
+        }
+        for (i = 0; i < this.data.length; i++) {
+            if (this.el(i, true).value === sip.db.d.page.key) {
+                this.el(i, true).style.backgroundColor = 'skyblue';
+            }
+        }
+        for (; i < this.el()-1; i++) {
+            if (this.el(i, true).value === sip.db.d.page.filter) {
+                this.el(i, true).style.backgroundColor = 'skyblue';
+            }
+        }
+    };
+
     o.gen_ev_handler = function () {
-        var evs = [], i, j;
+        var evs = [], i, j, id, last = this.el();
 
         for (i = 0; i < this.data.length; i++) {
             var value = this.data[i];
             evs.push((function () {
                 var v = value;
                 return (function () {
-                    sip.db.set('cur_key', v);
-                });
-            }()));
+                    //console.log(this);
+                    sip.db.set('page_key', v);
+                    this.set_btn_bgcolor();
+                }.bind(this));
+            }.bind(this)()));
         }
-
         evs.push((function () {
-            var v = '全部';
+            var v = '全部';   
             return(function () {
                 //console.log('clicked:', v);
                 sip.db.set('filter', v);
-            });
-        }()));
+                this.set_btn_bgcolor();
+            }.bind(this));
+        }.bind(this)()));
 
         for (j = 0; j < sip.uset.atypes.length; j++) {
             var value = sip.uset.atypes[j];
@@ -2008,9 +2191,18 @@ sip.o.main.group_view = function (cid) {
                 return(function () {
                     //console.log('clicked:', v);
                     sip.db.set('filter', v);
+                    this.set_btn_bgcolor();
                 });
-            }()));
+            }.bind(this)()));
         }
+        evs.push((function () {
+            //console.log('clicked: all article');
+            for (var k = 0; k < this.el(); k++) {
+                this.el(k, true).style.backgroundColor = 'white';
+            }
+            this.el(this.el()-1, true).style.backgroundColor = 'skyblue';
+            this.f.event('main_show_pager');
+        }.bind(this)));
 
         return evs;
     };
@@ -2077,6 +2269,7 @@ sip.o.main.article_board = function (cid) {
                     style: 'article-summary'
                 });
             } else {
+                this.f.event('main_clear_pager');
                 this.el(0, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-article-summary-container'), {
                     recent: data,
                     style: 'article-all-content'
@@ -2151,7 +2344,7 @@ sip.o.main.search_box = function (cid) {
                 if (k.keyCode !== 13) {
                     return;
                 }
-                this.f.trigger(2);
+                this.f.trigger(1);
                 //this.el(1,true).click();
             },
             // click
@@ -2161,14 +2354,14 @@ sip.o.main.search_box = function (cid) {
             }
         ];
     };
-    
-    o.show_search_result=function(){
+
+    o.show_search_result = function () {
         this.clean_up();
         this.child = sip.o.main.match_list(this.el(2)).show();
     };
 
     o.after_add_event = function () {
-        this.f.event('show_main_search_result',this.show_search_result);
+        this.f.event('show_main_search_result', this.show_search_result);
     };
 
     o.clean_up = function () {
