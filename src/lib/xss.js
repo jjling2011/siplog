@@ -160,7 +160,9 @@ function safeAttrValue (tag, name, value, cssFilter) {
          value.substr(0, 8) === 'https://' ||
          value.substr(0, 7) === 'mailto:' ||
          value[0] === '#' ||
-         value[0] === '/')) {
+         value[0] === '/' ||
+         value.substr(0,7)==='upload/'
+         )) {
       return '';
     }
   } else if (name === 'background') {

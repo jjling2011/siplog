@@ -156,7 +156,7 @@ class Serv extends UserMgr {
     private function export_article($year, $month) {
         $top_articles = CommLib::fetch_assoc('select * from article where `top`=1 order by mtime desc ');
         $recent_articles = CommLib::fetch_assoc('select * from article where `top`=0 order by mtime desc limit 15');
-        file_put_contents(EXPORT_PATH, $this->article_array_to_json($top_articles,$recent_articles));
+        file_put_contents(EXPORT_PATH, $this->article_array_to_json($top_articles, $recent_articles));
         //$this->ok('完成!');
         if ($year > 0 && $month > 0 && $month < 13) {
             $sql = 'select * from article where year(ctime)=? and month(ctime)=?';
@@ -166,15 +166,15 @@ class Serv extends UserMgr {
                 file_put_contents(ARTICLE_PATH . $year . '/' . $month . '.json', $this->article_array_to_json($articles));
                 //gen files.json
                 $files = [];
-                $sql='SELECT count(*) as c,concat(year(ctime),month(ctime)) as k '
+                $sql = 'SELECT count(*) as c,concat(year(ctime),month(ctime)) as k '
                         . ' FROM `article` '
                         . ' group by year(ctime),month(ctime) '
                         . ' order by k desc';
-                $rs= CommLib::fetch_assoc($sql);
-                foreach($rs as $r){
-                    $files[$r['k']]=$r['c'];
+                $rs = CommLib::fetch_assoc($sql);
+                foreach ($rs as $r) {
+                    $files[$r['k']] = $r['c'];
                 }
-                file_put_contents(FILE_PATH, json_encode(['files'=>$files,'update'=>"$year$month"]));
+                file_put_contents(FILE_PATH, json_encode(['files' => $files, 'update' => "$year$month"]));
             } else {
                 error_log('Error: serv.php.export_article() query fail!');
             }
@@ -363,10 +363,10 @@ class Serv extends UserMgr {
         $aid = $param['id'] + 0;
         $sql = 'select id,type,title,content,`top`,`lock` from article where id=?';
         $r = CommLib::fetch_assoc($sql, 'i', [$aid]);
-        if($r && count($r)>0){
-            $d=$r[0];
+        if ($r && count($r) > 0) {
+            $d = $r[0];
             $d['title'] = CommLib::utf8_to_base64($d['title']);
-            $d['content'] = CommLib::utf8_to_base64($d['content']);    
+            $d['content'] = CommLib::utf8_to_base64($d['content']);
             $this->ok($d);
             return;
         }
@@ -541,5 +541,9 @@ class Serv extends UserMgr {
 
 }
 
-$serv = new Serv();
-$serv->reply();
+#  define('_upload_mod_on','nothing');
+if (!defined('_upload_mod_on')) {
+    //error_log('normal_mod');
+    $serv = new Serv();
+    $serv->reply();
+}

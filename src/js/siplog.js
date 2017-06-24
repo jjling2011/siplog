@@ -96,6 +96,7 @@ sip.f.parse_json = function (e) {
         },
         content: function (d) {
             return(filterXSS(cardjs.lib.base64_to_utf8(d)));
+            //return((cardjs.lib.base64_to_utf8(d)));
         },
         top: function (d) {
             return(d === 0 ? false : true);
@@ -413,7 +414,7 @@ sip.o.db.article = function () {
                 m = key.substr(4),
                 path = sip.s.article_path + (y) + '/' + (m) + '.json';
 
-        console.log('Load data:'+key+'.json');
+        console.log('Load data:' + key + '.json');
 
         $.getJSON(path + '?t=' + cardjs.lib.rand(8), this.got_json.bind(this, callback, key));
 
@@ -701,12 +702,14 @@ sip.o.Main_wrap = function (cid) {
         name = param.name;
         desc = param.desc;
 
+        //console.log('update_banner',name,desc);
+
         if (name === undefined) {
-            name = sip.uset.banner_name;
+            name = cardjs.lib.base64_to_utf8(sip.uset.banner_name);
         }
 
         if (desc === undefined) {
-            desc = sip.uset.banner_desc;
+            desc = cardjs.lib.base64_to_utf8(sip.uset.banner_desc);
         }
 
 
@@ -726,6 +729,8 @@ sip.o.Main_wrap = function (cid) {
         this.f.event('main_update_banner', this.update_banner);
         this.f.event('main_clear_pager', this.clear_pager);
         this.f.event('main_show_pager', this.show_pager);
+
+        this.f.event('main_update_banner');
     };
 
     return o;
@@ -900,12 +905,12 @@ sip.o.art.list_orphan_img = function (cid) {
                             'deltime': cardjs.lib.getYMD(e.deltime),
                             'path': e.path && e.path.substr(3, e.path.length)
                         });
-                    });
+                    }.bind(this));
                     this.refresh();
                     if (this.data.length === 0) {
                         alert('没有孤儿图片');
                     }
-                });
+                }.bind(this));
             },
             function () {
                 //console.log('click1');
@@ -967,7 +972,7 @@ sip.o.art.editor = function (cid) {
     o.gen_ev_handler = function () {
         return {
             'commit': function () {
-                var content = this.editor.$txt.html();
+                var content = this.editor.txt.html();
                 var cache = this.f.restore();
                 var data = {
                     'title': cardjs.lib.utf8_to_base64(this.el(0, true).value),
@@ -988,7 +993,7 @@ sip.o.art.editor = function (cid) {
                 cardjs.lib.url_set_params('index.html');
 
                 this.el(5, true).innerHTML = '正在提交数据 ...';
-                o.f.fetch('post_article', data, function () {
+                this.f.fetch('post_article', data, function () {
                     alert('提交成功!');
                     this.f.trigger('new');
                     sip.db.load_files();
@@ -1010,7 +1015,7 @@ sip.o.art.editor = function (cid) {
                 this.el(10, true).checked = false;
                 this.el(0, true).value = '';
                 this.el(2, true).options[0].selected = true;
-                o.editor.$txt.html('<p><br></p>');
+                this.editor.txt.clear();
                 this.el(5, true).innerHTML = "新文章";
                 this.f.clear_cache('clear_art_board');
                 cardjs.lib.url_set_params('index.html');
@@ -1062,19 +1067,37 @@ sip.o.art.editor = function (cid) {
     };
 
     o.gen_html = function () {
-        this.ids = [];
+        var ids = [];
+        var atype = this.article_type;
         for (var i = 0; i < 11; i++) {
-            this.ids.push(this.el(i));
+            ids.push(this.el(i));
         }
-        return Mustache.render(cardjs.lib.load_html('tp-uma-editor'), this);
+        return Mustache.render(cardjs.lib.load_html('tp-uma-editor'), {ids: ids, atype: atype});
     };
 
     o.after_add_event = function () {
-        this.editor && this.editor.destroy();
-        this.editor = new wangEditor(o.ids[1]);
+        //this.editor && this.editor.destroy();
+
+        this.editor = new window.wangEditor('#' + this.el(1));
+        //this.editor = new wangEditor(o.ids[1]);
         if (sip.uset.upload) {
-            this.editor.config.uploadImgUrl = "./php/upload.php";
-            this.editor.config.uploadImgFileName = 'upload';
+            this.editor.customConfig.uploadImgServer = './php/upload.php';
+            this.editor.customConfig.uploadImgMaxSize = 4 * 1024 * 1024;
+            this.editor.customConfig.uploadImgMaxLength = 1;
+            var param = {tk: cardjs.lib.cookie_get('tk')};
+
+            this.editor.customConfig.uploadImgParams = param;
+            var func = {
+                fail: function (xhr, editor, result) {
+                    console.log(result.errno, result.msg);
+                }
+            };
+            this.editor.customConfig.uploadImgHooks = func;
+            this.editor.customConfig.uploadFileName = 'upload';
+//            this.editor.customConfig.debug = true;
+//            this.editor.customConfig.uploadImgHeaders = {
+//                'Accept': 'text/x-json'
+//            };
         }
         this.editor.create();
 
@@ -1104,7 +1127,7 @@ sip.o.art.editor = function (cid) {
         }
 
         if (sid > 0) {
-            this.editor.$txt.html('读取数据中 ...');
+            this.editor.txt.html('读取数据中 ...');
             this.f.fetch('fetch_article', {'id': sid}, function (data) {
                 //$this->ok(array('id'=>$id,'type'=>$type,'title'=>$title,'content'=>$content));
 
@@ -1121,7 +1144,7 @@ sip.o.art.editor = function (cid) {
                 //console.log('loadhtml', sip.cache.article.html);
                 this.load_cache();
             }, false, function (r) {
-                this.editor.$txt.html('<font color="red">' + r + '</font>');
+                this.editor.txt.html('<font color="red">' + r + '</font>');
             });
         } else {
             this.f.trigger('new');
@@ -1135,7 +1158,7 @@ sip.o.art.editor = function (cid) {
         cache.title = this.el(0, true).value;
         cache.type = this.el(2, true).selectedIndex;
         if (this.editor) {
-            cache.html = this.editor.$txt.html();
+            cache.html = this.editor.txt.html();
         }
         cache.lock = this.el(9, true).checked;
         cache.top = this.el(10, true).checked;
@@ -1153,7 +1176,7 @@ sip.o.art.editor = function (cid) {
                 type_no = cache.type;
             }
             this.el(2, true).options[type_no].selected = true;
-            this.editor.$txt.html(filterXSS(cache.html));
+            this.editor.txt.html(filterXSS(cache.html));
             this.el(9, true).checked = cache.lock;
             this.el(10, true).checked = cache.top;
             var cid = cache.cache_id;
@@ -1168,7 +1191,7 @@ sip.o.art.editor = function (cid) {
     o.clean_up = function () {
         if (this.editor) {
             this.save_cache();
-            this.editor.destroy();
+            //this.editor.destroy();
             this.editor = null;
         }
     };
@@ -1202,6 +1225,7 @@ sip.o.art.types = function (cid) {
                 //console.log(types);
                 sip.uset.atypes = types;
                 types = null;
+
                 o.f.fetch('update_uset', sip.uset, function () {
                     alert('分类信息修改成功！');
                     this.refresh();
@@ -1597,8 +1621,8 @@ sip.o.art.set_banner = function (cid) {
     };
 
     o.after_add_event = function () {
-        var name = sip.uset['banner_name'];
-        var desc = sip.uset['banner_desc'];
+        var name = cardjs.lib.base64_to_utf8(sip.uset['banner_name']);
+        var desc = cardjs.lib.base64_to_utf8(sip.uset['banner_desc']);
         if (name && name.length > 0) {
             this.el(0, true).value = name;
         }
@@ -1615,8 +1639,8 @@ sip.o.art.set_banner = function (cid) {
                 if (!confirm('确定提交修改?')) {
                     return;
                 }
-                sip.uset['banner_name'] = this.el(0, true).value;
-                sip.uset['banner_desc'] = this.el(1, true).value;
+                sip.uset['banner_name'] = cardjs.lib.utf8_to_base64(this.el(0, true).value);
+                sip.uset['banner_desc'] = cardjs.lib.utf8_to_base64(this.el(1, true).value);
                 this.f.fetch('update_uset', sip.uset, function (r) {
                     alert(r);
                 }, function (r) {
@@ -2146,15 +2170,15 @@ sip.o.main.group_view = function (cid) {
 
     o.set_btn_bgcolor = function () {
         var i;
-        for(i=0;i<this.el();i++){
-            this.el(i,true).style.backgroundColor='white';
+        for (i = 0; i < this.el(); i++) {
+            this.el(i, true).style.backgroundColor = 'white';
         }
         for (i = 0; i < this.data.length; i++) {
             if (this.el(i, true).value === sip.db.d.page.key) {
                 this.el(i, true).style.backgroundColor = 'skyblue';
             }
         }
-        for (; i < this.el()-1; i++) {
+        for (; i < this.el() - 1; i++) {
             if (this.el(i, true).value === sip.db.d.page.filter) {
                 this.el(i, true).style.backgroundColor = 'skyblue';
             }
@@ -2176,7 +2200,7 @@ sip.o.main.group_view = function (cid) {
             }.bind(this)()));
         }
         evs.push((function () {
-            var v = '全部';   
+            var v = '全部';
             return(function () {
                 //console.log('clicked:', v);
                 sip.db.set('filter', v);
@@ -2200,7 +2224,7 @@ sip.o.main.group_view = function (cid) {
             for (var k = 0; k < this.el(); k++) {
                 this.el(k, true).style.backgroundColor = 'white';
             }
-            this.el(this.el()-1, true).style.backgroundColor = 'skyblue';
+            this.el(this.el() - 1, true).style.backgroundColor = 'skyblue';
             this.f.event('main_show_pager');
         }.bind(this)));
 

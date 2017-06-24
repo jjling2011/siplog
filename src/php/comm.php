@@ -224,6 +224,12 @@ class Reply {
             self::fail('失败');
         }
     }
+    
+    public function check_token(){
+        $this->utk = substr(filter_input(INPUT_POST, 'tk', FILTER_SANITIZE_STRING), 0, 50);
+        //console.log('tk:'.$this->utk);
+        return $this->check_login();
+    }
 
     public function reply() {
 
@@ -236,6 +242,7 @@ class Reply {
 
         $func = substr(filter_input(INPUT_POST, 'op', FILTER_SANITIZE_STRING), 0, 32);
         $this->utk = substr(filter_input(INPUT_POST, 'tk', FILTER_SANITIZE_STRING), 0, 50);
+        //error_log($this->utk);
         $data = filter_input(INPUT_POST, "data", FILTER_UNSAFE_RAW);
         
         //error_log('user token:'.$this->utk);
