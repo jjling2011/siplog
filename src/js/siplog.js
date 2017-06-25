@@ -194,6 +194,7 @@ sip.o.main.pager = function (cid) {
         //console.log('call get data:key/idx/skip', key, key_index, skip);
         if (key in sip.db.d.data) {
             var ids = Object.keys(sip.db.d.data[key]).sort().reverse();
+            //console.log(ids);
             for (var i = skip; i < ids.length && this.d.data.length < size; i++) {
                 //console.log('push(key,idx)', key, i);
                 this.d.data.push(sip.db.d.data[key][ids[i]]);
@@ -310,9 +311,11 @@ sip.o.db.article = function () {
         //console.log(this);
         var d = [], f = this.d.page.filter, k = this.d.page.key, db = this.d.data;
         if (k in db) {
-            for (var id in db[k]) {
-                if (f === '全部' || f === '' || db[k][id].type === f) {
-                    d.unshift(db[k][id]);
+            var idx=Object.keys(db[k]).sort().reverse();
+            //console.log(idx);
+            for (var i=0;i<idx.length;i++) {
+                if (f === '全部' || f === '' || db[k][idx[i]].type === f) {
+                    d.push(db[k][idx[i]]);
                 }
             }
         }
@@ -366,11 +369,14 @@ sip.o.db.article = function () {
 
     o.search_cache = function (keywords, key) {
 
-        var id, e, mark, kw_idx;
+        var  e, mark, kw_idx;
+        
+        var idx=Object.keys(this.d.data[key]).sort().reverse();
+        //console.log('search idx:',idx);
 
-        for (id in this.d.data[key]) {
+        for (var i=0;i<idx.length;i++) {
             mark = 0;
-            e = this.d.data[key][id];
+            e = this.d.data[key][idx[i]];
             for (kw_idx in keywords) {
                 if (e.title.indexOf(keywords[kw_idx]) >= 0
                         || e.text.indexOf(keywords[kw_idx]) >= 0) {
@@ -382,7 +388,7 @@ sip.o.db.article = function () {
             if (keywords.length <= 0 || mark === keywords.length) {
                 this.d.search.result.push({
                     key: key,
-                    id: id,
+                    id: idx[i],
                     title: e.title,
                     data: e
                 });
