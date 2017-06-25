@@ -83,6 +83,7 @@ sip.f.parse_json = function (e) {
             return(filterXSS(cardjs.lib.base64_to_utf8(d)));
         },
         mtime: function (d) {
+            //console.log('mtime:'+d);
             return(cardjs.lib.getYMD(d));
         },
         ctime: function (d) {
@@ -192,7 +193,7 @@ sip.o.main.pager = function (cid) {
         var key = sip.db.d.file_key[key_index];
         //console.log('call get data:key/idx/skip', key, key_index, skip);
         if (key in sip.db.d.data) {
-            var ids = Object.keys(sip.db.d.data[key]);
+            var ids = Object.keys(sip.db.d.data[key]).sort().reverse();
             for (var i = skip; i < ids.length && this.d.data.length < size; i++) {
                 //console.log('push(key,idx)', key, i);
                 this.d.data.push(sip.db.d.data[key][ids[i]]);
@@ -311,7 +312,7 @@ sip.o.db.article = function () {
         if (k in db) {
             for (var id in db[k]) {
                 if (f === '全部' || f === '' || db[k][id].type === f) {
-                    d.push(db[k][id]);
+                    d.unshift(db[k][id]);
                 }
             }
         }
@@ -577,7 +578,7 @@ sip.o.main.msg = function (cid) {
                 data.forEach(function (e) {
                     msg.push({
                         text: filterXSS(e.text),
-                        ctime: cardjs.lib.getYMD(e.time),
+                        ctime: cardjs.lib.getYMD(e.ctime),
                         name: filterXSS(e.name)
                     });
                 });
@@ -2281,6 +2282,7 @@ sip.o.main.article_board = function (cid) {
             if (data === undefined || data.length === 0) {
                 data = null;
             }
+            
             //console.log('call main_art_board_update:', data);
             this.f.cache(data);
             if (!data) {

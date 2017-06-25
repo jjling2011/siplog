@@ -159,7 +159,7 @@ class Serv extends UserMgr {
         file_put_contents(EXPORT_PATH, $this->article_array_to_json($top_articles, $recent_articles));
         //$this->ok('完成!');
         if ($year > 0 && $month > 0 && $month < 13) {
-            $sql = 'select * from article where year(ctime)=? and month(ctime)=?';
+            $sql = 'select * from article where year(ctime)=? and month(ctime)=? order by mtime desc';
             $articles = CommLib::fetch_assoc($sql, 'ii', [$year, $month]);
             if ($articles !== false) {
                 CommLib::mkdir(ARTICLE_PATH . $year);
