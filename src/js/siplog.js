@@ -193,7 +193,7 @@ sip.o.main.pager = function (cid) {
         var key = sip.db.d.file_key[key_index];
         //console.log('call get data:key/idx/skip', key, key_index, skip);
         if (key in sip.db.d.data) {
-            var ids = Object.keys(sip.db.d.data[key]).sort().reverse();
+            var ids = Object.keys(sip.db.d.data[key]).sort(function(a,b){return (a-b);}).reverse();
             //console.log(ids);
             for (var i = skip; i < ids.length && this.d.data.length < size; i++) {
                 //console.log('push(key,idx)', key, i);
@@ -311,7 +311,7 @@ sip.o.db.article = function () {
         //console.log(this);
         var d = [], f = this.d.page.filter, k = this.d.page.key, db = this.d.data;
         if (k in db) {
-            var idx=Object.keys(db[k]).sort().reverse();
+            var idx=Object.keys(db[k]).sort(function(a,b){return (a-b);}).reverse();
             //console.log(idx);
             for (var i=0;i<idx.length;i++) {
                 if (f === '全部' || f === '' || db[k][idx[i]].type === f) {
@@ -371,7 +371,7 @@ sip.o.db.article = function () {
 
         var  e, mark, kw_idx;
         
-        var idx=Object.keys(this.d.data[key]).sort().reverse();
+        var idx=Object.keys(this.d.data[key]).sort(function(a,b){return (a-b);}).reverse();
         //console.log('search idx:',idx);
 
         for (var i=0;i<idx.length;i++) {
@@ -482,7 +482,7 @@ sip.o.db.article = function () {
             if ('files' in data) {
                 this.d.files = data.files;
                 //console.log('files', this.d.files);
-                this.d.file_key = Object.keys(data.files).sort().reverse();
+                this.d.file_key = Object.keys(data.files).sort(function(a,b){return (a-b);}).reverse();
                 if (this.d.file_key.length > 0) {
                     this.d.page.key = this.d.file_key[0];
                     var sum = 0;
