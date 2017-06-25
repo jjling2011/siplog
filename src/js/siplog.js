@@ -1049,9 +1049,9 @@ sip.o.art.editor = function (cid) {
                 if (this.el(8, true).style.display === 'block') {
                     this.el(8, true).style.display = 'none';
                 } else {
-                    var pos = cardjs.lib.get_DOM_offset(this.el(1, true));
-                    this.el(8, true).style.left = (pos.left - 8 - parseInt(this.el(8, true).style.width)) + "px";
-                    this.el(8, true).style.top = (pos.top - 8 - parseInt(this.el(8, true).style.height)) + "px";
+                    var pos = cardjs.lib.get_DOM_offset(this.el(7, true));
+                    this.el(8, true).style.left = (pos.left - parseInt(this.el(8, true).style.width)) + "px";
+                    this.el(8, true).style.top = (pos.top + 8 ) + "px";
                     this.el(8, true).style.display = 'block';
                 }
             }

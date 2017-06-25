@@ -155,7 +155,7 @@ class Serv extends UserMgr {
 
     private function export_article($year, $month) {
         $top_articles = CommLib::fetch_assoc('select * from article where `top`=1 order by mtime desc ');
-        $recent_articles = CommLib::fetch_assoc('select * from article where `top`=0 order by mtime desc limit 15');
+        $recent_articles = CommLib::fetch_assoc('select * from article where `top`=0 order by mtime desc limit 5');
         file_put_contents(EXPORT_PATH, $this->article_array_to_json($top_articles, $recent_articles));
         //$this->ok('完成!');
         if ($year > 0 && $month > 0 && $month < 13) {

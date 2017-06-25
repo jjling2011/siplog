@@ -161,7 +161,8 @@ function safeAttrValue (tag, name, value, cssFilter) {
          value.substr(0, 7) === 'mailto:' ||
          value[0] === '#' ||
          value[0] === '/' ||
-         value.substr(0,7)==='upload/'
+         value.substr(0,7)==='upload/' ||
+         value.substr(0,11)==='index.html?'
          )) {
       return '';
     }
