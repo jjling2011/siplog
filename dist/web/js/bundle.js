@@ -4200,7 +4200,6 @@ sip.o.db.article = function () {
         key: data_key,
         d: {
             data: {},
-            top: [],
             files: [],
             search: {
                 kw_cache: null,
@@ -4410,7 +4409,6 @@ sip.o.db.article = function () {
     o.load_files = function () {
 
         this.d.files = [];
-        this.d.top = [];
         this.d.search.kw_cache = null;
         this.d.search.kw_cur = null;
         this.d.result = [];
@@ -4443,12 +4441,6 @@ sip.o.db.article = function () {
                 }
             }
             //console.log(this);
-        }.bind(this)).always(function () {
-            $.getJSON(sip.s.top_art_path + '?t=' + cardjs.lib.rand(8), function (data) {
-                for (var i = 0; i < data.length; i++) {
-                    this.d.top.push(sip.f.parse_json(data[i]));
-                }
-            }.bind(this));
         }.bind(this));
     };
 
@@ -6230,7 +6222,7 @@ sip.o.main.article_board = function (cid) {
             return '<div id="' + this.el(0) + '"></div>';
         },
         update: function (data) {
-            if (data === undefined || data===null || !data.length || data.length === 0) {
+            if (data === undefined || (data.length && data.length === 0)) {
                 data = null;
             }
             

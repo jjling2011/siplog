@@ -91,7 +91,7 @@ function gen_sql() {
   `path` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `atid` int(11) NOT NULL DEFAULT '0',
   `tag` int(11) NOT NULL DEFAULT '0',
-  KEY `id` (`id`),
+  UNIQUE KEY `id` (`id`),
   KEY `url` (`url`(191))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='上传图片数据'";
 

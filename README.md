@@ -1,6 +1,8 @@
 ## Siplog  
-A single page blog.  
+  
 一个单页博客。  
+A single page blog.  
+  
 [演示地址][1]  
   
 界面通过[card.js][2](我的另一个项目)动态生成。  
@@ -10,22 +12,36 @@ A single page blog.
   
     
 ## 安装  
-1.克隆这个源的全部文件到支持php的http目录。例如：`/srv/http`  
-`git clone https://github.com/jjling2011/siplog.git`  
-
-2.创建并为http用户添加upload目录的写入权限。  
+1.克隆这个项目  
 ```
-# mkdir src/upload
-# chown http:http src/upload
-# chmod u+rwx src/upload
+git clone https://github.com/jjling2011/siplog.git 
+```
+  
+2.复制dist文件夹到支持php的http目录  
+`假设目录为/srv/http`  
+```
+cd siplog
+cp -a dist /srv/http/siplog
+```
+  
+3.创建upload目录,并添加写入权限(通常不需要这步)  
+`假设http服务的用户名及组为 http:http`  
+```
+mkdir /srv/http/siplog/web/upload
+chown http:http /srv/http/siplog/web/upload
+chmod u+rwx /srv/http/siplog/upload
 ```  
   
-3.添加mariandb数据库及添加用户(略)  
-
-4.打开浏览器访问 `http://......../siplog/src/install.php` 填入相应信息  
-
-以上
-
+4.添加一个数据库并为数据库用户添加以下权限  
+```
+SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,INDEX,ALTER
+```
+  
+5.打开浏览器输入下网址进行安装  
+`http:// ... /siplog/web/install.php`  
+  
+以上  
+  
 
   [1]: http://ltc.epizy.com/siplog/index.html
   [2]: https://github.com/jjling2011/card.js
