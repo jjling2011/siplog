@@ -3,23 +3,22 @@
 
 /* global define */
 
+(function (name, context, definition) {
+    // copy from https://github.com/ded/qwery/blob/master/src/qwery.js
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = definition();
+    } else if (typeof define === 'function' && define.amd) {
+        define(function () {
+            return definition();
+        });
+    } else {
+        context[name] = definition();
+    }
+})('cardjs', this, function () {
 
-"use strict";
-
-/*
- (function (name, context, definition) {
- // copy from https://github.com/ded/qwery/blob/master/src/qwery.js
- if (typeof module !== 'undefined' && module.exports) {
- module.exports = definition(context);
- } else if (typeof define === 'function' && define.amd) {
- define(function () {
- return definition(context);
- });
- } else {
- context[name] = definition(context);
- }
- })('cardjs', this, */
-(function (root, module_name) {
+    "use strict";
+    
+    var root = window;
 
     var Package = function (params) {
 
@@ -734,7 +733,7 @@
             var sy = (root.pageYOffset !== undefined)
                     ? root.pageYOffset
                     : (root.document.documentElement || root.document.body.parentNode || root.document.body).scrollTop;
-            
+
             left = rect.left + sx + rect.width;
             top = rect.top + sy + rect.height;
             //console.log('rect:', rect, ' root.sx/sy:', root.scrollX, root.scrollY, ' left/top:', left, top);
@@ -1121,8 +1120,7 @@
         create: Create
     };
 
-    root[module_name] = exports;
+    //root[module_name] = exports;
 
-    //return (exports);
-}(window, 'cardjs'));
-// );
+    return (exports);
+});

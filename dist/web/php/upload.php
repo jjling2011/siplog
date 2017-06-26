@@ -56,7 +56,7 @@ function make_dir() {
 
 function get_actual_link($file) {
     //$link = "http://$_SERVER[HTTP_HOST]" . dirname($_SERVER['PHP_SELF']) . "/$file";
-    $link = str_replace('../', '', $file);
+    $link = str_replace('../', 'web/', $file);
     //$link = str_replace('/php/../', '/', $link);
     return ($link);
 }

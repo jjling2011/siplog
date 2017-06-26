@@ -4,8 +4,9 @@
  * and open the template in the editor.
  */
 
-/* global cardjs, Mustache */
-cardjs.set({server_page: 'php/serv.php'});
+/* global  Mustache,cardjs */
+
+cardjs.set({server_page: 'web/php/serv.php'});
 
 /*
  * cache share keys:
@@ -30,15 +31,16 @@ var sip = {
     },
     s: {
         //最近文章数据的位置
-        top_art_path: 'upload/json/top.json',
+        json_path:'web/upload/json/',
+        top_art_path: 'web/upload/json/top.json',
         // 文章分类
-        atypes_path: 'upload/json/atypes.json',
-        msg_path: 'upload/json/msg.json',
-        article_path: 'upload/json/',
+        atypes_path: 'web/upload/json/atypes.json',
+        msg_path: 'web/upload/json/msg.json',
+        article_path: 'web/upload/json/',
         // 记录json文件是否存在，由serv.php生成。
         // {'20176':true,'201612':true}
-        files_path: 'upload/json/files.json',
-        uset_path: 'upload/json/uset.json'
+        files_path: 'web/upload/json/files.json',
+        uset_path: 'web/upload/json/uset.json'
     },
     // 这些不太重要的设置，用户可以自己改。
     // 会被 upload/uset.json 覆盖。
@@ -1085,10 +1087,10 @@ sip.o.art.editor = function (cid) {
     o.after_add_event = function () {
         //this.editor && this.editor.destroy();
 
-        this.editor = new window.wangEditor('#' + this.el(1));
+        this.editor = new wangEditor('#' + this.el(1));
         //this.editor = new wangEditor(o.ids[1]);
         if (sip.uset.upload) {
-            this.editor.customConfig.uploadImgServer = './php/upload.php';
+            this.editor.customConfig.uploadImgServer = './web/php/upload.php';
             this.editor.customConfig.uploadImgMaxSize = 4 * 1024 * 1024;
             this.editor.customConfig.uploadImgMaxLength = 1;
             var param = {tk: cardjs.lib.cookie_get('tk')};
@@ -2285,7 +2287,7 @@ sip.o.main.article_board = function (cid) {
             return '<div id="' + this.el(0) + '"></div>';
         },
         update: function (data) {
-            if (data === undefined || data.length === 0) {
+            if (data === undefined || data===null || !data.length || data.length === 0) {
                 data = null;
             }
             
@@ -2323,7 +2325,7 @@ sip.o.main.article_board = function (cid) {
             }
             var param = get_url_keyid();
             if (param.y && param.m && param.id) {
-                $.getJSON('upload/json/' + param.y + '/' + param.m + '.json', function (data) {
+                $.getJSON(sip.s.json_path + param.y + '/' + param.m + '.json', function (data) {
                     //console.log(data,tid);
                     for (var i = 0; i < data.length; i++) {
                         if (data[i].id === param.id) {
@@ -2461,4 +2463,5 @@ sip.o.art.backup = function (cid) {
     return o;
 
 };
+
 

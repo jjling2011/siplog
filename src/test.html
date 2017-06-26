@@ -7,16 +7,16 @@
         <title>siplog (developing)</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=1366,  maximum-scale=1.5, user-scalable=yes" />
-        <script type="text/javascript" src="lib/jquery.min.js"></script> 
-        <link rel="stylesheet" href="lib/bootstrap.min.css" >
-        <link rel="stylesheet" href="css/siplog.css?t=20170518001">
-        <script type="text/javascript" src="lib/bootstrap.min.js"></script>
-        <script type="text/javascript" src="lib/mustache.js"></script>
-        <script type="text/javascript" src="lib/xss.js"></script>
-        <script type="text/javascript" src="lib/md5.js"></script>
-        <script type="text/javascript" src="lib/wangEditor.min.js"></script>
-        <script type="text/javascript" src="js/card.js?t=20170518001"></script>
-        <script type="text/javascript" src="js/siplog.js?t=20170518001"></script>
+        <script type="text/javascript" src="web/js/lib/jquery.min.js"></script> 
+        <link rel="stylesheet" href="web/css/bootstrap.min.css" >
+        <link rel="stylesheet" href="web/css/siplog.css?t=20170518001">
+        <script type="text/javascript" src="web/js/lib/bootstrap.min.js"></script>
+        <script type="text/javascript" src="web/js/lib/mustache.js"></script>
+        <script type="text/javascript" src="web/js/lib/xss.js"></script>
+        <script type="text/javascript" src="web/js/lib/md5.js"></script>
+        <script type="text/javascript" src="web/js/lib/wangEditor.min.js"></script>
+        <script type="text/javascript" src="web/js/src/card.js?t=20170518001"></script>
+        <script type="text/javascript" src="web/js/src/siplog.js?t=20170518001"></script>
     </head>
     <body >
         <div style="width:100%;" id="main-page-container"></div>
@@ -28,7 +28,7 @@
         <script>
             var main_page;
             $(document).ready(function () {
-                $("#templates").load("res/template.html", function () {
+                $("#templates").load("web/template.html", function () {
                     $.getJSON(sip.s.uset_path + '?t=' + cardjs.lib.rand(), function (data) {
                         sip.f.merge_uset(data);
                     }).always(function () {

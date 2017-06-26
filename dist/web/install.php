@@ -11,7 +11,7 @@ $r = check_param();
 
 if ($r[0]) {
     install();
-    die('安装完成！<a href="index.html" >点击跳转到主页</a>');
+    die('安装完成！<a href="../index.html" >点击跳转到主页</a>');
 }
 
 function install() {
@@ -28,11 +28,11 @@ function install() {
     make_dir('upload/json');
     make_dir('upload/pics');
 
-    copy('res/settings.skeleton.php', 'upload/config/settings.php');
-    copy('res/files.json', 'upload/json/files.json');
-    copy('res/uset.json', 'upload/json/uset.json');
-    copy('res/top.json', 'upload/json/top.json');
-    copy('res/msg.json', 'upload/json/msg.json');
+    copy('install/settings.skeleton.php', 'upload/config/settings.php');
+    copy('install/files.json', 'upload/json/files.json');
+    copy('install/uset.json', 'upload/json/uset.json');
+    copy('install/top.json', 'upload/json/top.json');
+    copy('install/msg.json', 'upload/json/msg.json');
 
     set('DB_HOST', $param['host']);
     set('DB_USER', $param['dbuser']);
