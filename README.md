@@ -29,10 +29,10 @@ cp -a dist /srv/http/siplog
 ```
 mkdir /srv/http/siplog/web/upload
 chown http:http /srv/http/siplog/web/upload
-chmod u+rwx /srv/http/siplog/upload
+chmod u+rwx /srv/http/siplog/web/upload
 ```  
   
-4.添加一个数据库并为数据库用户添加以下权限  
+4.添加一个数据库并为数据库用户授予以下权限  
 ```
 SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,INDEX,ALTER
 ```
