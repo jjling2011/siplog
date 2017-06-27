@@ -50,7 +50,7 @@
         </td>
     </tr>
 	<tr>
-		<td align="center">
+		<td align="center" style="padding-bottom:25px;">
 			<div style="width:960px;text-align:right;padding-right:8px;color:#aaa;margin-top: 8px;border-top: 1px solid #ddd;">
 			<a href="https://github.com/jjling2011/siplog" >Siplog</a>&nbsp;
 			&copy;&nbsp;2017&nbsp;Power&nbsp;by&nbsp; 
@@ -190,29 +190,73 @@
 
 <script type="text/template" id="tp-uma-help">
     <div style="padding: 0px;margin: 8px;">
-	【主页搜索】<br>
-	主页右侧搜索框只能搜索最近半年的数据。<br>
-	主页左侧的文章概要在每次发布、修改、删除文章后更新。<br><br>
-	
-	【编辑及删除文章】<br>
-	先在 [管理] -> [搜索] 中输入条件，<br>
-	找到你想编辑或删除的文件。<br>
-	点中后相应行会变色，<br>
-	然后切换到 [编辑] 分页即可修改。<br><br>
-	
-	
-    【搜索选项】<br>
-	注意，这里是指[管理]页面中的搜索，不是[主页]中的搜索。
+	【首页】<br>
+	左侧窗口在发布、修改、删除文章 或者 点击搜索结果、分类窗口时，显示相应文章<br>
+	单击标题或者双击文章内容显示全文<br>
+	右侧搜索窗口可以搜索标题或者内容，只显示前15个结果<br>
+	右侧是留言窗口无需登录，可在[设置]中开启/关闭<br>
+	<br>
+	【管理页面】<br>
+	所有功能登录后才可使用。右侧是登录和用户管理。<br>
+	<br>
+	一、右侧<br>
+	1.问候栏<br>
+	点击“更改密码”会出现修改用名及密码窗口。<br>
+	<br>
+	2.账号管理<br>
+	点击下拉列表选择用户<br>
+	第一行是用户名
+	第二行是登录账号
+	中间为权限列表，详见下表：<br>
+	<table class="table table-bordered" style="width:250px;">
+	<tr><th style="width:50px;"> 权限代号</th><th>说明</th></tr>
+	<tr><td>USERM</td><td>管理用户(最高权限)</td></tr>
+	<tr><td>ARTM</td><td>发布新文章<br>修改未锁定的文章</td></tr>
+	<tr><td>ARTL</td><td>设置文章锁定及置顶<br>可修改锁定的文章</td></tr>
+	<tr><td>SETM</td><td>使用[设置]分页中的功能</td></tr>
+	<tr><td>BACKUP</td><td>使用备份功能</td></tr>
+	</table>
+	各按钮说明：<br>
+	<table class="table table-bordered" style="width:250px;">
+	<tr><th style="width:50px;">按钮</th><th>功能</th></tr>
+	<tr><td>停用</td><td>选中的用户禁止登录<br>账号栏变成灰色</td></tr>
+	<tr><td>修改</td><td>修改选中用户的设置</td></tr>
+	<tr><td>重置</td><td>密码重设为默认密码<br>清除所有权限</td></tr>
+	<tr><td>添加</td><td>添加新用户</td></tr>
+	</table>
+	<br>
+	二、左侧<br>
+	1.编辑<br>
+	新增、修改、删除文章。<br>
+	<br>
+	可以通过以下方式选定文章：<br>
+	<ul>
+	<li>在首页点击文章标题，注意url会变成 index.html?id=1 的形式</li>
+	<li>在首页搜索出文章后点击相应的搜索结果</li>
+	<li>在管理页面的搜索中点击相应的搜索结果</li>
+	</ul>
+	<br>
+	2.搜索<br>
+	根据输入的条件搜索文章。<br>
+	点击搜索结果后可切换到[编辑]页面进行修改。<br>
+	<br>
+	可用搜索选项：<br>
     <ul>
     <li>@名字</li>
     <li>#标题</li>
     <li>=分类(注意分类用数字）</li>
-    <li>内容直接搜索</li>
+    <li>其他关键词匹配正文内容</li>
     </ul>
-    例如：<br />
-    ( 汽车 or 自行车 ) #便宜 and =0 <br />
+    例如：<br>
+    ( 汽车 or 自行车 ) #便宜 and =0 <br>
     搜索分类0里面，标题含有【便宜】<br>
 	正文含有 【汽车】或【自行车】的文章<br>
+	<br>
+	3.图片管理<br>
+	列出或删除所有已上传但不属于任何文章的图片<br>
+	<br>
+	4.剩下三个不用说明了吧 XD<br>
+	<br>
     </div>
 </script>
 
@@ -393,7 +437,14 @@
 			<div style="width:100%;padding-top:8px;padding-bottom:20px;padding-left: 16px;padding-right: 16px;border-radius:3px;border: 1px solid #ddd;background:white;">
             <table style="width:100%;">
                 <tr>
-					<td style="text-align:left;font-size:23px;width:1%;white-space:nowrap;">
+					<td style="text-align:left;font-size:23px;width:1%;white-space:nowrap;" onclick="(function(el){
+						var content=$(el).closest('tr').next().next().find('td:first').find('div:first');
+						content.dblclick();
+						//console.log(content.html());
+						if (window.history.pushState) {
+							window.history.pushState({}, null, 'index.html?id={{id}}');
+						}
+					}(this));">
 						{{title}}
 						{{#top}}&nbsp;<input type="button" class="btn btn-xs " style="background:lightblue;color:#999;" value="📌">{{/top}}
 						{{#lock}}&nbsp;<input type="button" class="btn btn-xs " style="background:bisque;color:#999;" value="🔒">{{/lock}}
