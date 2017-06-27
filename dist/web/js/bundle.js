@@ -3464,17 +3464,19 @@ module.exports = {
             }
             o = null;
         },
-        utf8_to_base64: function (text_utf8) {
+        encode_utf8: function (text_utf8) {
             //对应 php decode:
             // $txt_utf8 = urldecode(base64_decode($txt_b64));
-            return root.btoa(root.encodeURIComponent(text_utf8));
+            //return root.btoa(root.encodeURIComponent(text_utf8));
+            return root.encodeURIComponent(text_utf8);
         },
-        base64_to_utf8: function (text_base64) {
+        decode_utf8: function (text_base64) {
             // 对应 php encode: 
             // $txt_b64 =base64_encode(rawurlencode($txt_utf8));
             // **** 注意是带raw三个字母 **** 
             // 不要问为什么！记住php是世界上最好的语言就对了！！
-            return (root.decodeURIComponent(root.atob(text_base64)));
+            //return (root.decodeURIComponent(root.atob(text_base64)));
+            return (root.decodeURIComponent(text_base64));
         },
         load_html: function (id) {
             return(root.document.getElementById(id).innerHTML);
@@ -4025,7 +4027,7 @@ sip.f.add_frame = function (frame_id, content, tag, style) {
 sip.f.parse_json = function (e) {
     var f = {
         title: function (d) {
-            return(filterXSS(cardjs.lib.base64_to_utf8(d)));
+            return(filterXSS(cardjs.lib.decode_utf8(d)));
         },
         mtime: function (d) {
             //console.log('mtime:'+d);
@@ -4041,8 +4043,8 @@ sip.f.parse_json = function (e) {
             return(filterXSS(d));
         },
         content: function (d) {
-            return(filterXSS(cardjs.lib.base64_to_utf8(d)));
-            //return((cardjs.lib.base64_to_utf8(d)));
+            return(filterXSS(cardjs.lib.decode_utf8(d)));
+            //return((cardjs.lib.decode_utf8(d)));
         },
         top: function (d) {
             return(d === 0 ? false : true);
@@ -4649,11 +4651,11 @@ sip.o.Main_wrap = function (cid) {
         //console.log('update_banner',name,desc);
 
         if (name === undefined) {
-            name = cardjs.lib.base64_to_utf8(sip.uset.banner_name);
+            name = cardjs.lib.decode_utf8(sip.uset.banner_name);
         }
 
         if (desc === undefined) {
-            desc = cardjs.lib.base64_to_utf8(sip.uset.banner_desc);
+            desc = cardjs.lib.decode_utf8(sip.uset.banner_desc);
         }
 
 
@@ -4919,15 +4921,14 @@ sip.o.art.editor = function (cid) {
                 var content = this.editor.txt.html();
                 var cache = this.f.restore();
                 var data = {
-                    'title': cardjs.lib.utf8_to_base64(this.el(0, true).value),
-                    'content': cardjs.lib.utf8_to_base64(content),
+                    'title': cardjs.lib.encode_utf8(this.el(0, true).value),
+                    'content': cardjs.lib.encode_utf8(content),
                     'type': this.el(2, true).options[this.el(2, true).selectedIndex].value,
                     'id': cache.cache_id,
                     'top': this.el(10, true).checked ? 1 : 0,
                     'lock': this.el(9, true).checked ? 1 : 0
-
                 };
-                //console.log(content);
+                //console.log(data.content);
                 if (!confirm('确定提交？')) {
                     return;
                 }
@@ -5077,8 +5078,8 @@ sip.o.art.editor = function (cid) {
 
                 var cache = this.f.restore() || {};
                 cache.cache_id = data.id;
-                cache.title = cardjs.lib.base64_to_utf8(data.title);
-                cache.html = cardjs.lib.base64_to_utf8(data.content);
+                cache.title = cardjs.lib.decode_utf8(data.title);
+                cache.html = cardjs.lib.decode_utf8(data.content);
                 cache.type = data.type;
                 cache.lock = !(data.lock === 0);
                 cache.top = !(data.top === 0);
@@ -5121,6 +5122,9 @@ sip.o.art.editor = function (cid) {
             }
             this.el(2, true).options[type_no].selected = true;
             this.editor.txt.html(filterXSS(cache.html));
+            //console.log('raw',cache.html);
+            //console.log('fxss',filterXSS(cache.html));
+            //this.editor.txt.html(cache.html);
             this.el(9, true).checked = cache.lock;
             this.el(10, true).checked = cache.top;
             var cid = cache.cache_id;
@@ -5565,8 +5569,8 @@ sip.o.art.set_banner = function (cid) {
     };
 
     o.after_add_event = function () {
-        var name = cardjs.lib.base64_to_utf8(sip.uset['banner_name']);
-        var desc = cardjs.lib.base64_to_utf8(sip.uset['banner_desc']);
+        var name = cardjs.lib.decode_utf8(sip.uset['banner_name']);
+        var desc = cardjs.lib.decode_utf8(sip.uset['banner_desc']);
         if (name && name.length > 0) {
             this.el(0, true).value = name;
         }
@@ -5583,8 +5587,8 @@ sip.o.art.set_banner = function (cid) {
                 if (!confirm('确定提交修改?')) {
                     return;
                 }
-                sip.uset['banner_name'] = cardjs.lib.utf8_to_base64(this.el(0, true).value);
-                sip.uset['banner_desc'] = cardjs.lib.utf8_to_base64(this.el(1, true).value);
+                sip.uset['banner_name'] = cardjs.lib.encode_utf8(this.el(0, true).value);
+                sip.uset['banner_desc'] = cardjs.lib.encode_utf8(this.el(1, true).value);
                 this.f.fetch('update_uset', sip.uset, function (r) {
                     alert(r);
                 }, function (r) {

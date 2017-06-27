@@ -111,8 +111,8 @@ class Serv extends UserMgr {
                         $d['id'] + 0,
                         $d['userid'] + 0,
                         $d['type'] + 0,
-                        CommLib::base64_to_utf8($d['title']),
-                        CommLib::base64_to_utf8($d['content']),
+                        CommLib::decode_utf8($d['title']),
+                        CommLib::decode_utf8($d['content']),
                         $d['tag'] + 0,
                         $d['ctime'],
                         $d['mtime'],
@@ -186,8 +186,8 @@ class Serv extends UserMgr {
         foreach ($params as $param) {
             foreach ($param as $p) {
                 $d[] = [
-                    'title' => CommLib::utf8_to_base64($p['title']),
-                    'content' => CommLib::utf8_to_base64($p['content']),
+                    'title' => CommLib::encode_utf8($p['title']),
+                    'content' => CommLib::encode_utf8($p['content']),
                     'mtime' => $p['mtime'],
                     'ctime' => $p['ctime'],
                     'id' => $p['id'] + 0,
@@ -365,8 +365,8 @@ class Serv extends UserMgr {
         $r = CommLib::fetch_assoc($sql, 'i', [$aid]);
         if ($r && count($r) > 0) {
             $d = $r[0];
-            $d['title'] = CommLib::utf8_to_base64($d['title']);
-            $d['content'] = CommLib::utf8_to_base64($d['content']);
+            $d['title'] = CommLib::encode_utf8($d['title']);
+            $d['content'] = CommLib::encode_utf8($d['content']);
             $this->ok($d);
             return;
         }
@@ -462,8 +462,11 @@ class Serv extends UserMgr {
 
         $data = json_decode($raw_data, true);
 
-        $content = CommLib::base64_to_utf8($data['content']);
-        $title = CommLib::base64_to_utf8($data['title']);
+        $content = CommLib::decode_utf8($data['content']);
+        $title = CommLib::decode_utf8($data['title']);
+        
+        //error_log(print_r($data,true));
+        //error_log(print_r($content,true));
 
         /*
          * var data = {

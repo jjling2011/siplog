@@ -65,12 +65,14 @@ class CommLib {
         return $datas;
     }
 
-    public static function base64_to_utf8($txt_b64) {
-        return urldecode(base64_decode($txt_b64));
+    public static function decode_utf8($txt_b64) {
+        //return urldecode(base64_decode($txt_b64));
+        return urldecode($txt_b64);
     }
 
-    public static function utf8_to_base64($txt_utf8) {
-        return base64_encode(rawurlencode($txt_utf8));
+    public static function encode_utf8($txt_utf8) {
+        //return base64_encode(rawurlencode($txt_utf8));
+        return rawurlencode($txt_utf8);
     }
 
     public static function filter_str($s, $len = 48) {
