@@ -31,7 +31,8 @@ var sip = {
     },
     s: {
         //最近文章数据的位置
-        json_path:'web/upload/json/',
+        rainbow: "4YpcTwRat7A8hqlAKW4B7jOUJyBUEvnr",
+        json_path: 'web/upload/json/',
         top_art_path: 'web/upload/json/top.json',
         // 文章分类
         atypes_path: 'web/upload/json/atypes.json',
@@ -82,7 +83,7 @@ sip.f.add_frame = function (frame_id, content, tag, style) {
 sip.f.parse_json = function (e) {
     var f = {
         title: function (d) {
-            return(filterXSS(cardjs.lib.base64_to_utf8(d)));
+            return(filterXSS(cardjs.lib.decode_utf8(d)));
         },
         mtime: function (d) {
             //console.log('mtime:'+d);
@@ -98,8 +99,8 @@ sip.f.parse_json = function (e) {
             return(filterXSS(d));
         },
         content: function (d) {
-            return(filterXSS(cardjs.lib.base64_to_utf8(d)));
-            //return((cardjs.lib.base64_to_utf8(d)));
+            return(filterXSS(cardjs.lib.decode_utf8(d)));
+            //return((cardjs.lib.decode_utf8(d)));
         },
         top: function (d) {
             return(d === 0 ? false : true);
@@ -195,7 +196,9 @@ sip.o.main.pager = function (cid) {
         var key = sip.db.d.file_key[key_index];
         //console.log('call get data:key/idx/skip', key, key_index, skip);
         if (key in sip.db.d.data) {
-            var ids = Object.keys(sip.db.d.data[key]).sort(function(a,b){return (a-b);}).reverse();
+            var ids = Object.keys(sip.db.d.data[key]).sort(function (a, b) {
+                return (a - b);
+            }).reverse();
             //console.log(ids);
             for (var i = skip; i < ids.length && this.d.data.length < size; i++) {
                 //console.log('push(key,idx)', key, i);
@@ -312,9 +315,11 @@ sip.o.db.article = function () {
         //console.log(this);
         var d = [], f = this.d.page.filter, k = this.d.page.key, db = this.d.data;
         if (k in db) {
-            var idx=Object.keys(db[k]).sort(function(a,b){return (a-b);}).reverse();
+            var idx = Object.keys(db[k]).sort(function (a, b) {
+                return (a - b);
+            }).reverse();
             //console.log(idx);
-            for (var i=0;i<idx.length;i++) {
+            for (var i = 0; i < idx.length; i++) {
                 if (f === '全部' || f === '' || db[k][idx[i]].type === f) {
                     d.push(db[k][idx[i]]);
                 }
@@ -370,12 +375,14 @@ sip.o.db.article = function () {
 
     o.search_cache = function (keywords, key) {
 
-        var  e, mark, kw_idx;
-        
-        var idx=Object.keys(this.d.data[key]).sort(function(a,b){return (a-b);}).reverse();
+        var e, mark, kw_idx;
+
+        var idx = Object.keys(this.d.data[key]).sort(function (a, b) {
+            return (a - b);
+        }).reverse();
         //console.log('search idx:',idx);
 
-        for (var i=0;i<idx.length;i++) {
+        for (var i = 0; i < idx.length; i++) {
             mark = 0;
             e = this.d.data[key][idx[i]];
             for (kw_idx in keywords) {
@@ -482,7 +489,9 @@ sip.o.db.article = function () {
             if ('files' in data) {
                 this.d.files = data.files;
                 //console.log('files', this.d.files);
-                this.d.file_key = Object.keys(data.files).sort(function(a,b){return (a-b);}).reverse();
+                this.d.file_key = Object.keys(data.files).sort(function (a, b) {
+                    return (a - b);
+                }).reverse();
                 if (this.d.file_key.length > 0) {
                     this.d.page.key = this.d.file_key[0];
                     var sum = 0;
@@ -706,11 +715,11 @@ sip.o.Main_wrap = function (cid) {
         //console.log('update_banner',name,desc);
 
         if (name === undefined) {
-            name = cardjs.lib.base64_to_utf8(sip.uset.banner_name);
+            name = cardjs.lib.decode_utf8(sip.uset.banner_name);
         }
 
         if (desc === undefined) {
-            desc = cardjs.lib.base64_to_utf8(sip.uset.banner_desc);
+            desc = cardjs.lib.decode_utf8(sip.uset.banner_desc);
         }
 
 
@@ -976,15 +985,14 @@ sip.o.art.editor = function (cid) {
                 var content = this.editor.txt.html();
                 var cache = this.f.restore();
                 var data = {
-                    'title': cardjs.lib.utf8_to_base64(this.el(0, true).value),
-                    'content': cardjs.lib.utf8_to_base64(content),
+                    'title': cardjs.lib.encode_utf8(this.el(0, true).value),
+                    'content': cardjs.lib.encode_utf8(content),
                     'type': this.el(2, true).options[this.el(2, true).selectedIndex].value,
                     'id': cache.cache_id,
                     'top': this.el(10, true).checked ? 1 : 0,
                     'lock': this.el(9, true).checked ? 1 : 0
-
                 };
-                //console.log(content);
+                //console.log(data.content);
                 if (!confirm('确定提交？')) {
                     return;
                 }
@@ -1052,7 +1060,7 @@ sip.o.art.editor = function (cid) {
                 } else {
                     var pos = cardjs.lib.get_DOM_offset(this.el(7, true));
                     this.el(8, true).style.left = (pos.left - parseInt(this.el(8, true).style.width)) + "px";
-                    this.el(8, true).style.top = (pos.top + 8 ) + "px";
+                    this.el(8, true).style.top = (pos.top + 8) + "px";
                     this.el(8, true).style.display = 'block';
                 }
             }
@@ -1134,8 +1142,8 @@ sip.o.art.editor = function (cid) {
 
                 var cache = this.f.restore() || {};
                 cache.cache_id = data.id;
-                cache.title = cardjs.lib.base64_to_utf8(data.title);
-                cache.html = cardjs.lib.base64_to_utf8(data.content);
+                cache.title = cardjs.lib.decode_utf8(data.title);
+                cache.html = cardjs.lib.decode_utf8(data.content);
                 cache.type = data.type;
                 cache.lock = !(data.lock === 0);
                 cache.top = !(data.top === 0);
@@ -1178,6 +1186,9 @@ sip.o.art.editor = function (cid) {
             }
             this.el(2, true).options[type_no].selected = true;
             this.editor.txt.html(filterXSS(cache.html));
+            //console.log('raw',cache.html);
+            //console.log('fxss',filterXSS(cache.html));
+            //this.editor.txt.html(cache.html);
             this.el(9, true).checked = cache.lock;
             this.el(10, true).checked = cache.top;
             var cid = cache.cache_id;
@@ -1295,9 +1306,10 @@ sip.o.art.art_wrap = function (cid) {
         pages: {
             '编辑': [sip.o.art.editor],
             '搜索': [sip.o.art.search_box],
-            '图片管理': [sip.o.art.list_orphan_img],
+            '图片': [sip.o.art.list_orphan_img],
             '设置': [sip.o.art.set_wrap],
             '备份': [sip.o.art.backup],
+            'MDE': [sip.o.art.simplemde],
             '说明': [sip.o.art.help]
         },
         style: {
@@ -1392,7 +1404,7 @@ sip.o.mgr.change_psw = function (cid, parent_update) {
                     return;
                 }
                 // console.log(new_psw, org_psw, name);
-                var data = {'name': name, 'opsw': md5(org_psw), 'npsw': md5(new_psw)};
+                var data = {'name': name, 'opsw': md5(sip.s.rainbow + md5(org_psw)), 'npsw': md5(sip.s.rainbow + md5(new_psw))};
                 this.f.fetch('user_modify', data, function (r) {
                     this.el(5, true).innerHTML = cardjs.lib.html_escape(r);
                     o.update();
@@ -1622,8 +1634,8 @@ sip.o.art.set_banner = function (cid) {
     };
 
     o.after_add_event = function () {
-        var name = cardjs.lib.base64_to_utf8(sip.uset['banner_name']);
-        var desc = cardjs.lib.base64_to_utf8(sip.uset['banner_desc']);
+        var name = cardjs.lib.decode_utf8(sip.uset['banner_name']);
+        var desc = cardjs.lib.decode_utf8(sip.uset['banner_desc']);
         if (name && name.length > 0) {
             this.el(0, true).value = name;
         }
@@ -1640,8 +1652,8 @@ sip.o.art.set_banner = function (cid) {
                 if (!confirm('确定提交修改?')) {
                     return;
                 }
-                sip.uset['banner_name'] = cardjs.lib.utf8_to_base64(this.el(0, true).value);
-                sip.uset['banner_desc'] = cardjs.lib.utf8_to_base64(this.el(1, true).value);
+                sip.uset['banner_name'] = cardjs.lib.encode_utf8(this.el(0, true).value);
+                sip.uset['banner_desc'] = cardjs.lib.encode_utf8(this.el(1, true).value);
                 this.f.fetch('update_uset', sip.uset, function (r) {
                     alert(r);
                 }, function (r) {
@@ -1865,6 +1877,50 @@ sip.o.AAChild = function (cid) {
     }));
 };
 
+sip.o.art.simplemde = function (cid) {
+    var key=cardjs.lib.gen_key();
+    
+    var o = new cardjs.card(cid);
+    o.f.merge({
+        header: 'smde',
+        key:key
+    });
+
+    o.smde = null;
+
+    o.clean_up = function () {
+        //console.log('destory');
+        this.smde && this.smde.toTextArea();
+        this.smde = null;
+    };
+    
+    o.save_cache=function(){
+        if(!this.smde){
+            console.log('no editor');
+            return;
+        }
+        var data=this.smde.value();
+        this.f.cache(data);
+    };
+
+    o.after_add_event = function () {
+        var cache=this.f.restore();
+        if(!cache){
+            cache='';
+        }
+        this.smde = new SimpleMDE({element: this.el(0, true)});
+        this.smde.codemirror.on('change',this.save_cache.bind(this));
+        this.smde.value(cache);
+    };
+
+
+    o.gen_html = function () {
+        return Mustache.render(cardjs.lib.load_html('tp-art-smde'), {ids: [this.el(0)]});
+    };
+
+    return o;
+};
+
 sip.o.AATest = function (cid) {
     var key = cardjs.lib.gen_key();
 
@@ -1876,18 +1932,21 @@ sip.o.AATest = function (cid) {
     });
 
     o.func1 = function () {
-        console.log('call parent func1:', this.settings.key);
+        console.log('click t1');
     };
 
     o.child = null;
     o.gen_ev_handler = function () {
         return {
             't1': function () {
-                //sip.db.load_last_six_month();
+                console.log('click t1');
+                var salt = "nothing";
+                var psw = "123456";
+                console.log(md5(salt + md5(sip.s.rainbow + md5(psw))));
             },
             't2': function () {
                 console.log('click t2');
-                console.log(sip.db);
+
             }
         };
     };
@@ -1946,7 +2005,7 @@ sip.o.mgr.login = function (cid, parent_update) {
                 function () {
                     var user_info = {
                         user: this.el(0, true).value,
-                        psw: md5(this.el(1, true).value)
+                        psw: md5(sip.s.rainbow + md5(this.el(1, true).value))
                     };
                     //console.log(user_info);
                     this.f.fetch('login', user_info,
@@ -2282,7 +2341,7 @@ sip.o.main.article_board = function (cid) {
             if (data === undefined || (data.length && data.length === 0)) {
                 data = null;
             }
-            
+
             //console.log('call main_art_board_update:', data);
             this.f.cache(data);
             if (!data) {

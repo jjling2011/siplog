@@ -114,7 +114,7 @@ class UserMgr extends Reply {
             return;
         }
         $salt = CommLib::rand_str(48);
-        $psw = hash('md5', $salt . hash('md5', INIT_PASSWORD));
+        $psw = hash('md5', $salt . hash('md5',RAINBOW.hash('md5', INIT_PASSWORD)));
         $r = CommLib::query('update user set salt=?,psw=?,prv=0,ban=0 where id=?', 'ssi', [&$salt, &$psw, &$id]);
         $this->haste($r['status']);
     }
@@ -367,7 +367,7 @@ class UserMgr extends Reply {
         $user = CommLib::filter_str($user_info['user']);
         $name = CommLib::filter_str($user_info['name']);
         $salt = CommLib::rand_str(48);
-        $psw = hash('md5', $salt . hash('md5', INIT_PASSWORD));
+        $psw = hash('md5', $salt . hash('md5',RAINBOW.hash('md5', INIT_PASSWORD)));
         $token = CommLib::rand_str(48);
         $prv = $this->prv_name_to_num($user_info['prv']);
 

@@ -8,6 +8,10 @@ and open the template in the editor.
     Author     : luke2
 */
 
+.CodeMirror {
+	height: 400px;
+}
+
 .banner{
     width: 100%;
     height: 130px;

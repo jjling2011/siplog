@@ -646,17 +646,19 @@
             }
             o = null;
         },
-        utf8_to_base64: function (text_utf8) {
+        encode_utf8: function (text_utf8) {
             //对应 php decode:
             // $txt_utf8 = urldecode(base64_decode($txt_b64));
-            return root.btoa(root.encodeURIComponent(text_utf8));
+            //return root.btoa(root.encodeURIComponent(text_utf8));
+            return root.encodeURIComponent(text_utf8);
         },
-        base64_to_utf8: function (text_base64) {
+        decode_utf8: function (text_base64) {
             // 对应 php encode: 
             // $txt_b64 =base64_encode(rawurlencode($txt_utf8));
             // **** 注意是带raw三个字母 **** 
             // 不要问为什么！记住php是世界上最好的语言就对了！！
-            return (root.decodeURIComponent(root.atob(text_base64)));
+            //return (root.decodeURIComponent(root.atob(text_base64)));
+            return (root.decodeURIComponent(text_base64));
         },
         load_html: function (id) {
             return(root.document.getElementById(id).innerHTML);

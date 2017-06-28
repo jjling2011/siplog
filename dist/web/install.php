@@ -10,6 +10,7 @@ $r = check_param();
 //debug();
 
 if ($r[0]) {
+    include_once 'install/settings.skeleton.php';
     install();
     die('安装完成！<a href="../index.html" >点击跳转到主页</a>');
 }
@@ -50,7 +51,7 @@ function install() {
     # query('insert into sys set utime=utc_timestamp(),id=1');
     $salt = rand_str();
     $token = rand_str();
-    $pass = hash('md5', $salt . hash('md5', $param['pass1']));
+    $pass = hash('md5', $salt . (hash('md5',RAINBOW.hash('md5', $param['pass1']))));
 
     // insert admin 
     query("insert into user set user='" . $param['user'] . "',psw='$pass',prv=3,salt='$salt',token='$token',name='" . $param['name'] . "'");
