@@ -3976,6 +3976,7 @@ var sip = {
     },
     s: {
         //最近文章数据的位置
+        rainbow:"4YpcTwRat7A8hqlAKW4B7jOUJyBUEvnr",
         json_path:'web/upload/json/',
         top_art_path: 'web/upload/json/top.json',
         // 文章分类
@@ -5339,7 +5340,7 @@ sip.o.mgr.change_psw = function (cid, parent_update) {
                     return;
                 }
                 // console.log(new_psw, org_psw, name);
-                var data = {'name': name, 'opsw': md5(org_psw), 'npsw': md5(new_psw)};
+                var data = {'name': name, 'opsw': md5(sip.s.rainbow+md5(org_psw)), 'npsw': md5(sip.s.rainbow+md5(new_psw))};
                 this.f.fetch('user_modify', data, function (r) {
                     this.el(5, true).innerHTML = cardjs.lib.html_escape(r);
                     o.update();
@@ -5823,18 +5824,21 @@ sip.o.AATest = function (cid) {
     });
 
     o.func1 = function () {
-        console.log('call parent func1:', this.settings.key);
+        console.log('click t1');
     };
 
     o.child = null;
     o.gen_ev_handler = function () {
         return {
             't1': function () {
-                //sip.db.load_last_six_month();
+                console.log('click t1');
+                var salt="nothing";
+                var psw="123456";
+                console.log(md5(salt+md5(sip.s.rainbow+md5(psw))));
             },
             't2': function () {
                 console.log('click t2');
-                console.log(sip.db);
+                
             }
         };
     };
@@ -5893,7 +5897,7 @@ sip.o.mgr.login = function (cid, parent_update) {
                 function () {
                     var user_info = {
                         user: this.el(0, true).value,
-                        psw: md5(this.el(1, true).value)
+                        psw: md5(sip.s.rainbow+md5(this.el(1, true).value))
                     };
                     //console.log(user_info);
                     this.f.fetch('login', user_info,

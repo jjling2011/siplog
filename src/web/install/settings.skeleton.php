@@ -2,6 +2,8 @@
 
 define('DEBUG_MODE', false);
 
+define('RAINBOW','4YpcTwRat7A8hqlAKW4B7jOUJyBUEvnr');
+
 define('EXPORT_PATH', '../upload/json/top.json');
 define('ATYPES_PATH', '../upload/json/atypes.json');
 define('MSG_PATH', '../upload/json/msg.json');
