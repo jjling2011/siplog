@@ -2849,7 +2849,7 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
 })('cardjs', this, function () {
 
     "use strict";
-    
+
     var root = window;
 
     var Package = function (params) {
@@ -3691,7 +3691,7 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
             }
         var stack = e.stack.toString().split(/\r\n|\n/),
                 frame,
-                frameRE = /:(\d+):(?:\d+)[^\d]*$/,
+                frameRE = /:(\d+):(?:(\d+))[^\d]*$/,
                 scriptRE = /\/(\w+)\.js/;
 
         e = null;
@@ -3701,13 +3701,21 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
         } while (!frameRE.exec(frame) && stack.length);
 
         frame = (stack.shift());
+        
+        var m = frameRE.exec(frame);
 
-        var line = frameRE.exec(frame)[1],
+        var line = m[1],
+                char = m[2],
                 script = scriptRE.exec(frame)[1];
         frameRE = null;
         scriptRE = null;
-        //console.log(script);
-        return 'key_' + script + '_js_' + line;
+        m=null;
+        
+        var k='key_' + script + '_' + line + '_' + char;
+        
+        //var k='key_' + script + '_' + line ;
+        //console.log(k);
+        return k;
     });
 
     var gset = {};
