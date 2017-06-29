@@ -21,19 +21,12 @@
     var root = window;
 
     var Package = function (params) {
-
-        var key;
-        var skip = {'key': true};
-
-        for (key  in params) {
-            if (!(key in skip)) {
-                this[key] = params[key];
-            }
-        }
-
+       
         this.settings = {
-            key: params.key || 'pkgshare'
+            key: 'pkgshare'
         };
+        
+        Lib.expand(this.settings,params.settings);
 
         this.cjsv = {
             // 登记 this.f.event()的时候记录下事件名.close的时候销毁事件.
@@ -42,8 +35,8 @@
 
         this.f = {};
 
-        for (key in Database) {
-            this.f[key] = Database[key].bind(this);
+        for (var k in Database) {
+            this.f[k] = Database[k].bind(this);
         }
 
         this.self = true;
@@ -349,7 +342,7 @@
         }
         return html;
     };
-    
+
     function get_obj(str) {
         var obj = root;
         var s = str.split('.');
@@ -916,6 +909,21 @@
         SubType.prototype = prototype;
     }
 
+    function bind_params(o, p) {
+        var skip = {'cards': null, 'type': null, 'settings': null, 'pages': null, 'style': null};
+
+        for (var key in p) {
+            if (!(key in skip)) {
+                if (Lib.isFunction(p[key])) {
+                    o[key] = p[key].bind(o);
+                } else {
+                    o[key] = p[key];
+                }
+            }
+        }
+    }
+
+
     function Create(params) {
 
         if (!Lib.isObject(params)) {
@@ -924,6 +932,14 @@
 
         if (!('cid' in params)) {
             //throw new Error('CardJS.Create(params): params must have key cid');
+            if(params.type==='package'){
+                var o=new Package(params);
+                bind_params(o,params);
+                if(Lib.isFunction(o.init)){
+                    o.init.bind(o)();
+                }
+                return o;
+            }
             return function (cid) {
                 params.cid = cid;
                 //console.log('params:', p);
@@ -963,26 +979,14 @@
             Lib.expand(o.settings, params['settings']);
         }
 
-        var skip = {'cards': null, 'type': null, 'settings': null, 'pages': null, 'style': null};
+        bind_params(o, params);
 
-        for (var key in params) {
-            if (!(key in skip)) {
-                if (Lib.isFunction(params[key])) {
-                    o[key] = params[key].bind(o);
-                } else {
-                    o[key] = params[key];
-                }
-            }
-        }
-
-        cid = null;
         style = null;
-        skip = null;
         params = null;
-
 
         return o;
     }
+
 
     var Database = (function () {
         var d = {};
@@ -1138,7 +1142,6 @@
     }());
 
     var exports = {
-        package: Package,
         card: Card,
         //page: Page,
         //panel: Panel,

@@ -128,34 +128,31 @@ sip.f.filter_json = function (e) {
     return d;
 };
 
-sip.o.db.article = function () {
-
-    var data_key = cardjs.lib.gen_key();
-
-    var o = new cardjs.package({
-        key: data_key,
-        d: {
-            data: {},
-            files: [],
-            search: {
-                kw_cache: null,
-                kw_cur: '',
-                result: []
-            },
-            page: {
-                key: null,
-                filter: '',
-                size: 5,
-                cur_page: 0,
-                cur_key: 0,
-                id_loaded: 0
-            },
-            file_key: [],
-            total_article: 0
-        }
-    });
-
-    o.set = function (key, value) {
+sip.db = cardjs.create({
+    type: 'package',
+    settings: {
+        key: cardjs.lib.gen_key()
+    },
+    d: {
+        data: {},
+        files: [],
+        search: {
+            kw_cache: null,
+            kw_cur: '',
+            result: []
+        },
+        page: {
+            key: null,
+            filter: '',
+            size: 5,
+            cur_page: 0,
+            cur_key: 0,
+            id_loaded: 0
+        },
+        file_key: [],
+        total_article: 0
+    },
+    set: function (key, value) {
         //this[key] = value;
         //console.log('set :',key,value);
         if (key === 'page_key') {
@@ -172,18 +169,18 @@ sip.o.db.article = function () {
             this.d.page.filter = value;
             this.show_page.bind(this)();
         }
-    };
+    },
 
-    o.show_page = function () {
+    show_page: function () {
         //console.log(this);
         if (this.d.page.key in this.d.data) {
             this.push_main_art_board.bind(this)();
         } else {
             this.load_json.bind(this)(this.d.page.key, this.push_main_art_board.bind(this));
         }
-    };
+    },
 
-    o.push_main_art_board = function () {
+    push_main_art_board: function () {
         if (!(this.d.page.key in this.d.data)) {
             console.log('Error: key not exist!', this.d.page.key);
             return;
@@ -203,13 +200,11 @@ sip.o.db.article = function () {
         }
         //console.log('k/d/f/db' ,k, d,f,db);
         this.f.event('main_article_board_update', d);
-        d = null;
-        f = null;
-        k = null;
-        db = null;
-    };
+        d = f = k = db = null;
 
-    o.search = function (raw_keywords) {
+    },
+
+    search: function (raw_keywords) {
 
         if (this.d.search.kw_cache === raw_keywords) {
             //console.log('using cache!');
@@ -225,9 +220,8 @@ sip.o.db.article = function () {
 
         this.d.search.result = [];
         this.search_recursive.bind(this)(keywords, 0);
-    };
-
-    o.search_recursive = function (keywords, index) {
+    },
+    search_recursive: function (keywords, index) {
         if (index >= this.d.file_key.length) {
             this.f.event('show_main_search_result');
             console.log('search done!');
@@ -247,9 +241,9 @@ sip.o.db.article = function () {
         }
         //console.log('load file:', key);
         this.load_json(key, this.search_recursive.bind(this, keywords, index));
-    };
+    },
 
-    o.search_cache = function (keywords, key) {
+    search_cache: function (keywords, key) {
 
         var e, mark, kw_idx;
 
@@ -283,9 +277,9 @@ sip.o.db.article = function () {
             }
         }
 
-    };
+    },
 
-    o.load_json = function (key, callback) {
+    load_json: function (key, callback) {
 
         if (!cardjs.lib.isString(key)) {
             throw new Error('key muset be string.');
@@ -309,15 +303,15 @@ sip.o.db.article = function () {
 
         $.getJSON(path + '?t=' + cardjs.lib.rand(8), this.got_json.bind(this, callback, key));
 
-    };
+    },
 
-    o.get = function (key) {
+    get: function (key) {
         if (key === 'files') {
-            return o.d.files;
+            return this.d.files;
         }
-    };
+    },
 
-    o.got_json = function (callback, key, data) {
+    got_json: function (callback, key, data) {
 
         /* cache.data={
          *   201706:{
@@ -344,9 +338,9 @@ sip.o.db.article = function () {
         if (cardjs.lib.isFunction(callback)) {
             callback();
         }
-    };
+    },
 
-    o.load_files = function () {
+    load_files: function () {
 
         this.d.files = [];
         this.d.search.kw_cache = null;
@@ -384,16 +378,14 @@ sip.o.db.article = function () {
             }
             //console.log(this);
         }.bind(this));
-    };
+    },
+    init: function () {
 
-    o.load_files();
+        this.load_files();
+    }
+});
 
-    return o;
-};
-
-sip.db = sip.o.db.article();
-
-sip.o.art.art_wrap = new cardjs.create({
+sip.o.art.art_wrap = cardjs.create({
     type: 'panel',
     pages: {
         '编辑': ['sip.o.art.editor'],
@@ -413,7 +405,7 @@ sip.o.art.art_wrap = new cardjs.create({
     }
 });
 
-sip.o.main.pager = new cardjs.create({
+sip.o.main.pager = cardjs.create({
     settings: {
         header: 'pager',
         add_event: true
@@ -534,7 +526,7 @@ sip.o.main.pager = new cardjs.create({
     }
 });
 
-sip.o.main.msg = new cardjs.create({
+sip.o.main.msg = cardjs.create({
     settings: {
         key: cardjs.lib.gen_key(),
         header: 'main_mbox',
@@ -616,16 +608,18 @@ sip.o.main.msg = new cardjs.create({
     }
 });
 
-sip.o.Main_wrap = new cardjs.create({
+sip.o.Main_wrap = cardjs.create({
 
-    settings:{
+    settings: {
         header: 'main_wrap',
         add_event: true
     },
+    
+    contents:[],
 
-    pager : null,
+    pager: null,
 
-    gen_ev_handler : function () {
+    gen_ev_handler: function () {
         return([
             function () {
                 this.el(0, true).className = 'tag-main-active';
@@ -641,7 +635,7 @@ sip.o.Main_wrap = new cardjs.create({
         ]);
     },
 
-    show_main_page : function () {
+    show_main_page: function () {
         //console.log('show_main_page:',this);
         this.clear_contents();
         this.contents.push(sip.o.main.article_board(this.el(5)).show());
@@ -652,18 +646,20 @@ sip.o.Main_wrap = new cardjs.create({
             this.contents.push(sip.o.main.msg(this.el(cnum++)).show());
         }
     },
-    show_mgr_page : function () {
+    
+    show_mgr_page: function () {
         //console.log('show_mgr_page developing');
         //return;
         this.clear_contents();
         this.contents.push(sip.o.art.art_wrap(this.el(4)).show());
         this.contents.push(sip.o.mgr.user_panel(this.el(6)).show());
     },
-    add_event : function () {
+    
+    add_event: function () {
         this.f.on('click', 0);
         this.f.on('click', 1);
     },
-    gen_html : function () {
+    gen_html: function () {
         var ids = [];
         for (var i = 0; i < 10; i++) {
             ids.push(this.el(i));
@@ -676,28 +672,34 @@ sip.o.Main_wrap = new cardjs.create({
     },
 
     clear_pager: function () {
+        //console.log('clear_pager');
         this.pager && this.pager.destroy();
         this.pager = null;
         this.el(4, true).innerHTML = '';
     },
 
-    clear_contents:function() {
+    clear_contents: function () {
 
         this.clear_pager();
+        
+        //console.log('clear_contents:',this.contents);
 
         if (this.contents && this.contents.length > 0) {
             this.contents.forEach(function (e) {
                 //console.log('main:',o);
-                //console.log('contents:',e);
+                //console.log('clear contents:',e);
                 e.destroy();
             });
         }
+        
         this.contents = [];
+        
         for (var i = 4; i < 10; i++) {
             this.el(i, true).innerHTML = '';
         }
     },
-    reload : function () {
+    
+    reload: function () {
         //console.log('call main_page.refresh()');
         this.f.cache(null, 'um_cur_user_info');
         this.f.cache(null, 'um_all_user_info');
@@ -705,11 +707,10 @@ sip.o.Main_wrap = new cardjs.create({
         this.show_mgr_page();
     },
 
-    update_banner : function (param) {
+    update_banner: function (param) {
         var name, desc;
 
         param = param || {};
-
 
         name = param.name;
         desc = param.desc;
@@ -734,10 +735,10 @@ sip.o.Main_wrap = new cardjs.create({
         desc = null;
     },
 
-    after_add_event : function () {
+    after_add_event: function () {
         this.clear_contents();
         this.show_main_page();
-        //this.update_banner();
+        
         this.f.event('main_update_banner', this.update_banner);
         this.f.event('main_clear_pager', this.clear_pager);
         this.f.event('main_show_pager', this.show_pager);
@@ -1403,7 +1404,7 @@ sip.o.mgr.change_psw = function (cid, parent_update) {
 
 };
 
-sip.o.mgr.user_mgr_wrap = new cardjs.create({
+sip.o.mgr.user_mgr_wrap = cardjs.create({
     child: null,
     settings: {
         header: 'mgr_umgr_wrap',
@@ -1611,10 +1612,10 @@ sip.o.art.set_banner = function (cid) {
         var name = cardjs.lib.decode_utf8(sip.uset['banner_name']);
         var desc = cardjs.lib.decode_utf8(sip.uset['banner_desc']);
         if (name && name.length > 0) {
-            this.el(0, true).value = name;
+            this.el(0, true).value = cardjs.lib.html_escape(name);
         }
         if (desc && desc.length > 0) {
-            this.el(1, true).value = desc;
+            this.el(1, true).value = cardjs.lib.html_escape(desc);
         }
         name = null;
         desc = null;
@@ -1712,14 +1713,14 @@ sip.o.art.set_main_page = function (cid) {
 
 };
 
-sip.o.art.help = new cardjs.create({
+sip.o.art.help = cardjs.create({
     settings: {header: 'art_help'},
     gen_html: function () {
         return Mustache.render(cardjs.lib.load_html('tp-uma-help'));
     }
 });
 
-sip.o.art.search_box = new cardjs.create({
+sip.o.art.search_box = cardjs.create({
     child: null,
     settings: {
         header: 'main_search_box',
@@ -1795,7 +1796,7 @@ sip.o.art.search_box = new cardjs.create({
 
         if (!this.child && cache && cache.content
                 && cache.content.length > 0) {
-            this.el(0, true).value = cache.cache_kw;
+            this.el(0, true).value = cardjs.lib.html_escape(cache.cache_kw);
             cache.current_kw = cache.cache_kw;
             this.chile = sip.o.art.search_result(this.el(2), this.settings.key).show();
         }
@@ -1810,33 +1811,6 @@ sip.o.art.search_box = new cardjs.create({
         this.f.on('click', 1, 0);
     }
 });
-
-sip.o.AAChild = function (cid) {
-    var key = cardjs.lib.gen_key();
-    return(cardjs.create({
-        cid: cid,
-        settings: {
-            key: key
-        },
-        func1_child: function (p) {
-            console.log('call child func1(' + p + ')');
-        },
-        func2_child: function (p) {
-            console.log('call child func2(' + p + ')');
-        },
-        gen_html: function () {
-            return 'child';
-        },
-        after_add_event: function () {
-            this.f.event('hello', this.func1_child);
-            this.f.event('world', this.func2_child);
-        },
-        clean_up: function () {
-            this.self.innerHTML = '';
-            //this.f.event('hello', this.func_child, false);
-        }
-    }));
-};
 
 sip.o.art.simplemde = function (cid) {
     var key = cardjs.lib.gen_key();
