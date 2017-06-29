@@ -272,6 +272,7 @@
 
     // 我真的不知道为什么我喜欢给他设个根本用不上的名字 ...
     Card.prototype.name = 'CARD';
+
     Card.prototype.gen_html = function () {
         throw new Error('Card.prototype.gen_html(): Please rewrite this function.');
         return '';
@@ -348,11 +349,22 @@
         }
         return html;
     };
+    
+    function get_obj(str) {
+        var obj = root;
+        var s = str.split('.');
+        for (var i = 0; i < s.length && obj !== undefined; i++) {
+            obj = obj[s[i]];
+        }
+        return obj;
+    }
 
     Page.prototype.after_add_event = function () {
         this.clean_up();
+        //console.log('page.this', this);
+
         for (var i = 0; i < this.cards.length; i++) {
-            this.children.push(this.cards[i](this.el(i)).show());
+            this.children.push(get_obj(this.cards[i])(this.el(i)).show());
         }
     };
 
@@ -869,7 +881,7 @@
         } while (!frameRE.exec(frame) && stack.length);
 
         frame = (stack.shift());
-        
+
         var m = frameRE.exec(frame);
 
         var line = m[1],
@@ -877,10 +889,10 @@
                 script = scriptRE.exec(frame)[1];
         frameRE = null;
         scriptRE = null;
-        m=null;
-        
-        var k='key_' + script + '_' + line + '_' + char;
-        
+        m = null;
+
+        var k = 'key_' + script + '_' + line + '_' + char;
+
         //var k='key_' + script + '_' + line ;
         //console.log(k);
         return k;
@@ -911,8 +923,14 @@
         }
 
         if (!('cid' in params)) {
-            throw new Error('CardJS.Create(params): params must have key cid');
+            //throw new Error('CardJS.Create(params): params must have key cid');
+            return function (cid) {
+                params.cid = cid;
+                //console.log('params:', p);
+                return Create(params);
+            };
         }
+
         var o = null;
         var style = undefined;
         var cid = params['cid'];

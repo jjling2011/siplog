@@ -30,9 +30,9 @@ var sip = {
         db: {}
     },
     s: {
-        //最近文章数据的位置
         rainbow: "4YpcTwRat7A8hqlAKW4B7jOUJyBUEvnr",
         json_path: 'web/upload/json/',
+        //最近文章数据的位置
         top_art_path: 'web/upload/json/top.json',
         // 文章分类
         atypes_path: 'web/upload/json/atypes.json',
@@ -80,8 +80,14 @@ sip.f.add_frame = function (frame_id, content, tag, style) {
     return Mustache.render(cardjs.lib.load_html(frame_id), d);
 };
 
-sip.f.parse_json = function (e) {
+sip.f.filter_json = function (e) {
+
+    //id userid type title content tag ctime mtime name lock top
+
     var f = {
+        msg: function (d) {
+            return(filterXSS(d));
+        },
         title: function (d) {
             return(filterXSS(cardjs.lib.decode_utf8(d)));
         },
@@ -100,7 +106,6 @@ sip.f.parse_json = function (e) {
         },
         content: function (d) {
             return(filterXSS(cardjs.lib.decode_utf8(d)));
-            //return((cardjs.lib.decode_utf8(d)));
         },
         top: function (d) {
             return(d === 0 ? false : true);
@@ -121,135 +126,6 @@ sip.f.parse_json = function (e) {
     }
 
     return d;
-};
-
-sip.o.main.pager = function (cid) {
-    var o = new cardjs.card(cid);
-    o.f.merge({
-        header: 'pager',
-        add_event: true
-    });
-
-    o.btn_num = 5;
-
-    o.d = {};
-
-    o.data_parser = function () {
-        var cur = sip.db.d.page.cur_page;
-        var size = sip.db.d.page.size;
-        var max = Math.ceil(sip.db.d.total_article / size);
-        var first = Math.max(0, (cur - Math.floor(this.btn_num / 2)));
-        var last = Math.min(first + this.btn_num, max);
-        first = Math.min(first, last - this.btn_num);
-        first = Math.max(first, 0);
-        if (cur > last) {
-            cur = last;
-        }
-        if (cur < first) {
-            cur = first;
-        }
-        sip.db.d.page.cur_page = cur;
-        this.d.first = first;
-        this.d.last = last;
-        this.d.cur = cur;
-        //console.log('data parser:', this.d);
-    };
-
-    o.gen_html = function () {
-        var v = [];
-        for (var i = this.d.first; i < this.d.last; i++) {
-            v.push({id: this.el(i - this.d.first + 1), value: i + 1});
-        }
-        var first = {id: this.el(0), value: '首页'};
-        return (Mustache.render(cardjs.lib.load_html('tp-main-pager'), {first: first, v: v}));
-    };
-
-    o.show_page = function (num) {
-        //console.log('show page ' + num);
-        //sip.db.d.page.cur_page = num;
-        var min = Math.max(num * sip.db.d.page.size, 0);
-        var first = 0, sum = 0, key = 0, skip = 0, per_sum = 0;
-        var d = sip.db.d;
-
-        while (sum <= min && key < d.file_key.length) {
-            first = key;
-            per_sum = sum;
-            sum += d.files[d.file_key[key]];
-            key++;
-        }
-
-        skip = Math.max(min - per_sum, 0);
-        //var k = d.file_key[first];
-        //console.log('show page: num/min/first/key/skip', num, min, first, k, skip);
-        d = null;
-        this.d.data = [];
-        this.get_data.bind(this)(first, skip);
-    };
-
-    o.get_data = function (key_index, skip) {
-        if (key_index >= sip.db.d.file_key.length) {
-            console.log('Last page!');
-            this.f.event('main_article_board_update', this.d.data);
-            return;
-        }
-        var size = sip.db.d.page.size;
-        var key = sip.db.d.file_key[key_index];
-        //console.log('call get data:key/idx/skip', key, key_index, skip);
-        if (key in sip.db.d.data) {
-            var ids = Object.keys(sip.db.d.data[key]).sort(function (a, b) {
-                return (a - b);
-            }).reverse();
-            //console.log(ids);
-            for (var i = skip; i < ids.length && this.d.data.length < size; i++) {
-                //console.log('push(key,idx)', key, i);
-                this.d.data.push(sip.db.d.data[key][ids[i]]);
-            }
-            if (this.d.data.length < size) {
-                this.get_data.bind(this, key_index + 1, 0)();
-                return;
-            }
-            this.f.event('main_article_board_update', this.d.data);
-        } else {
-            //console.log('load json:', key);
-            sip.db.load_json(key, this.get_data.bind(this, key_index, skip));
-        }
-    };
-
-    o.gen_ev_handler = function () {
-        var evs = [];
-        evs.push(function () {
-            sip.db.d.page.cur_page = 0;
-            this.refresh();
-            //this.show_page(0);
-        });
-
-        for (var i = this.d.first; i < this.d.last; i++) {
-            evs.push((function () {
-                var num = i;
-                return(function () {
-                    sip.db.d.page.cur_page = num;
-                    this.refresh();
-                    //this.show_page(num);
-                }.bind(this));
-            }.bind(this)()));
-        }
-
-        return evs;
-    };
-
-    o.add_event = function () {
-        for (var i = 0; i < this.el(); i++) {
-            this.f.on('click', i);
-        }
-    };
-
-    o.after_add_event = function () {
-        //this.f.trigger(0);
-        this.el(this.d.cur - this.d.first + 1, true).style.backgroundColor = 'skyblue';
-        this.show_page(sip.db.d.page.cur_page);
-    };
-
-    return o;
 };
 
 sip.o.db.article = function () {
@@ -457,7 +333,7 @@ sip.o.db.article = function () {
 
         var d = {}, e, i, div = document.createElement("div");
         for (i = 0; i < data.length; i++) {
-            e = sip.f.parse_json(data[i]);
+            e = sip.f.filter_json(data[i]);
             div.innerHTML = e.content;
             e.text = div.textContent || div.innerText || "";
             d[e.id] = e;
@@ -517,106 +393,239 @@ sip.o.db.article = function () {
 
 sip.db = sip.o.db.article();
 
-sip.o.main.msg = function (cid) {
-    var key = cardjs.lib.gen_key();
-    return(cardjs.create({
-        cid: cid,
-        settings: {
-            key: key,
-            header: 'main_mbox',
-            add_event: true
-        },
-        gen_html: function () {
-            var content = Mustache.render(cardjs.lib.load_html('tp-mp-msg'), {ids: [this.el(0), this.el(1), this.el(2)]});
-            return sip.f.add_frame('tp-frame-tag-card', content, "", 'margin-bottom:8px;margin-top:0px;');
-        },
+sip.o.art.art_wrap = new cardjs.create({
+    type: 'panel',
+    pages: {
+        '编辑': ['sip.o.art.editor'],
+        '搜索': ['sip.o.art.search_box'],
+        '图片': ['sip.o.art.list_orphan_img'],
+        '设置': ['sip.o.art.set_wrap'],
+        '备份': ['sip.o.art.backup'],
+        'MDE': ['sip.o.art.simplemde'],
+        '说明': ['sip.o.art.help']
+    },
+    style: {
+        'tags': ' ',
+        'tag_active': 'tag-active',
+        'tag_normal': 'tag-normal',
+        'page': 'page',
+        'card': ' '
+    }
+});
 
-        gen_ev_handler: function () {
-            return [
-                //enter
-                function (e) {
-                    //console.log('enter key!');
-                    var k = e || window.event;
-                    if (k.keyCode !== 13) {
-                        return;
-                    }
-                    this.f.trigger(1);
-                },
-                //click
-                function () {
-                    //console.log('click');
-                    var d = this.el(0, true).value;
-                    //console.log('msg:', d);
-                    if (d.length > 0) {
-                        this.f.fetch('post_msg', d, function () {
-                            var msg = this.f.restore();
-                            if (!msg) {
-                                msg = [];
-                            }
-                            msg.unshift({
-                                ctime: new Date().toJSON().slice(0, 10),
-                                name: 'me',
-                                text: filterXSS(d)
-                            });
-                            while (msg.length > sip.uset.msg_keep) {
-                                msg.pop();
-                            }
-                            this.f.cache(msg);
-                            this.refresh();
-                        }, function (r) {
-                            alert(r);
-                        });
-                    }
-                }
-            ];
-        },
-        add_event: function () {
-            this.f.on('click', 1);
-            this.f.on('keyup', 0);
-        },
-        after_add_event: function () {
-            this.el(0, true).focus();
-            var msg = this.f.restore();
-            if (msg && msg.length > 0) {
-                //console.log('using cache.');
-                this.el(2, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-mp-msg-list'), {msg: msg});
+sip.o.main.pager = new cardjs.create({
+    settings: {
+        header: 'pager',
+        add_event: true
+    },
+    btn_num: 5,
+    d: {},
+    data_parser: function () {
+        var cur = sip.db.d.page.cur_page;
+        var size = sip.db.d.page.size;
+        var max = Math.ceil(sip.db.d.total_article / size);
+        var first = Math.max(0, (cur - Math.floor(this.btn_num / 2)));
+        var last = Math.min(first + this.btn_num, max);
+        first = Math.min(first, last - this.btn_num);
+        first = Math.max(first, 0);
+        if (cur > last) {
+            cur = last;
+        }
+        if (cur < first) {
+            cur = first;
+        }
+        sip.db.d.page.cur_page = cur;
+        this.d.first = first;
+        this.d.last = last;
+        this.d.cur = cur;
+        //console.log('data parser:', this.d);
+    },
+    gen_html: function () {
+        var v = [];
+        for (var i = this.d.first; i < this.d.last; i++) {
+            v.push({id: this.el(i - this.d.first + 1), value: i + 1});
+        }
+        var first = {id: this.el(0), value: '首页'};
+        return (Mustache.render(cardjs.lib.load_html('tp-main-pager'), {first: first, v: v}));
+    },
+    show_page: function (num) {
+        //console.log('show page ' + num);
+        //sip.db.d.page.cur_page = num;
+        var min = Math.max(num * sip.db.d.page.size, 0);
+        var first = 0, sum = 0, key = 0, skip = 0, per_sum = 0;
+        var d = sip.db.d;
+
+        while (sum <= min && key < d.file_key.length) {
+            first = key;
+            per_sum = sum;
+            sum += d.files[d.file_key[key]];
+            key++;
+        }
+
+        skip = Math.max(min - per_sum, 0);
+        //var k = d.file_key[first];
+        //console.log('show page: num/min/first/key/skip', num, min, first, k, skip);
+        d = null;
+        this.d.data = [];
+        this.get_data.bind(this)(first, skip);
+    },
+
+    get_data: function (key_index, skip) {
+        if (key_index >= sip.db.d.file_key.length) {
+            console.log('Last page!');
+            this.f.event('main_article_board_update', this.d.data);
+            return;
+        }
+        var size = sip.db.d.page.size;
+        var key = sip.db.d.file_key[key_index];
+        //console.log('call get data:key/idx/skip', key, key_index, skip);
+        if (key in sip.db.d.data) {
+            var ids = Object.keys(sip.db.d.data[key]).sort(function (a, b) {
+                return (a - b);
+            }).reverse();
+            //console.log(ids);
+            for (var i = skip; i < ids.length && this.d.data.length < size; i++) {
+                //console.log('push(key,idx)', key, i);
+                this.d.data.push(sip.db.d.data[key][ids[i]]);
+            }
+            if (this.d.data.length < size) {
+                this.get_data.bind(this, key_index + 1, 0)();
                 return;
             }
-            $.getJSON(sip.s.msg_path + '?t=' + cardjs.lib.rand(8), function (data) {
-                var msg = [];
-                data.forEach(function (e) {
-                    msg.push({
-                        text: filterXSS(e.text),
-                        ctime: cardjs.lib.getYMD(e.ctime),
-                        name: filterXSS(e.name)
-                    });
-                });
-                this.f.cache(msg);
-            }.bind(this)).fail(function () {
-                console.log('留言文件加载失败！');
-            }).always(function () {
-                if (sip.uset.show_mbox) {
-                    var msg = this.f.restore();
-                    this.el(2, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-mp-msg-list'), {msg: msg});
-                }
-            }.bind(this));
+            this.f.event('main_article_board_update', this.d.data);
+        } else {
+            //console.log('load json:', key);
+            sip.db.load_json(key, this.get_data.bind(this, key_index, skip));
         }
-    }));
+    },
 
-};
+    gen_ev_handler: function () {
+        var evs = [];
+        evs.push(function () {
+            sip.db.d.page.cur_page = 0;
+            this.refresh();
+            //this.show_page(0);
+        });
 
-sip.o.Main_wrap = function (cid) {
+        for (var i = this.d.first; i < this.d.last; i++) {
+            evs.push((function () {
+                var num = i;
+                return(function () {
+                    sip.db.d.page.cur_page = num;
+                    this.refresh();
+                    //this.show_page(num);
+                }.bind(this));
+            }.bind(this)()));
+        }
 
-    var o = new cardjs.card(cid);
+        return evs;
+    },
 
-    o.f.merge({
+    add_event: function () {
+        for (var i = 0; i < this.el(); i++) {
+            this.f.on('click', i);
+        }
+    },
+
+    after_add_event: function () {
+        //this.f.trigger(0);
+        this.el(this.d.cur - this.d.first + 1, true).style.backgroundColor = 'skyblue';
+        this.show_page(sip.db.d.page.cur_page);
+    }
+});
+
+sip.o.main.msg = new cardjs.create({
+    settings: {
+        key: cardjs.lib.gen_key(),
+        header: 'main_mbox',
+        add_event: true
+    },
+    gen_html: function () {
+        var content = Mustache.render(cardjs.lib.load_html('tp-mp-msg'), {ids: [this.el(0), this.el(1), this.el(2)]});
+        return sip.f.add_frame('tp-frame-tag-card', content, "", 'margin-bottom:8px;margin-top:0px;');
+    },
+    gen_ev_handler: function () {
+        return [
+            //enter
+            function (e) {
+                //console.log('enter key!');
+                var k = e || window.event;
+                if (k.keyCode !== 13) {
+                    return;
+                }
+                this.f.trigger(1);
+            },
+            //click
+            function () {
+                //console.log('click');
+                var d = this.el(0, true).value;
+                //console.log('msg:', d);
+                if (d.length > 0) {
+                    this.f.fetch('post_msg', d, function () {
+                        var msg = this.f.restore();
+                        if (!msg) {
+                            msg = [];
+                        }
+                        msg.unshift({
+                            ctime: new Date().toJSON().slice(0, 10),
+                            name: 'me',
+                            text: filterXSS(d)
+                        });
+                        while (msg.length > sip.uset.msg_keep) {
+                            msg.pop();
+                        }
+                        this.f.cache(msg);
+                        this.refresh();
+                    }, function (r) {
+                        alert(r);
+                    });
+                }
+            }
+        ];
+    },
+    add_event: function () {
+        this.f.on('click', 1);
+        this.f.on('keyup', 0);
+    },
+    after_add_event: function () {
+        this.el(0, true).focus();
+        var msg = this.f.restore();
+        if (msg && msg.length > 0) {
+            //console.log('using cache.');
+            this.el(2, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-mp-msg-list'), {msg: msg});
+            return;
+        }
+        $.getJSON(sip.s.msg_path + '?t=' + cardjs.lib.rand(8), function (data) {
+            var msg = [];
+            data.forEach(function (e) {
+                msg.push({
+                    text: filterXSS(e.text),
+                    ctime: cardjs.lib.getYMD(e.ctime),
+                    name: filterXSS(e.name)
+                });
+            });
+            this.f.cache(msg);
+        }.bind(this)).fail(function () {
+            console.log('留言文件加载失败！');
+        }).always(function () {
+            if (sip.uset.show_mbox) {
+                var msg = this.f.restore();
+                this.el(2, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-mp-msg-list'), {msg: msg});
+            }
+        }.bind(this));
+    }
+});
+
+sip.o.Main_wrap = new cardjs.create({
+
+    settings:{
         header: 'main_wrap',
         add_event: true
-    });
+    },
 
-    o.pager = null;
+    pager : null,
 
-    o.gen_ev_handler = function () {
+    gen_ev_handler : function () {
         return([
             function () {
                 this.el(0, true).className = 'tag-main-active';
@@ -630,80 +639,73 @@ sip.o.Main_wrap = function (cid) {
                 this.show_mgr_page();
             }
         ]);
-    };
+    },
 
-    o.show_main_page = function () {
+    show_main_page : function () {
         //console.log('show_main_page:',this);
-        clear_contents();
-        o.contents.push(sip.o.main.article_board(o.el(5)).show());
+        this.clear_contents();
+        this.contents.push(sip.o.main.article_board(this.el(5)).show());
         var cnum = 6;
-        o.contents.push(sip.o.main.search_box(o.el(cnum++)).show());
-        o.contents.push(sip.o.main.group_view(o.el(cnum++)).show());
+        this.contents.push(sip.o.main.search_box(this.el(cnum++)).show());
+        this.contents.push(sip.o.main.group_view(this.el(cnum++)).show());
         if (sip.uset.show_mbox) {
-            this.contents.push(sip.o.main.msg(o.el(cnum++)).show());
+            this.contents.push(sip.o.main.msg(this.el(cnum++)).show());
         }
-    };
-
-
-
-    o.show_mgr_page = function () {
+    },
+    show_mgr_page : function () {
         //console.log('show_mgr_page developing');
         //return;
-        clear_contents();
+        this.clear_contents();
         this.contents.push(sip.o.art.art_wrap(this.el(4)).show());
         this.contents.push(sip.o.mgr.user_panel(this.el(6)).show());
-    };
-
-    o.add_event = function () {
-        o.f.on('click', 0);
-        o.f.on('click', 1);
-    };
-
-    o.gen_html = function () {
+    },
+    add_event : function () {
+        this.f.on('click', 0);
+        this.f.on('click', 1);
+    },
+    gen_html : function () {
         var ids = [];
         for (var i = 0; i < 10; i++) {
             ids.push(this.el(i));
         }
         return Mustache.render(cardjs.lib.load_html('tp-main-wrap'), {ids: ids});
-    };
-
-    o.show_pager = function () {
+    },
+    show_pager: function () {
         this.clear_pager();
         this.pager = sip.o.main.pager(this.el(4)).show();
-    };
+    },
 
-    o.clear_pager = function () {
+    clear_pager: function () {
         this.pager && this.pager.destroy();
         this.pager = null;
         this.el(4, true).innerHTML = '';
-    };
+    },
 
-    function clear_contents() {
+    clear_contents:function() {
 
-        o.clear_pager();
+        this.clear_pager();
 
-        if (o.contents && o.contents.length > 0) {
-            o.contents.forEach(function (e) {
+        if (this.contents && this.contents.length > 0) {
+            this.contents.forEach(function (e) {
                 //console.log('main:',o);
                 //console.log('contents:',e);
                 e.destroy();
             });
         }
-        o.contents = [];
+        this.contents = [];
         for (var i = 4; i < 10; i++) {
-            o.el(i, true).innerHTML = '';
+            this.el(i, true).innerHTML = '';
         }
-    }
-
-    o.reload = function () {
+    },
+    reload : function () {
         //console.log('call main_page.refresh()');
-        o.f.cache(null, 'um_cur_user_info');
-        o.f.cache(null, 'um_all_user_info');
-        clear_contents();
-        o.show_mgr_page();
-    };
+        this.f.cache(null, 'um_cur_user_info');
+        this.f.cache(null, 'um_all_user_info');
+        this.clear_contents();
+        this.show_mgr_page();
+    },
 
-    o.update_banner = function (param) {
+    update_banner : function (param) {
         var name, desc;
 
         param = param || {};
@@ -730,21 +732,19 @@ sip.o.Main_wrap = function (cid) {
 
         name = null;
         desc = null;
-    };
+    },
 
-    o.after_add_event = function () {
-        clear_contents();
-        o.show_main_page();
+    after_add_event : function () {
+        this.clear_contents();
+        this.show_main_page();
         //this.update_banner();
         this.f.event('main_update_banner', this.update_banner);
         this.f.event('main_clear_pager', this.clear_pager);
         this.f.event('main_show_pager', this.show_pager);
 
         this.f.event('main_update_banner');
-    };
-
-    return o;
-};
+    }
+});
 
 sip.o.art.search_result = function (cid, key) {
     var o = new cardjs.card(cid);
@@ -1299,29 +1299,6 @@ sip.o.art.types = function (cid) {
 
 };
 
-sip.o.art.art_wrap = function (cid) {
-    return(cardjs.create({
-        cid: cid,
-        type: 'panel',
-        pages: {
-            '编辑': [sip.o.art.editor],
-            '搜索': [sip.o.art.search_box],
-            '图片': [sip.o.art.list_orphan_img],
-            '设置': [sip.o.art.set_wrap],
-            '备份': [sip.o.art.backup],
-            'MDE': [sip.o.art.simplemde],
-            '说明': [sip.o.art.help]
-        },
-        style: {
-            'tags': ' ',
-            'tag_active': 'tag-active',
-            'tag_normal': 'tag-normal',
-            'page': 'page',
-            'card': ' '
-        }
-    }));
-};
-
 sip.o.mgr.logout = function (cid, parent_update, key) {
     return(cardjs.create({
         cid: cid,
@@ -1367,6 +1344,7 @@ sip.o.mgr.logout = function (cid, parent_update, key) {
 };
 
 sip.o.mgr.change_psw = function (cid, parent_update) {
+
     var o = new cardjs.card(cid);
 
     o.f.merge({
@@ -1425,43 +1403,39 @@ sip.o.mgr.change_psw = function (cid, parent_update) {
 
 };
 
-sip.o.mgr.user_mgr_wrap = function (cid) {
-    var key = cardjs.lib.gen_key();
-    return(cardjs.create({
-        cid: cid,
-        child: null,
-        settings: {
-            header: 'mgr_umgr_wrap',
-            key: key
-        },
-        gen_html: function () {
-            var html = '<div id="' + this.el(0) + '">正在读取数据 ...</div>';
-            return sip.f.add_frame('tp-frame-tag-card', html, '账号管理');
-        },
-        update: function () {
-            this.el(0, true).innerHTML = '更新数据中 ... ';
-            this.f.cache(null);
-            this.after_add_event();
-        },
-        after_add_event: function () {
-            this.f.clear_cache('clear_all_user_data', true);
-            this.clean_up();
-            var cache = this.f.restore();
-            if (cache) {
-                this.child = sip.o.mgr.user_mgr(this.el(0), key, this.update.bind(this)).show();
-                return;
-            }
-            this.f.fetch('fetch_all_user_info', function (data) {
-                this.f.cache(data);
-                this.child = sip.o.mgr.user_mgr(this.el(0), key, this.update.bind(this)).show();
-            });
-        },
-        clean_up: function () {
-            this.child && this.child.destroy();
-            //this.f.cache(null);
+sip.o.mgr.user_mgr_wrap = new cardjs.create({
+    child: null,
+    settings: {
+        header: 'mgr_umgr_wrap',
+        key: cardjs.lib.gen_key()
+    },
+    gen_html: function () {
+        var html = '<div id="' + this.el(0) + '">正在读取数据 ...</div>';
+        return sip.f.add_frame('tp-frame-tag-card', html, '账号管理');
+    },
+    update: function () {
+        this.el(0, true).innerHTML = '更新数据中 ... ';
+        this.f.cache(null);
+        this.after_add_event();
+    },
+    after_add_event: function () {
+        this.f.clear_cache('clear_all_user_data', true);
+        this.clean_up();
+        var cache = this.f.restore();
+        if (cache) {
+            this.child = sip.o.mgr.user_mgr(this.el(0), this.settings.key, this.update.bind(this)).show();
+            return;
         }
-    }));
-};
+        this.f.fetch('fetch_all_user_info', function (data) {
+            this.f.cache(data);
+            this.child = sip.o.mgr.user_mgr(this.el(0), this.settings.key, this.update.bind(this)).show();
+        });
+    },
+    clean_up: function () {
+        this.child && this.child.destroy();
+        //this.f.cache(null);
+    }
+});
 
 sip.o.mgr.user_mgr = function (cid, key, parent_update) {
 
@@ -1738,117 +1712,104 @@ sip.o.art.set_main_page = function (cid) {
 
 };
 
-sip.o.art.help = function (cid) {
-    var o = new cardjs.card(cid);
-    o.f.merge({
-        header: 'at_help'
-    });
-
-    o.gen_html = function () {
+sip.o.art.help = new cardjs.create({
+    settings: {header: 'art_help'},
+    gen_html: function () {
         return Mustache.render(cardjs.lib.load_html('tp-uma-help'));
-    };
+    }
+});
 
-    return o;
+sip.o.art.search_box = new cardjs.create({
+    child: null,
+    settings: {
+        header: 'main_search_box',
+        add_event: true,
+        key: cardjs.lib.gen_key()
+    },
+    gen_html: function () {
+        return Mustache.render(cardjs.lib.load_html('tp-uma-search-box'), {ids: [this.el(0), this.el(1), this.el(2)]});
+    },
+    gen_ev_handler: function () {
+        return [
+            function () {
+                //console.log('fire');
+                var cache = this.f.restore();
 
-};
+                var kw = this.el(0, true).value;
 
-sip.o.art.search_box = function (cid) {
-
-    var key = cardjs.lib.gen_key();
-
-    return(cardjs.create({
-        cid: cid,
-        child: null,
-        settings: {
-            header: 'main_search_box',
-            add_event: true,
-            key: key
-        },
-        gen_html: function () {
-            return Mustache.render(cardjs.lib.load_html('tp-uma-search-box'), {ids: [this.el(0), this.el(1), this.el(2)]});
-        },
-        gen_ev_handler: function () {
-            return [
-                function () {
-                    //console.log('fire');
-                    var cache = this.f.restore();
-
-                    var kw = this.el(0, true).value;
-
-                    if (!cache
-                            || kw !== cache.cache_kw
-                            || !cache.content
-                            || cache.content.length === 0) {
-                        if (!cache) {
-                            cache = {
-                                'page_size': 15,
-                                'total': -1,
-                                'cache_kw': '',
-                                'content': null
-                            };
-                        }
-                        cache['current_kw'] = kw,
-                                cache.pn = 0;
-                        this.clean_up();
-                        this.f.cache(cache);
-
-                        this.el(2, true).innerHTML = "搜索中 ...";
-                        this.f.fetch('search', {'kw': kw, 'pn': 0, 'get_total': true, 'page_size': cache.page_size},
-                                function (data) {
-                                    var cache = this.f.restore();
-                                    cache.cache_kw = kw;
-                                    cache.total = data.total;
-                                    cache.content = data.data;
-                                    this.f.cache(cache);
-
-                                    //console.log(data);
-                                    this.child = sip.o.art.search_result(this.el(2), this.settings.key).show();
-                                },
-                                function () {
-                                    this.el(2, true).innerHTML = "此功能登录后才可使用";
-                                    //console.log(r);
-                                }, false);
-                    } else {
-                        console.log('using cache!');
-                        if (!this.child) {
-                            this.child = sip.o.art.search_result(this.el(2), this.settings.key).show();
-                        }
+                if (!cache
+                        || kw !== cache.cache_kw
+                        || !cache.content
+                        || cache.content.length === 0) {
+                    if (!cache) {
+                        cache = {
+                            'page_size': 15,
+                            'total': -1,
+                            'cache_kw': '',
+                            'content': null
+                        };
                     }
-                },
-                function (e) {
-                    var k = e || window.event;
-                    if (k.keyCode === 13) {
-                        //console.log('fire');
-                        this.f.trigger(0);
+                    cache['current_kw'] = kw,
+                            cache.pn = 0;
+                    this.clean_up();
+                    this.f.cache(cache);
+
+                    this.el(2, true).innerHTML = "搜索中 ...";
+                    this.f.fetch('search', {'kw': kw, 'pn': 0, 'get_total': true, 'page_size': cache.page_size},
+                            function (data) {
+                                var cache = this.f.restore();
+                                cache.cache_kw = kw;
+                                cache.total = data.total;
+                                cache.content = data.data;
+                                this.f.cache(cache);
+
+                                //console.log(data);
+                                this.child = sip.o.art.search_result(this.el(2), this.settings.key).show();
+                            },
+                            function () {
+                                this.el(2, true).innerHTML = "此功能登录后才可使用";
+                                //console.log(r);
+                            }, false);
+                } else {
+                    console.log('using cache!');
+                    if (!this.child) {
+                        this.child = sip.o.art.search_result(this.el(2), this.settings.key).show();
                     }
                 }
-            ];
-        },
-        after_add_event: function () {
-            // clear_cache: {msbox/asearch/mboard} 相应键为true时清空缓存。
-            this.f.clear_cache('update_article', true);
-
-            var cache = this.f.restore();
-            this.el(0, true).focus();
-
-            if (!this.child && cache && cache.content
-                    && cache.content.length > 0) {
-                this.el(0, true).value = cache.cache_kw;
-                cache.current_kw = cache.cache_kw;
-                this.chile = sip.o.art.search_result(this.el(2), this.settings.key).show();
+            },
+            function (e) {
+                var k = e || window.event;
+                if (k.keyCode === 13) {
+                    //console.log('fire');
+                    this.f.trigger(0);
+                }
             }
+        ];
+    },
+    after_add_event: function () {
+        // clear_cache: {msbox/asearch/mboard} 相应键为true时清空缓存。
+        this.f.clear_cache('update_article', true);
 
-        },
-        clean_up: function () {
-            this.child && this.child.destroy();
-        },
-        add_event: function () {
-            //console.log('add event');
-            this.f.on('keyup', 0, 1);
-            this.f.on('click', 1, 0);
+        var cache = this.f.restore();
+        this.el(0, true).focus();
+
+        if (!this.child && cache && cache.content
+                && cache.content.length > 0) {
+            this.el(0, true).value = cache.cache_kw;
+            cache.current_kw = cache.cache_kw;
+            this.chile = sip.o.art.search_result(this.el(2), this.settings.key).show();
         }
-    }));
-};
+
+    },
+    clean_up: function () {
+        this.child && this.child.destroy();
+    },
+    add_event: function () {
+        //console.log('add event');
+        this.f.on('keyup', 0, 1);
+        this.f.on('click', 1, 0);
+    }
+});
 
 sip.o.AAChild = function (cid) {
     var key = cardjs.lib.gen_key();
@@ -1878,12 +1839,12 @@ sip.o.AAChild = function (cid) {
 };
 
 sip.o.art.simplemde = function (cid) {
-    var key=cardjs.lib.gen_key();
-    
+    var key = cardjs.lib.gen_key();
+
     var o = new cardjs.card(cid);
     o.f.merge({
         header: 'smde',
-        key:key
+        key: key
     });
 
     o.smde = null;
@@ -1893,23 +1854,23 @@ sip.o.art.simplemde = function (cid) {
         this.smde && this.smde.toTextArea();
         this.smde = null;
     };
-    
-    o.save_cache=function(){
-        if(!this.smde){
+
+    o.save_cache = function () {
+        if (!this.smde) {
             console.log('no editor');
             return;
         }
-        var data=this.smde.value();
+        var data = this.smde.value();
         this.f.cache(data);
     };
 
     o.after_add_event = function () {
-        var cache=this.f.restore();
-        if(!cache){
-            cache='';
+        var cache = this.f.restore();
+        if (!cache) {
+            cache = '';
         }
         this.smde = new SimpleMDE({element: this.el(0, true)});
-        this.smde.codemirror.on('change',this.save_cache.bind(this));
+        this.smde.codemirror.on('change', this.save_cache.bind(this));
         this.smde.value(cache);
     };
 
@@ -2380,7 +2341,7 @@ sip.o.main.article_board = function (cid) {
                     //console.log(data,tid);
                     for (var i = 0; i < data.length; i++) {
                         if (data[i].id === param.id) {
-                            this.update(sip.f.parse_json(data[i]));
+                            this.update(sip.f.filter_json(data[i]));
                             return;
                         }
                     }
@@ -2392,7 +2353,7 @@ sip.o.main.article_board = function (cid) {
             $.getJSON(sip.s.top_art_path + '?t=' + cardjs.lib.rand(8), function (data) {
                 var d = [];
                 data.forEach(function (e) {
-                    d.push(sip.f.parse_json(e));
+                    d.push(sip.f.filter_json(e));
                 });
                 if (!this.self) {
                     console.log('sip.o.main.article_board: Object 已经销毁,取消更新操作');
