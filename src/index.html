@@ -30,8 +30,9 @@
         <script>
             var main_page;
             $(document).ready(function () {
+                $.ajaxSetup({ cache: false });
                 $("#templates").load("web/template.html", function () {
-                    $.getJSON(sip.s.uset_path + '?t=' + cardjs.lib.rand(), function (data) {
+                    $.getJSON(sip.s.uset_path , function (data) {
                         sip.f.merge_uset(data);
                     }).always(function () {
                         main_page = sip.o.Main_wrap("main-page-container").show();

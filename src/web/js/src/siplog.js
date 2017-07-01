@@ -301,7 +301,7 @@ sip.db = cardjs.create({
 
         console.log('Load data:' + key + '.json');
 
-        $.getJSON(path + '?t=' + cardjs.lib.rand(8), this.got_json.bind(this, callback, key));
+        $.getJSON(path , this.got_json.bind(this, callback, key));
 
     },
 
@@ -354,7 +354,7 @@ sip.db = cardjs.create({
         this.d.file_key = [];
         this.d.total_article = 0;
 
-        $.getJSON(sip.s.files_path + '?t=' + cardjs.lib.rand(8), function (data) {
+        $.getJSON(sip.s.files_path , function (data) {
             // console.log('files.json:', data);
             if ('files' in data) {
                 this.d.files = data.files;
@@ -587,7 +587,7 @@ sip.o.main.msg = cardjs.create({
             this.el(2, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-mp-msg-list'), {msg: msg});
             return;
         }
-        $.getJSON(sip.s.msg_path + '?t=' + cardjs.lib.rand(8), function (data) {
+        $.getJSON(sip.s.msg_path , function (data) {
             var msg = [];
             data.forEach(function (e) {
                 msg.push({
@@ -2079,7 +2079,7 @@ sip.o.mgr.user_panel = function (cid) {
     o.show_user_panel = function () {
         //console.log('developing: show_user_panel ');
         var info = this.f.restore();
-        //console.log('info:', info);
+        //console.log('user_info:', info);
         var current_id = 0;
         if (info && info.login) {
             //window.setTimeout(function () {
@@ -2092,6 +2092,7 @@ sip.o.mgr.user_panel = function (cid) {
             }
 
         } else {
+            //console.log(info);
             this.children.push(sip.o.mgr.login(o.el(current_id++), o.update).show());
         }
     };
@@ -2311,7 +2312,8 @@ sip.o.main.article_board = function (cid) {
             }
             var param = get_url_keyid();
             if (param.y && param.m && param.id) {
-                $.getJSON(sip.s.json_path + param.y + '/' + param.m + '.json', function (data) {
+                var path=sip.s.json_path + param.y + '/' + param.m + '.json';
+                $.getJSON(path, function (data) {
                     //console.log(data,tid);
                     for (var i = 0; i < data.length; i++) {
                         if (data[i].id === param.id) {
@@ -2324,7 +2326,7 @@ sip.o.main.article_board = function (cid) {
                 return;
             }
             // no cache, no url params 
-            $.getJSON(sip.s.top_art_path + '?t=' + cardjs.lib.rand(8), function (data) {
+            $.getJSON(sip.s.top_art_path , function (data) {
                 var d = [];
                 data.forEach(function (e) {
                     d.push(sip.f.filter_json(e));
