@@ -2072,7 +2072,7 @@ sip.o.mgr.user_panel = function (cid) {
         for (var i = 0; i < this.el(); i++) {
             this.el(i, true).innerHTML = '';
         }
-        this.f.cache(null);
+        this.f.cache(null);  //?
         this.after_add_event();
     }.bind(o);
 

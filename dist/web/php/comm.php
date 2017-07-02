@@ -228,6 +228,7 @@ class Reply {
     }
     
     public function check_token(){
+        // for upload pictures
         $this->utk = substr(filter_input(INPUT_POST, 'tk', FILTER_SANITIZE_STRING), 0, 50);
         //console.log('tk:'.$this->utk);
         return $this->check_login();

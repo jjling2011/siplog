@@ -114,7 +114,7 @@ class UserMgr extends Reply {
             return;
         }
         $salt = CommLib::rand_str(48);
-        $psw = hash('md5', $salt . hash('md5',RAINBOW.hash('md5', INIT_PASSWORD)));
+        $psw = hash('md5', $salt . hash('md5', RAINBOW . hash('md5', INIT_PASSWORD)));
         $r = CommLib::query('update user set salt=?,psw=?,prv=0,ban=0 where id=?', 'ssi', [&$salt, &$psw, &$id]);
         $this->haste($r['status']);
     }
@@ -169,6 +169,7 @@ class UserMgr extends Reply {
             'login' => $this->check_login(),
             'token' => $this->utk
         ];
+
         if ($user['login']) {
             $db = CommLib::open_db();
             $stmt = $db->prepare('select prv,name,id from user where token=?');
@@ -208,7 +209,7 @@ class UserMgr extends Reply {
 
     public function check_login() {
         $token = $this->utk;
-        
+
         $r = CommLib::query('select id from user where token=?', 's', [&$token]);
 
         if ($r['status'] && $r['count'] > 0) {
@@ -259,7 +260,7 @@ class UserMgr extends Reply {
         $ip = CommLib::get_ip();
         $user = $user_info['user'];
         $token = CommLib::rand_str(48);
-        $this->token=$token;
+        $this->token = $token;
         CommLib::query('update user set last=utc_timestamp(),ip=?,token=? where user=?', 'sss', [&$ip, &$token, &$user]);
         $this->ok("欢迎！");
         return true;
@@ -270,7 +271,8 @@ class UserMgr extends Reply {
         $new = CommLib::rand_str(48);
         $r = CommLib::query('update user set token=?,tk_update=utc_timestamp() where token=?', 'ss', [&$new, &$token]);
         if ($r['status']) {
-            $this->token=$new;
+            $this->token = $new;
+            $this->utk = $new;
         }
         return $r['status'];
     }
@@ -367,7 +369,7 @@ class UserMgr extends Reply {
         $user = CommLib::filter_str($user_info['user']);
         $name = CommLib::filter_str($user_info['name']);
         $salt = CommLib::rand_str(48);
-        $psw = hash('md5', $salt . hash('md5',RAINBOW.hash('md5', INIT_PASSWORD)));
+        $psw = hash('md5', $salt . hash('md5', RAINBOW . hash('md5', INIT_PASSWORD)));
         $token = CommLib::rand_str(48);
         $prv = $this->prv_name_to_num($user_info['prv']);
 

@@ -3276,6 +3276,8 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
     Panel.prototype.after_add_event = function () {
         this.f.trigger(0);
     };
+    
+    var token=null;
 
     var funcs = {
         trigger: function (key) {
@@ -3439,8 +3441,9 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
                 }
                 var rsp = root.JSON.parse(raw_rsp);
                 if (rsp && rsp.tk) {
-                    //console.log('update token:', rsp.tk);
-                    Lib.cookie_set('tk', rsp.tk);
+                    //console.log('update token, rsp:',rsp);
+                    token=rsp.tk;
+                    Lib.cookie_set('tk', token);
                 }
                 if (rsp && rsp.status && rsp.data) {
                     //function ok
@@ -3451,9 +3454,12 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
                 }
                 func = null;
             }.bind(this);
-
-            xhr.send(encodeURI('tk=' + Lib.cookie_get('tk') + '&op=' + op + '&data=' + param));
-
+            
+            if (token===null){
+                token=Lib.cookie_get('tk');
+            }
+            //console.log('op/data/tk',op,param,token);
+            xhr.send(encodeURI('tk=' + token + '&op=' + op + '&data=' + param));
         }
     };
 
@@ -6059,7 +6065,7 @@ sip.o.mgr.user_panel = function (cid) {
         for (var i = 0; i < this.el(); i++) {
             this.el(i, true).innerHTML = '';
         }
-        this.f.cache(null);
+        this.f.cache(null);  //?
         this.after_add_event();
     }.bind(o);
 
