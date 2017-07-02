@@ -1,5 +1,7 @@
 <?php
 
+set_time_limit(30);
+
 define('DEBUG_MODE', false);
 
 define('RAINBOW','4YpcTwRat7A8hqlAKW4B7jOUJyBUEvnr');

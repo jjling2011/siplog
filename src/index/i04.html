@@ -1,0 +1,14 @@
+        </div>
+        <script>
+            var main_page;
+            $(document).ready(function () {
+                    $.ajaxSetup({ cache: false });
+                    $.getJSON(sip.s.uset_path, function (data) {
+                        sip.f.merge_uset(data);
+                    }).always(function () {
+                        main_page = sip.o.Main_wrap("main-page-container").show();
+                    });
+            });
+        </script>
+    </body>
+</html>

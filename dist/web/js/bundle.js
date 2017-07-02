@@ -2849,23 +2849,16 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
 })('cardjs', this, function () {
 
     "use strict";
-    
+
     var root = window;
 
     var Package = function (params) {
 
-        var key;
-        var skip = {'key': true};
-
-        for (key  in params) {
-            if (!(key in skip)) {
-                this[key] = params[key];
-            }
-        }
-
         this.settings = {
-            key: params.key || 'pkgshare'
+            key: 'pkgshare'
         };
+
+        Lib.expand(this.settings, params.settings);
 
         this.cjsv = {
             // 登记 this.f.event()的时候记录下事件名.close的时候销毁事件.
@@ -2874,8 +2867,8 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
 
         this.f = {};
 
-        for (key in Database) {
-            this.f[key] = Database[key].bind(this);
+        for (var k in Database) {
+            this.f[k] = Database[k].bind(this);
         }
 
         this.self = true;
@@ -3104,6 +3097,7 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
 
     // 我真的不知道为什么我喜欢给他设个根本用不上的名字 ...
     Card.prototype.name = 'CARD';
+
     Card.prototype.gen_html = function () {
         throw new Error('Card.prototype.gen_html(): Please rewrite this function.');
         return '';
@@ -3181,10 +3175,21 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
         return html;
     };
 
+    function get_obj(str) {
+        var obj = root;
+        var s = str.split('.');
+        for (var i = 0; i < s.length && obj !== undefined; i++) {
+            obj = obj[s[i]];
+        }
+        return obj;
+    }
+
     Page.prototype.after_add_event = function () {
         this.clean_up();
+        //console.log('page.this', this);
+
         for (var i = 0; i < this.cards.length; i++) {
-            this.children.push(this.cards[i](this.el(i)).show());
+            this.children.push(get_obj(this.cards[i])(this.el(i)).show());
         }
     };
 
@@ -3271,6 +3276,8 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
     Panel.prototype.after_add_event = function () {
         this.f.trigger(0);
     };
+    
+    var token=null;
 
     var funcs = {
         trigger: function (key) {
@@ -3434,8 +3441,9 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
                 }
                 var rsp = root.JSON.parse(raw_rsp);
                 if (rsp && rsp.tk) {
-                    //console.log('update token:',rsp.tk);
-                    Lib.cookie_set('tk', rsp.tk);
+                    //console.log('update token, rsp:',rsp);
+                    token=rsp.tk;
+                    Lib.cookie_set('tk', token);
                 }
                 if (rsp && rsp.status && rsp.data) {
                     //function ok
@@ -3446,10 +3454,12 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
                 }
                 func = null;
             }.bind(this);
-            var cookie = Lib.cookie_get('tk');
-            //console.log('fetch read local cookie:',cookie);
-            xhr.send(encodeURI('op=' + op + '&data=' + param + '&tk=' + cookie));
-            cookie = null;
+            
+            if (token===null){
+                token=Lib.cookie_get('tk');
+            }
+            //console.log('op/data/tk',op,param,token);
+            xhr.send(encodeURI('tk=' + token + '&op=' + op + '&data=' + param));
         }
     };
 
@@ -3691,7 +3701,7 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
             }
         var stack = e.stack.toString().split(/\r\n|\n/),
                 frame,
-                frameRE = /:(\d+):(?:\d+)[^\d]*$/,
+                frameRE = /:(\d+):(?:(\d+))[^\d]*$/,
                 scriptRE = /\/(\w+)\.js/;
 
         e = null;
@@ -3702,12 +3712,20 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
 
         frame = (stack.shift());
 
-        var line = frameRE.exec(frame)[1],
+        var m = frameRE.exec(frame);
+
+        var line = m[1],
+                char = m[2],
                 script = scriptRE.exec(frame)[1];
         frameRE = null;
         scriptRE = null;
-        //console.log(script);
-        return 'key_' + script + '_js_' + line;
+        m = null;
+
+        var k = 'key_' + script + '_' + line + '_' + char;
+
+        //var k='key_' + script + '_' + line ;
+        //console.log(k);
+        return k;
     });
 
     var gset = {};
@@ -3728,6 +3746,21 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
         SubType.prototype = prototype;
     }
 
+    function bind_params(o, p) {
+        var skip = {'cards': null, 'type': null, 'settings': null, 'pages': null, 'style': null};
+
+        for (var key in p) {
+            if (!(key in skip)) {
+                if (Lib.isFunction(p[key])) {
+                    o[key] = p[key].bind(o);
+                } else {
+                    o[key] = p[key];
+                }
+            }
+        }
+    }
+
+
     function Create(params) {
 
         if (!Lib.isObject(params)) {
@@ -3735,8 +3768,22 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
         }
 
         if (!('cid' in params)) {
-            throw new Error('CardJS.Create(params): params must have key cid');
+            //throw new Error('CardJS.Create(params): params must have key cid');
+            if (params.type === 'package') {
+                var o = new Package(params);
+                bind_params(o, params);
+                if (Lib.isFunction(o.init)) {
+                    o.init.bind(o)();
+                }
+                return o;
+            }
+            return function (cid) {
+                params.cid = cid;
+                //console.log('params:', p);
+                return Create(params);
+            };
         }
+
         var o = null;
         var style = undefined;
         var cid = params['cid'];
@@ -3769,26 +3816,14 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
             Lib.expand(o.settings, params['settings']);
         }
 
-        var skip = {'cards': null, 'type': null, 'settings': null, 'pages': null, 'style': null};
+        bind_params(o, params);
 
-        for (var key in params) {
-            if (!(key in skip)) {
-                if (Lib.isFunction(params[key])) {
-                    o[key] = params[key].bind(o);
-                } else {
-                    o[key] = params[key];
-                }
-            }
-        }
-
-        cid = null;
         style = null;
-        skip = null;
         params = null;
-
 
         return o;
     }
+
 
     var Database = (function () {
         var d = {};
@@ -3944,7 +3979,6 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
     }());
 
     var exports = {
-        package: Package,
         card: Card,
         //page: Page,
         //panel: Panel,
@@ -3989,9 +4023,9 @@ var sip = {
         db: {}
     },
     s: {
-        //最近文章数据的位置
         rainbow: "4YpcTwRat7A8hqlAKW4B7jOUJyBUEvnr",
         json_path: 'web/upload/json/',
+        //最近文章数据的位置
         top_art_path: 'web/upload/json/top.json',
         // 文章分类
         atypes_path: 'web/upload/json/atypes.json',
@@ -4039,8 +4073,14 @@ sip.f.add_frame = function (frame_id, content, tag, style) {
     return Mustache.render(cardjs.lib.load_html(frame_id), d);
 };
 
-sip.f.parse_json = function (e) {
+sip.f.filter_json = function (e) {
+
+    //id userid type title content tag ctime mtime name lock top
+
     var f = {
+        msg: function (d) {
+            return(filterXSS(d));
+        },
         title: function (d) {
             return(filterXSS(cardjs.lib.decode_utf8(d)));
         },
@@ -4059,7 +4099,6 @@ sip.f.parse_json = function (e) {
         },
         content: function (d) {
             return(filterXSS(cardjs.lib.decode_utf8(d)));
-            //return((cardjs.lib.decode_utf8(d)));
         },
         top: function (d) {
             return(d === 0 ? false : true);
@@ -4082,163 +4121,31 @@ sip.f.parse_json = function (e) {
     return d;
 };
 
-sip.o.main.pager = function (cid) {
-    var o = new cardjs.card(cid);
-    o.f.merge({
-        header: 'pager',
-        add_event: true
-    });
-
-    o.btn_num = 5;
-
-    o.d = {};
-
-    o.data_parser = function () {
-        var cur = sip.db.d.page.cur_page;
-        var size = sip.db.d.page.size;
-        var max = Math.ceil(sip.db.d.total_article / size);
-        var first = Math.max(0, (cur - Math.floor(this.btn_num / 2)));
-        var last = Math.min(first + this.btn_num, max);
-        first = Math.min(first, last - this.btn_num);
-        first = Math.max(first, 0);
-        if (cur > last) {
-            cur = last;
-        }
-        if (cur < first) {
-            cur = first;
-        }
-        sip.db.d.page.cur_page = cur;
-        this.d.first = first;
-        this.d.last = last;
-        this.d.cur = cur;
-        //console.log('data parser:', this.d);
-    };
-
-    o.gen_html = function () {
-        var v = [];
-        for (var i = this.d.first; i < this.d.last; i++) {
-            v.push({id: this.el(i - this.d.first + 1), value: i + 1});
-        }
-        var first = {id: this.el(0), value: '首页'};
-        return (Mustache.render(cardjs.lib.load_html('tp-main-pager'), {first: first, v: v}));
-    };
-
-    o.show_page = function (num) {
-        //console.log('show page ' + num);
-        //sip.db.d.page.cur_page = num;
-        var min = Math.max(num * sip.db.d.page.size, 0);
-        var first = 0, sum = 0, key = 0, skip = 0, per_sum = 0;
-        var d = sip.db.d;
-
-        while (sum <= min && key < d.file_key.length) {
-            first = key;
-            per_sum = sum;
-            sum += d.files[d.file_key[key]];
-            key++;
-        }
-
-        skip = Math.max(min - per_sum, 0);
-        //var k = d.file_key[first];
-        //console.log('show page: num/min/first/key/skip', num, min, first, k, skip);
-        d = null;
-        this.d.data = [];
-        this.get_data.bind(this)(first, skip);
-    };
-
-    o.get_data = function (key_index, skip) {
-        if (key_index >= sip.db.d.file_key.length) {
-            console.log('Last page!');
-            this.f.event('main_article_board_update', this.d.data);
-            return;
-        }
-        var size = sip.db.d.page.size;
-        var key = sip.db.d.file_key[key_index];
-        //console.log('call get data:key/idx/skip', key, key_index, skip);
-        if (key in sip.db.d.data) {
-            var ids = Object.keys(sip.db.d.data[key]).sort(function (a, b) {
-                return (a - b);
-            }).reverse();
-            //console.log(ids);
-            for (var i = skip; i < ids.length && this.d.data.length < size; i++) {
-                //console.log('push(key,idx)', key, i);
-                this.d.data.push(sip.db.d.data[key][ids[i]]);
-            }
-            if (this.d.data.length < size) {
-                this.get_data.bind(this, key_index + 1, 0)();
-                return;
-            }
-            this.f.event('main_article_board_update', this.d.data);
-        } else {
-            //console.log('load json:', key);
-            sip.db.load_json(key, this.get_data.bind(this, key_index, skip));
-        }
-    };
-
-    o.gen_ev_handler = function () {
-        var evs = [];
-        evs.push(function () {
-            sip.db.d.page.cur_page = 0;
-            this.refresh();
-            //this.show_page(0);
-        });
-
-        for (var i = this.d.first; i < this.d.last; i++) {
-            evs.push((function () {
-                var num = i;
-                return(function () {
-                    sip.db.d.page.cur_page = num;
-                    this.refresh();
-                    //this.show_page(num);
-                }.bind(this));
-            }.bind(this)()));
-        }
-
-        return evs;
-    };
-
-    o.add_event = function () {
-        for (var i = 0; i < this.el(); i++) {
-            this.f.on('click', i);
-        }
-    };
-
-    o.after_add_event = function () {
-        //this.f.trigger(0);
-        this.el(this.d.cur - this.d.first + 1, true).style.backgroundColor = 'skyblue';
-        this.show_page(sip.db.d.page.cur_page);
-    };
-
-    return o;
-};
-
-sip.o.db.article = function () {
-
-    var data_key = cardjs.lib.gen_key();
-
-    var o = new cardjs.package({
-        key: data_key,
-        d: {
-            data: {},
-            files: [],
-            search: {
-                kw_cache: null,
-                kw_cur: '',
-                result: []
-            },
-            page: {
-                key: null,
-                filter: '',
-                size: 5,
-                cur_page: 0,
-                cur_key: 0,
-                id_loaded: 0
-            },
-            file_key: [],
-            total_article: 0
-        }
-    });
-
-    o.set = function (key, value) {
+sip.db = cardjs.create({
+    type: 'package',
+    settings: {
+        key: cardjs.lib.gen_key()
+    },
+    d: {
+        data: {},
+        files: [],
+        search: {
+            kw_cache: null,
+            kw_cur: '',
+            result: []
+        },
+        page: {
+            key: null,
+            filter: '',
+            size: 5,
+            cur_page: 0,
+            cur_key: 0,
+            id_loaded: 0
+        },
+        file_key: [],
+        total_article: 0
+    },
+    set: function (key, value) {
         //this[key] = value;
         //console.log('set :',key,value);
         if (key === 'page_key') {
@@ -4255,18 +4162,18 @@ sip.o.db.article = function () {
             this.d.page.filter = value;
             this.show_page.bind(this)();
         }
-    };
+    },
 
-    o.show_page = function () {
+    show_page: function () {
         //console.log(this);
         if (this.d.page.key in this.d.data) {
             this.push_main_art_board.bind(this)();
         } else {
             this.load_json.bind(this)(this.d.page.key, this.push_main_art_board.bind(this));
         }
-    };
+    },
 
-    o.push_main_art_board = function () {
+    push_main_art_board: function () {
         if (!(this.d.page.key in this.d.data)) {
             console.log('Error: key not exist!', this.d.page.key);
             return;
@@ -4286,13 +4193,11 @@ sip.o.db.article = function () {
         }
         //console.log('k/d/f/db' ,k, d,f,db);
         this.f.event('main_article_board_update', d);
-        d = null;
-        f = null;
-        k = null;
-        db = null;
-    };
+        d = f = k = db = null;
 
-    o.search = function (raw_keywords) {
+    },
+
+    search: function (raw_keywords) {
 
         if (this.d.search.kw_cache === raw_keywords) {
             //console.log('using cache!');
@@ -4308,9 +4213,8 @@ sip.o.db.article = function () {
 
         this.d.search.result = [];
         this.search_recursive.bind(this)(keywords, 0);
-    };
-
-    o.search_recursive = function (keywords, index) {
+    },
+    search_recursive: function (keywords, index) {
         if (index >= this.d.file_key.length) {
             this.f.event('show_main_search_result');
             console.log('search done!');
@@ -4330,9 +4234,9 @@ sip.o.db.article = function () {
         }
         //console.log('load file:', key);
         this.load_json(key, this.search_recursive.bind(this, keywords, index));
-    };
+    },
 
-    o.search_cache = function (keywords, key) {
+    search_cache: function (keywords, key) {
 
         var e, mark, kw_idx;
 
@@ -4366,9 +4270,9 @@ sip.o.db.article = function () {
             }
         }
 
-    };
+    },
 
-    o.load_json = function (key, callback) {
+    load_json: function (key, callback) {
 
         if (!cardjs.lib.isString(key)) {
             throw new Error('key muset be string.');
@@ -4390,17 +4294,17 @@ sip.o.db.article = function () {
 
         console.log('Load data:' + key + '.json');
 
-        $.getJSON(path + '?t=' + cardjs.lib.rand(8), this.got_json.bind(this, callback, key));
+        $.getJSON(path , this.got_json.bind(this, callback, key));
 
-    };
+    },
 
-    o.get = function (key) {
+    get: function (key) {
         if (key === 'files') {
-            return o.d.files;
+            return this.d.files;
         }
-    };
+    },
 
-    o.got_json = function (callback, key, data) {
+    got_json: function (callback, key, data) {
 
         /* cache.data={
          *   201706:{
@@ -4416,7 +4320,7 @@ sip.o.db.article = function () {
 
         var d = {}, e, i, div = document.createElement("div");
         for (i = 0; i < data.length; i++) {
-            e = sip.f.parse_json(data[i]);
+            e = sip.f.filter_json(data[i]);
             div.innerHTML = e.content;
             e.text = div.textContent || div.innerText || "";
             d[e.id] = e;
@@ -4427,9 +4331,9 @@ sip.o.db.article = function () {
         if (cardjs.lib.isFunction(callback)) {
             callback();
         }
-    };
+    },
 
-    o.load_files = function () {
+    load_files: function () {
 
         this.d.files = [];
         this.d.search.kw_cache = null;
@@ -4443,7 +4347,7 @@ sip.o.db.article = function () {
         this.d.file_key = [];
         this.d.total_article = 0;
 
-        $.getJSON(sip.s.files_path + '?t=' + cardjs.lib.rand(8), function (data) {
+        $.getJSON(sip.s.files_path , function (data) {
             // console.log('files.json:', data);
             if ('files' in data) {
                 this.d.files = data.files;
@@ -4467,115 +4371,248 @@ sip.o.db.article = function () {
             }
             //console.log(this);
         }.bind(this));
-    };
+    },
+    init: function () {
 
-    o.load_files();
+        this.load_files();
+    }
+});
 
-    return o;
-};
+sip.o.art.art_wrap = cardjs.create({
+    type: 'panel',
+    pages: {
+        '编辑': ['sip.o.art.editor'],
+        '搜索': ['sip.o.art.search_box'],
+        '图片': ['sip.o.art.list_orphan_img'],
+        '设置': ['sip.o.art.set_wrap'],
+        '备份': ['sip.o.art.backup'],
+        'MDE': ['sip.o.art.simplemde'],
+        '说明': ['sip.o.art.help']
+    },
+    style: {
+        'tags': ' ',
+        'tag_active': 'tag-active',
+        'tag_normal': 'tag-normal',
+        'page': 'page',
+        'card': ' '
+    }
+});
 
-sip.db = sip.o.db.article();
+sip.o.main.pager = cardjs.create({
+    settings: {
+        header: 'pager',
+        add_event: true
+    },
+    btn_num: 5,
+    d: {},
+    data_parser: function () {
+        var cur = sip.db.d.page.cur_page;
+        var size = sip.db.d.page.size;
+        var max = Math.ceil(sip.db.d.total_article / size);
+        var first = Math.max(0, (cur - Math.floor(this.btn_num / 2)));
+        var last = Math.min(first + this.btn_num, max);
+        first = Math.min(first, last - this.btn_num);
+        first = Math.max(first, 0);
+        if (cur > last) {
+            cur = last;
+        }
+        if (cur < first) {
+            cur = first;
+        }
+        sip.db.d.page.cur_page = cur;
+        this.d.first = first;
+        this.d.last = last;
+        this.d.cur = cur;
+        //console.log('data parser:', this.d);
+    },
+    gen_html: function () {
+        var v = [];
+        for (var i = this.d.first; i < this.d.last; i++) {
+            v.push({id: this.el(i - this.d.first + 1), value: i + 1});
+        }
+        var first = {id: this.el(0), value: '首页'};
+        return (Mustache.render(cardjs.lib.load_html('tp-main-pager'), {first: first, v: v}));
+    },
+    show_page: function (num) {
+        //console.log('show page ' + num);
+        //sip.db.d.page.cur_page = num;
+        var min = Math.max(num * sip.db.d.page.size, 0);
+        var first = 0, sum = 0, key = 0, skip = 0, per_sum = 0;
+        var d = sip.db.d;
 
-sip.o.main.msg = function (cid) {
-    var key = cardjs.lib.gen_key();
-    return(cardjs.create({
-        cid: cid,
-        settings: {
-            key: key,
-            header: 'main_mbox',
-            add_event: true
-        },
-        gen_html: function () {
-            var content = Mustache.render(cardjs.lib.load_html('tp-mp-msg'), {ids: [this.el(0), this.el(1), this.el(2)]});
-            return sip.f.add_frame('tp-frame-tag-card', content, "", 'margin-bottom:8px;margin-top:0px;');
-        },
+        while (sum <= min && key < d.file_key.length) {
+            first = key;
+            per_sum = sum;
+            sum += d.files[d.file_key[key]];
+            key++;
+        }
 
-        gen_ev_handler: function () {
-            return [
-                //enter
-                function (e) {
-                    //console.log('enter key!');
-                    var k = e || window.event;
-                    if (k.keyCode !== 13) {
-                        return;
-                    }
-                    this.f.trigger(1);
-                },
-                //click
-                function () {
-                    //console.log('click');
-                    var d = this.el(0, true).value;
-                    //console.log('msg:', d);
-                    if (d.length > 0) {
-                        this.f.fetch('post_msg', d, function () {
-                            var msg = this.f.restore();
-                            if (!msg) {
-                                msg = [];
-                            }
-                            msg.unshift({
-                                ctime: new Date().toJSON().slice(0, 10),
-                                name: 'me',
-                                text: filterXSS(d)
-                            });
-                            while (msg.length > sip.uset.msg_keep) {
-                                msg.pop();
-                            }
-                            this.f.cache(msg);
-                            this.refresh();
-                        }, function (r) {
-                            alert(r);
-                        });
-                    }
-                }
-            ];
-        },
-        add_event: function () {
-            this.f.on('click', 1);
-            this.f.on('keyup', 0);
-        },
-        after_add_event: function () {
-            this.el(0, true).focus();
-            var msg = this.f.restore();
-            if (msg && msg.length > 0) {
-                //console.log('using cache.');
-                this.el(2, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-mp-msg-list'), {msg: msg});
+        skip = Math.max(min - per_sum, 0);
+        //var k = d.file_key[first];
+        //console.log('show page: num/min/first/key/skip', num, min, first, k, skip);
+        d = null;
+        this.d.data = [];
+        this.get_data.bind(this)(first, skip);
+    },
+
+    get_data: function (key_index, skip) {
+        if (key_index >= sip.db.d.file_key.length) {
+            console.log('Last page!');
+            this.f.event('main_article_board_update', this.d.data);
+            return;
+        }
+        var size = sip.db.d.page.size;
+        var key = sip.db.d.file_key[key_index];
+        //console.log('call get data:key/idx/skip', key, key_index, skip);
+        if (key in sip.db.d.data) {
+            var ids = Object.keys(sip.db.d.data[key]).sort(function (a, b) {
+                return (a - b);
+            }).reverse();
+            //console.log(ids);
+            for (var i = skip; i < ids.length && this.d.data.length < size; i++) {
+                //console.log('push(key,idx)', key, i);
+                this.d.data.push(sip.db.d.data[key][ids[i]]);
+            }
+            if (this.d.data.length < size) {
+                this.get_data.bind(this, key_index + 1, 0)();
                 return;
             }
-            $.getJSON(sip.s.msg_path + '?t=' + cardjs.lib.rand(8), function (data) {
-                var msg = [];
-                data.forEach(function (e) {
-                    msg.push({
-                        text: filterXSS(e.text),
-                        ctime: cardjs.lib.getYMD(e.ctime),
-                        name: filterXSS(e.name)
-                    });
-                });
-                this.f.cache(msg);
-            }.bind(this)).fail(function () {
-                console.log('留言文件加载失败！');
-            }).always(function () {
-                if (sip.uset.show_mbox) {
-                    var msg = this.f.restore();
-                    this.el(2, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-mp-msg-list'), {msg: msg});
-                }
-            }.bind(this));
+            this.f.event('main_article_board_update', this.d.data);
+        } else {
+            //console.log('load json:', key);
+            sip.db.load_json(key, this.get_data.bind(this, key_index, skip));
         }
-    }));
+    },
 
-};
+    gen_ev_handler: function () {
+        var evs = [];
+        evs.push(function () {
+            sip.db.d.page.cur_page = 0;
+            this.refresh();
+            //this.show_page(0);
+        });
 
-sip.o.Main_wrap = function (cid) {
+        for (var i = this.d.first; i < this.d.last; i++) {
+            evs.push((function () {
+                var num = i;
+                return(function () {
+                    sip.db.d.page.cur_page = num;
+                    this.refresh();
+                    //this.show_page(num);
+                }.bind(this));
+            }.bind(this)()));
+        }
 
-    var o = new cardjs.card(cid);
+        return evs;
+    },
 
-    o.f.merge({
+    add_event: function () {
+        for (var i = 0; i < this.el(); i++) {
+            this.f.on('click', i);
+        }
+    },
+
+    after_add_event: function () {
+        //this.f.trigger(0);
+        this.el(this.d.cur - this.d.first + 1, true).style.backgroundColor = 'skyblue';
+        this.show_page(sip.db.d.page.cur_page);
+    }
+});
+
+sip.o.main.msg = cardjs.create({
+    settings: {
+        key: cardjs.lib.gen_key(),
+        header: 'main_mbox',
+        add_event: true
+    },
+    gen_html: function () {
+        var content = Mustache.render(cardjs.lib.load_html('tp-mp-msg'), {ids: [this.el(0), this.el(1), this.el(2)]});
+        return sip.f.add_frame('tp-frame-tag-card', content, "", 'margin-bottom:8px;margin-top:0px;');
+    },
+    gen_ev_handler: function () {
+        return [
+            //enter
+            function (e) {
+                //console.log('enter key!');
+                var k = e || window.event;
+                if (k.keyCode !== 13) {
+                    return;
+                }
+                this.f.trigger(1);
+            },
+            //click
+            function () {
+                //console.log('click');
+                var d = this.el(0, true).value;
+                //console.log('msg:', d);
+                if (d.length > 0) {
+                    this.f.fetch('post_msg', d, function () {
+                        var msg = this.f.restore();
+                        if (!msg) {
+                            msg = [];
+                        }
+                        msg.unshift({
+                            ctime: new Date().toJSON().slice(0, 10),
+                            name: 'me',
+                            text: filterXSS(d)
+                        });
+                        while (msg.length > sip.uset.msg_keep) {
+                            msg.pop();
+                        }
+                        this.f.cache(msg);
+                        this.refresh();
+                    }, function (r) {
+                        alert(r);
+                    });
+                }
+            }
+        ];
+    },
+    add_event: function () {
+        this.f.on('click', 1);
+        this.f.on('keyup', 0);
+    },
+    after_add_event: function () {
+        this.el(0, true).focus();
+        var msg = this.f.restore();
+        if (msg && msg.length > 0) {
+            //console.log('using cache.');
+            this.el(2, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-mp-msg-list'), {msg: msg});
+            return;
+        }
+        $.getJSON(sip.s.msg_path , function (data) {
+            var msg = [];
+            data.forEach(function (e) {
+                msg.push({
+                    text: filterXSS(e.text),
+                    ctime: cardjs.lib.getYMD(e.ctime),
+                    name: filterXSS(e.name)
+                });
+            });
+            this.f.cache(msg);
+        }.bind(this)).fail(function () {
+            console.log('留言文件加载失败！');
+        }).always(function () {
+            if (sip.uset.show_mbox) {
+                var msg = this.f.restore();
+                this.el(2, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-mp-msg-list'), {msg: msg});
+            }
+        }.bind(this));
+    }
+});
+
+sip.o.Main_wrap = cardjs.create({
+
+    settings: {
         header: 'main_wrap',
         add_event: true
-    });
+    },
+    
+    contents:[],
 
-    o.pager = null;
+    pager: null,
 
-    o.gen_ev_handler = function () {
+    gen_ev_handler: function () {
         return([
             function () {
                 this.el(0, true).className = 'tag-main-active';
@@ -4589,84 +4626,84 @@ sip.o.Main_wrap = function (cid) {
                 this.show_mgr_page();
             }
         ]);
-    };
+    },
 
-    o.show_main_page = function () {
+    show_main_page: function () {
         //console.log('show_main_page:',this);
-        clear_contents();
-        o.contents.push(sip.o.main.article_board(o.el(5)).show());
+        this.clear_contents();
+        this.contents.push(sip.o.main.article_board(this.el(5)).show());
         var cnum = 6;
-        o.contents.push(sip.o.main.search_box(o.el(cnum++)).show());
-        o.contents.push(sip.o.main.group_view(o.el(cnum++)).show());
+        this.contents.push(sip.o.main.search_box(this.el(cnum++)).show());
+        this.contents.push(sip.o.main.group_view(this.el(cnum++)).show());
         if (sip.uset.show_mbox) {
-            this.contents.push(sip.o.main.msg(o.el(cnum++)).show());
+            this.contents.push(sip.o.main.msg(this.el(cnum++)).show());
         }
-    };
-
-
-
-    o.show_mgr_page = function () {
+    },
+    
+    show_mgr_page: function () {
         //console.log('show_mgr_page developing');
         //return;
-        clear_contents();
+        this.clear_contents();
         this.contents.push(sip.o.art.art_wrap(this.el(4)).show());
         this.contents.push(sip.o.mgr.user_panel(this.el(6)).show());
-    };
-
-    o.add_event = function () {
-        o.f.on('click', 0);
-        o.f.on('click', 1);
-    };
-
-    o.gen_html = function () {
+    },
+    
+    add_event: function () {
+        this.f.on('click', 0);
+        this.f.on('click', 1);
+    },
+    gen_html: function () {
         var ids = [];
         for (var i = 0; i < 10; i++) {
             ids.push(this.el(i));
         }
         return Mustache.render(cardjs.lib.load_html('tp-main-wrap'), {ids: ids});
-    };
-
-    o.show_pager = function () {
+    },
+    show_pager: function () {
         this.clear_pager();
         this.pager = sip.o.main.pager(this.el(4)).show();
-    };
+    },
 
-    o.clear_pager = function () {
+    clear_pager: function () {
+        //console.log('clear_pager');
         this.pager && this.pager.destroy();
         this.pager = null;
         this.el(4, true).innerHTML = '';
-    };
+    },
 
-    function clear_contents() {
+    clear_contents: function () {
 
-        o.clear_pager();
+        this.clear_pager();
+        
+        //console.log('clear_contents:',this.contents);
 
-        if (o.contents && o.contents.length > 0) {
-            o.contents.forEach(function (e) {
+        if (this.contents && this.contents.length > 0) {
+            this.contents.forEach(function (e) {
                 //console.log('main:',o);
-                //console.log('contents:',e);
+                //console.log('clear contents:',e);
                 e.destroy();
             });
         }
-        o.contents = [];
+        
+        this.contents = [];
+        
         for (var i = 4; i < 10; i++) {
-            o.el(i, true).innerHTML = '';
+            this.el(i, true).innerHTML = '';
         }
-    }
-
-    o.reload = function () {
+    },
+    
+    reload: function () {
         //console.log('call main_page.refresh()');
-        o.f.cache(null, 'um_cur_user_info');
-        o.f.cache(null, 'um_all_user_info');
-        clear_contents();
-        o.show_mgr_page();
-    };
+        this.f.cache(null, 'um_cur_user_info');
+        this.f.cache(null, 'um_all_user_info');
+        this.clear_contents();
+        this.show_mgr_page();
+    },
 
-    o.update_banner = function (param) {
+    update_banner: function (param) {
         var name, desc;
 
         param = param || {};
-
 
         name = param.name;
         desc = param.desc;
@@ -4689,21 +4726,19 @@ sip.o.Main_wrap = function (cid) {
 
         name = null;
         desc = null;
-    };
+    },
 
-    o.after_add_event = function () {
-        clear_contents();
-        o.show_main_page();
-        //this.update_banner();
+    after_add_event: function () {
+        this.clear_contents();
+        this.show_main_page();
+        
         this.f.event('main_update_banner', this.update_banner);
         this.f.event('main_clear_pager', this.clear_pager);
         this.f.event('main_show_pager', this.show_pager);
 
         this.f.event('main_update_banner');
-    };
-
-    return o;
-};
+    }
+});
 
 sip.o.art.search_result = function (cid, key) {
     var o = new cardjs.card(cid);
@@ -5258,29 +5293,6 @@ sip.o.art.types = function (cid) {
 
 };
 
-sip.o.art.art_wrap = function (cid) {
-    return(cardjs.create({
-        cid: cid,
-        type: 'panel',
-        pages: {
-            '编辑': [sip.o.art.editor],
-            '搜索': [sip.o.art.search_box],
-            '图片': [sip.o.art.list_orphan_img],
-            '设置': [sip.o.art.set_wrap],
-            '备份': [sip.o.art.backup],
-            'MDE': [sip.o.art.simplemde],
-            '说明': [sip.o.art.help]
-        },
-        style: {
-            'tags': ' ',
-            'tag_active': 'tag-active',
-            'tag_normal': 'tag-normal',
-            'page': 'page',
-            'card': ' '
-        }
-    }));
-};
-
 sip.o.mgr.logout = function (cid, parent_update, key) {
     return(cardjs.create({
         cid: cid,
@@ -5326,6 +5338,7 @@ sip.o.mgr.logout = function (cid, parent_update, key) {
 };
 
 sip.o.mgr.change_psw = function (cid, parent_update) {
+
     var o = new cardjs.card(cid);
 
     o.f.merge({
@@ -5384,43 +5397,39 @@ sip.o.mgr.change_psw = function (cid, parent_update) {
 
 };
 
-sip.o.mgr.user_mgr_wrap = function (cid) {
-    var key = cardjs.lib.gen_key();
-    return(cardjs.create({
-        cid: cid,
-        child: null,
-        settings: {
-            header: 'mgr_umgr_wrap',
-            key: key
-        },
-        gen_html: function () {
-            var html = '<div id="' + this.el(0) + '">正在读取数据 ...</div>';
-            return sip.f.add_frame('tp-frame-tag-card', html, '账号管理');
-        },
-        update: function () {
-            this.el(0, true).innerHTML = '更新数据中 ... ';
-            this.f.cache(null);
-            this.after_add_event();
-        },
-        after_add_event: function () {
-            this.f.clear_cache('clear_all_user_data', true);
-            this.clean_up();
-            var cache = this.f.restore();
-            if (cache) {
-                this.child = sip.o.mgr.user_mgr(this.el(0), key, this.update.bind(this)).show();
-                return;
-            }
-            this.f.fetch('fetch_all_user_info', function (data) {
-                this.f.cache(data);
-                this.child = sip.o.mgr.user_mgr(this.el(0), key, this.update.bind(this)).show();
-            });
-        },
-        clean_up: function () {
-            this.child && this.child.destroy();
-            //this.f.cache(null);
+sip.o.mgr.user_mgr_wrap = cardjs.create({
+    child: null,
+    settings: {
+        header: 'mgr_umgr_wrap',
+        key: cardjs.lib.gen_key()
+    },
+    gen_html: function () {
+        var html = '<div id="' + this.el(0) + '">正在读取数据 ...</div>';
+        return sip.f.add_frame('tp-frame-tag-card', html, '账号管理');
+    },
+    update: function () {
+        this.el(0, true).innerHTML = '更新数据中 ... ';
+        this.f.cache(null);
+        this.after_add_event();
+    },
+    after_add_event: function () {
+        this.f.clear_cache('clear_all_user_data', true);
+        this.clean_up();
+        var cache = this.f.restore();
+        if (cache) {
+            this.child = sip.o.mgr.user_mgr(this.el(0), this.settings.key, this.update.bind(this)).show();
+            return;
         }
-    }));
-};
+        this.f.fetch('fetch_all_user_info', function (data) {
+            this.f.cache(data);
+            this.child = sip.o.mgr.user_mgr(this.el(0), this.settings.key, this.update.bind(this)).show();
+        });
+    },
+    clean_up: function () {
+        this.child && this.child.destroy();
+        //this.f.cache(null);
+    }
+});
 
 sip.o.mgr.user_mgr = function (cid, key, parent_update) {
 
@@ -5596,10 +5605,10 @@ sip.o.art.set_banner = function (cid) {
         var name = cardjs.lib.decode_utf8(sip.uset['banner_name']);
         var desc = cardjs.lib.decode_utf8(sip.uset['banner_desc']);
         if (name && name.length > 0) {
-            this.el(0, true).value = name;
+            this.el(0, true).value = cardjs.lib.html_escape(name);
         }
         if (desc && desc.length > 0) {
-            this.el(1, true).value = desc;
+            this.el(1, true).value = cardjs.lib.html_escape(desc);
         }
         name = null;
         desc = null;
@@ -5697,152 +5706,112 @@ sip.o.art.set_main_page = function (cid) {
 
 };
 
-sip.o.art.help = function (cid) {
-    var o = new cardjs.card(cid);
-    o.f.merge({
-        header: 'at_help'
-    });
-
-    o.gen_html = function () {
+sip.o.art.help = cardjs.create({
+    settings: {header: 'art_help'},
+    gen_html: function () {
         return Mustache.render(cardjs.lib.load_html('tp-uma-help'));
-    };
+    }
+});
 
-    return o;
+sip.o.art.search_box = cardjs.create({
+    child: null,
+    settings: {
+        header: 'main_search_box',
+        add_event: true,
+        key: cardjs.lib.gen_key()
+    },
+    gen_html: function () {
+        return Mustache.render(cardjs.lib.load_html('tp-uma-search-box'), {ids: [this.el(0), this.el(1), this.el(2)]});
+    },
+    gen_ev_handler: function () {
+        return [
+            function () {
+                //console.log('fire');
+                var cache = this.f.restore();
 
-};
+                var kw = this.el(0, true).value;
 
-sip.o.art.search_box = function (cid) {
-
-    var key = cardjs.lib.gen_key();
-
-    return(cardjs.create({
-        cid: cid,
-        child: null,
-        settings: {
-            header: 'main_search_box',
-            add_event: true,
-            key: key
-        },
-        gen_html: function () {
-            return Mustache.render(cardjs.lib.load_html('tp-uma-search-box'), {ids: [this.el(0), this.el(1), this.el(2)]});
-        },
-        gen_ev_handler: function () {
-            return [
-                function () {
-                    //console.log('fire');
-                    var cache = this.f.restore();
-
-                    var kw = this.el(0, true).value;
-
-                    if (!cache
-                            || kw !== cache.cache_kw
-                            || !cache.content
-                            || cache.content.length === 0) {
-                        if (!cache) {
-                            cache = {
-                                'page_size': 15,
-                                'total': -1,
-                                'cache_kw': '',
-                                'content': null
-                            };
-                        }
-                        cache['current_kw'] = kw,
-                                cache.pn = 0;
-                        this.clean_up();
-                        this.f.cache(cache);
-
-                        this.el(2, true).innerHTML = "搜索中 ...";
-                        this.f.fetch('search', {'kw': kw, 'pn': 0, 'get_total': true, 'page_size': cache.page_size},
-                                function (data) {
-                                    var cache = this.f.restore();
-                                    cache.cache_kw = kw;
-                                    cache.total = data.total;
-                                    cache.content = data.data;
-                                    this.f.cache(cache);
-
-                                    //console.log(data);
-                                    this.child = sip.o.art.search_result(this.el(2), this.settings.key).show();
-                                },
-                                function () {
-                                    this.el(2, true).innerHTML = "此功能登录后才可使用";
-                                    //console.log(r);
-                                }, false);
-                    } else {
-                        console.log('using cache!');
-                        if (!this.child) {
-                            this.child = sip.o.art.search_result(this.el(2), this.settings.key).show();
-                        }
+                if (!cache
+                        || kw !== cache.cache_kw
+                        || !cache.content
+                        || cache.content.length === 0) {
+                    if (!cache) {
+                        cache = {
+                            'page_size': 15,
+                            'total': -1,
+                            'cache_kw': '',
+                            'content': null
+                        };
                     }
-                },
-                function (e) {
-                    var k = e || window.event;
-                    if (k.keyCode === 13) {
-                        //console.log('fire');
-                        this.f.trigger(0);
+                    cache['current_kw'] = kw,
+                            cache.pn = 0;
+                    this.clean_up();
+                    this.f.cache(cache);
+
+                    this.el(2, true).innerHTML = "搜索中 ...";
+                    this.f.fetch('search', {'kw': kw, 'pn': 0, 'get_total': true, 'page_size': cache.page_size},
+                            function (data) {
+                                var cache = this.f.restore();
+                                cache.cache_kw = kw;
+                                cache.total = data.total;
+                                cache.content = data.data;
+                                this.f.cache(cache);
+
+                                //console.log(data);
+                                this.child = sip.o.art.search_result(this.el(2), this.settings.key).show();
+                            },
+                            function () {
+                                this.el(2, true).innerHTML = "此功能登录后才可使用";
+                                //console.log(r);
+                            }, false);
+                } else {
+                    console.log('using cache!');
+                    if (!this.child) {
+                        this.child = sip.o.art.search_result(this.el(2), this.settings.key).show();
                     }
                 }
-            ];
-        },
-        after_add_event: function () {
-            // clear_cache: {msbox/asearch/mboard} 相应键为true时清空缓存。
-            this.f.clear_cache('update_article', true);
-
-            var cache = this.f.restore();
-            this.el(0, true).focus();
-
-            if (!this.child && cache && cache.content
-                    && cache.content.length > 0) {
-                this.el(0, true).value = cache.cache_kw;
-                cache.current_kw = cache.cache_kw;
-                this.chile = sip.o.art.search_result(this.el(2), this.settings.key).show();
+            },
+            function (e) {
+                var k = e || window.event;
+                if (k.keyCode === 13) {
+                    //console.log('fire');
+                    this.f.trigger(0);
+                }
             }
+        ];
+    },
+    after_add_event: function () {
+        // clear_cache: {msbox/asearch/mboard} 相应键为true时清空缓存。
+        this.f.clear_cache('update_article', true);
 
-        },
-        clean_up: function () {
-            this.child && this.child.destroy();
-        },
-        add_event: function () {
-            //console.log('add event');
-            this.f.on('keyup', 0, 1);
-            this.f.on('click', 1, 0);
-        }
-    }));
-};
+        var cache = this.f.restore();
+        this.el(0, true).focus();
 
-sip.o.AAChild = function (cid) {
-    var key = cardjs.lib.gen_key();
-    return(cardjs.create({
-        cid: cid,
-        settings: {
-            key: key
-        },
-        func1_child: function (p) {
-            console.log('call child func1(' + p + ')');
-        },
-        func2_child: function (p) {
-            console.log('call child func2(' + p + ')');
-        },
-        gen_html: function () {
-            return 'child';
-        },
-        after_add_event: function () {
-            this.f.event('hello', this.func1_child);
-            this.f.event('world', this.func2_child);
-        },
-        clean_up: function () {
-            this.self.innerHTML = '';
-            //this.f.event('hello', this.func_child, false);
+        if (!this.child && cache && cache.content
+                && cache.content.length > 0) {
+            this.el(0, true).value = cardjs.lib.html_escape(cache.cache_kw);
+            cache.current_kw = cache.cache_kw;
+            this.chile = sip.o.art.search_result(this.el(2), this.settings.key).show();
         }
-    }));
-};
+
+    },
+    clean_up: function () {
+        this.child && this.child.destroy();
+    },
+    add_event: function () {
+        //console.log('add event');
+        this.f.on('keyup', 0, 1);
+        this.f.on('click', 1, 0);
+    }
+});
 
 sip.o.art.simplemde = function (cid) {
-    var key=cardjs.lib.gen_key();
-    
+    var key = cardjs.lib.gen_key();
+
     var o = new cardjs.card(cid);
     o.f.merge({
         header: 'smde',
-        key:key
+        key: key
     });
 
     o.smde = null;
@@ -5852,23 +5821,23 @@ sip.o.art.simplemde = function (cid) {
         this.smde && this.smde.toTextArea();
         this.smde = null;
     };
-    
-    o.save_cache=function(){
-        if(!this.smde){
+
+    o.save_cache = function () {
+        if (!this.smde) {
             console.log('no editor');
             return;
         }
-        var data=this.smde.value();
+        var data = this.smde.value();
         this.f.cache(data);
     };
 
     o.after_add_event = function () {
-        var cache=this.f.restore();
-        if(!cache){
-            cache='';
+        var cache = this.f.restore();
+        if (!cache) {
+            cache = '';
         }
         this.smde = new SimpleMDE({element: this.el(0, true)});
-        this.smde.codemirror.on('change',this.save_cache.bind(this));
+        this.smde.codemirror.on('change', this.save_cache.bind(this));
         this.smde.value(cache);
     };
 
@@ -6096,14 +6065,14 @@ sip.o.mgr.user_panel = function (cid) {
         for (var i = 0; i < this.el(); i++) {
             this.el(i, true).innerHTML = '';
         }
-        this.f.cache(null);
+        this.f.cache(null);  //?
         this.after_add_event();
     }.bind(o);
 
     o.show_user_panel = function () {
         //console.log('developing: show_user_panel ');
         var info = this.f.restore();
-        //console.log('info:', info);
+        //console.log('user_info:', info);
         var current_id = 0;
         if (info && info.login) {
             //window.setTimeout(function () {
@@ -6116,6 +6085,7 @@ sip.o.mgr.user_panel = function (cid) {
             }
 
         } else {
+            //console.log(info);
             this.children.push(sip.o.mgr.login(o.el(current_id++), o.update).show());
         }
     };
@@ -6335,11 +6305,12 @@ sip.o.main.article_board = function (cid) {
             }
             var param = get_url_keyid();
             if (param.y && param.m && param.id) {
-                $.getJSON(sip.s.json_path + param.y + '/' + param.m + '.json', function (data) {
+                var path=sip.s.json_path + param.y + '/' + param.m + '.json';
+                $.getJSON(path, function (data) {
                     //console.log(data,tid);
                     for (var i = 0; i < data.length; i++) {
                         if (data[i].id === param.id) {
-                            this.update(sip.f.parse_json(data[i]));
+                            this.update(sip.f.filter_json(data[i]));
                             return;
                         }
                     }
@@ -6348,10 +6319,10 @@ sip.o.main.article_board = function (cid) {
                 return;
             }
             // no cache, no url params 
-            $.getJSON(sip.s.top_art_path + '?t=' + cardjs.lib.rand(8), function (data) {
+            $.getJSON(sip.s.top_art_path , function (data) {
                 var d = [];
                 data.forEach(function (e) {
-                    d.push(sip.f.parse_json(e));
+                    d.push(sip.f.filter_json(e));
                 });
                 if (!this.self) {
                     console.log('sip.o.main.article_board: Object 已经销毁,取消更新操作');

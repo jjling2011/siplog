@@ -201,7 +201,7 @@ body {
 
 
         </style>    
-        <script type="text/javascript" src="web/js/bundle.js"></script> 
+        <script type="text/javascript" src="web/js/bundle.js?md5=3cb812f066db3f827bfe36512de72b70"></script> 
     </head>
     <body >
         <div style="width:100%;" id="main-page-container"></div>
@@ -773,7 +773,8 @@ body {
         <script>
             var main_page;
             $(document).ready(function () {
-                    $.getJSON(sip.s.uset_path + '?t=' + cardjs.lib.rand(), function (data) {
+                    $.ajaxSetup({ cache: false });
+                    $.getJSON(sip.s.uset_path, function (data) {
                         sip.f.merge_uset(data);
                     }).always(function () {
                         main_page = sip.o.Main_wrap("main-page-container").show();
