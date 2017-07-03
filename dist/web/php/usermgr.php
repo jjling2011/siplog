@@ -38,37 +38,42 @@ class UserMgr extends Reply {
         }
         $token = $this->utk;
         $info = json_decode($raw_info, true);
-        $db = CommLib::open_db();
         $sql = 'select salt,psw,name from user where token=?';
-        $stmt = $db->prepare($sql);
-        $stmt->bind_param('s', $token);
-        $salt = $psw = $name = null;
-        $stmt->bind_result($salt, $psw, $name);
-        $stmt->execute();
-        $stmt->fetch();
-        $stmt->free_result();
+        $r = CommLib::query($sql, 's', [$token]);
+
+        if ($r === false || count($r) < 1) {
+            $this->fail('查询失败');
+            return;
+        }
+
+        $salt = $r[0]['salt'];
+        $psw = $r[0]['psw'];
+
 
         if (strcmp(hash('md5', $salt . $info['opsw']), $psw) !== 0) {
             $this->fail('原密码错误，修改失败！');
             return;
         }
 
-        $nname = CommLib::filter_str($info['name']);
+        $new_name = $r[0]['name'];
 
-        if (strlen($nname) > 0) {
-            $r = CommLib::query('select name from user where name=?', 's', [&$nname]);
-            if ($r['status'] && $r['count'] > 0) {
+        $usr_name = CommLib::filter_str($info['name']);
+
+        if (strlen($usr_name) > 0) {
+            $s = CommLib::query('select name from user where name=?', 's', [$usr_name]);
+            if ($s !== false && count($s) > 0) {
                 $this->fail('名字重复，修改失败！');
                 return;
             }
-            $name = $nname;
+            $new_name = $usr_name;
         }
 
-        $nsalt = CommLib::rand_str(48);
-        $npsw = hash('md5', $nsalt . $info['npsw']);
-        $r = CommLib::query('update user set psw=?,salt=?,name=? where token=?', 'ssss', [&$npsw, &$nsalt, &$name, &$token]);
+        $new_salt = CommLib::rand_str(48);
+        $new_psw = hash('md5', $new_salt . $info['npsw']);
+
+        $s = CommLib::query('update user set psw=?,salt=?,name=? where token=?', 'ssss', [$new_psw, $new_salt, $new_name, $token]);
         //error_log($r['count']);
-        $this->haste($r['status']);
+        $this->haste($s !== false);
     }
 
     public function user_management($raw_info) {
@@ -88,8 +93,8 @@ class UserMgr extends Reply {
             return;
         }
         //error_log("id:$id prv:$prv ");
-        $r = CommLib::query('update user set prv=?,name=?,user=? where id=?', 'issi', [&$prv, &$name, &$user, &$id]);
-        $this->haste($r['status']);
+        $r = CommLib::query('update user set prv=?,name=?,user=? where id=?', 'issi', [$prv, $name, $user, $id]);
+        $this->haste($r !== false);
     }
 
     public function user_ban($raw_id) {
@@ -103,8 +108,8 @@ class UserMgr extends Reply {
             $this->fail('不能对自己进行此操作！');
             return;
         }
-        $r = CommLib::query('update user set ban=1 where id=?', 'i', [&$id]);
-        $this->haste($r['status']);
+        $r = CommLib::query('update user set ban=1 where id=?', 'i', [$id]);
+        $this->haste($r !== false);
     }
 
     public function user_reset($raw_id) {
@@ -115,8 +120,8 @@ class UserMgr extends Reply {
         }
         $salt = CommLib::rand_str(48);
         $psw = hash('md5', $salt . hash('md5', RAINBOW . hash('md5', INIT_PASSWORD)));
-        $r = CommLib::query('update user set salt=?,psw=?,prv=0,ban=0 where id=?', 'ssi', [&$salt, &$psw, &$id]);
-        $this->haste($r['status']);
+        $r = CommLib::query('update user set salt=?,psw=?,prv=0,ban=0 where id=?', 'ssi', [$salt, $psw, $id]);
+        $this->haste($r !== false);
     }
 
     public function fetch_all_user_info() {
@@ -210,9 +215,13 @@ class UserMgr extends Reply {
     public function check_login() {
         $token = $this->utk;
 
-        $r = CommLib::query('select id from user where token=?', 's', [&$token]);
+        $r = CommLib::query('select id from user where token=?', 's', [$token]);
 
-        if ($r['status'] && $r['count'] > 0) {
+        if ($r === false) {
+            return false;
+        }
+
+        if (count($r) > 0) {
             $sql = 'select ban,timestampdiff(hour,tk_update,utc_timestamp()) from user where token=?';
             $db = CommLib::open_db();
             $stmt = $db->prepare($sql);
@@ -237,8 +246,8 @@ class UserMgr extends Reply {
         if ($this->check_login()) {
             $token = $this->utk;
             $new = CommLib::rand_str(48);
-            $r = CommLib::query('update user set token=?,tk_update=utc_timestamp() where token=?', 'ss', [&$new, &$token]);
-            $this->haste($r['status']);
+            $r = CommLib::query('update user set token=?,tk_update=utc_timestamp() where token=?', 'ss', [$new, $token]);
+            $this->haste($r !== false);
         } else {
             $this->fail('登录后才可以操作！');
         }
@@ -261,7 +270,7 @@ class UserMgr extends Reply {
         $user = $user_info['user'];
         $token = CommLib::rand_str(48);
         $this->token = $token;
-        CommLib::query('update user set last=utc_timestamp(),ip=?,token=? where user=?', 'sss', [&$ip, &$token, &$user]);
+        CommLib::query('update user set last=utc_timestamp(),ip=?,token=? where user=?', 'sss', [$ip, $token, $user]);
         $this->ok("欢迎！");
         return true;
     }
@@ -269,12 +278,12 @@ class UserMgr extends Reply {
     private function update_cookie() {
         $token = $this->utk;
         $new = CommLib::rand_str(48);
-        $r = CommLib::query('update user set token=?,tk_update=utc_timestamp() where token=?', 'ss', [&$new, &$token]);
-        if ($r['status']) {
+        $r = CommLib::query('update user set token=?,tk_update=utc_timestamp() where token=?', 'ss', [$new, $token]);
+        if ($r !== false) {
             $this->token = $new;
             $this->utk = $new;
         }
-        return $r['status'];
+        return ($r !== false);
     }
 
     protected function check_prv($prv_name) {
@@ -300,13 +309,13 @@ class UserMgr extends Reply {
     }
 
     private static function user_exist($name) {
-        $r = CommLib::query('select user from user where user=?', 's', [&$name]);
-        return ($r['status'] && $r['count'] > 0);
+        $r = CommLib::query('select user from user where user=?', 's', [$name]);
+        return ($r !== false && count($r) > 0);
     }
 
     private static function name_exist($name) {
-        $r = CommLib::query('select name from user where name=?', 's', [&$name]);
-        return ($r['status'] && $r['count'] > 0);
+        $r = CommLib::query('select name from user where name=?', 's', [$name]);
+        return ($r !== false && count($r) > 0);
     }
 
     private function check_user_password($raw_user, $raw_psw) {
@@ -319,12 +328,12 @@ class UserMgr extends Reply {
         }
         // get salt
         $db = CommLib::open_db();
-        $stmt = $db->prepare('select fail,psw,salt from user where user=?');
+        $stmt = $db->prepare('select ban,fail,psw,salt from user where user=?');
         $stmt->bind_param('s', $user);
         $stmt->execute();
         $stmt->store_result();
-        $db_psw = $db_salt = $fail = null;
-        $stmt->bind_result($fail, $db_psw, $db_salt);
+        $ban = $db_psw = $db_salt = $fail = null;
+        $stmt->bind_result($ban, $fail, $db_psw, $db_salt);
         $stmt->fetch();
         $stmt->free_result();
 //        error_log($psw);
@@ -335,12 +344,16 @@ class UserMgr extends Reply {
             $this->fail('尝试次数过多，账号已锁定，请与管理员联系！');
             return false;
         }
-        if (strcmp(hash('md5', "$db_salt$psw"), $db_psw) !== 0) {
-            $this->fail('账号密码不符！');
-            CommLib::query('update user set fail=fail+1 where user=?', 's', [&$user]);
+        if($ban!==0){
+            $this->fail('账号已被停用,请与管理员联系!');
             return false;
         }
-        CommLib::query('update user set fail=0 where user=?', 's', [&$user]);
+        if (strcmp(hash('md5', "$db_salt$psw"), $db_psw) !== 0) {
+            $this->fail('账号密码不符！');
+            CommLib::query('update user set fail=fail+1 where user=?', 's', [$user]);
+            return false;
+        }
+        CommLib::query('update user set fail=0 where user=?', 's', [$user]);
         return true;
     }
 
@@ -378,8 +391,8 @@ class UserMgr extends Reply {
             return;
         }
 
-        $r = CommLib::query('insert into user(user,psw,prv,salt,token,name) values(?,?,?,?,?,?)', 'ssisss', [&$user, &$psw, &$prv, &$salt, &$token, &$name]);
-        $this->haste($r['status']);
+        $r = CommLib::query('insert into user(user,psw,prv,salt,token,name) values(?,?,?,?,?,?)', 'ssisss', [$user, $psw, $prv, $salt, $token, $name]);
+        $this->haste($r !== false);
     }
 
 }

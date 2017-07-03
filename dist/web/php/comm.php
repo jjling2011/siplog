@@ -16,15 +16,16 @@ class CommLib {
         }
     }
 
-    public static function fetch_assoc($sql, $types = false, $params = false) {
+    public static function query($sql, $types = false, $params = false) {
 
         $db = CommLib::open_db();
         $stmt = $db->prepare($sql);
-
+        
+        //error_log('query('.$sql.','.$types.','.print_r($params,true));
         // bind params
         if (is_string($types) && is_array($params) && count($params) === strlen($types)) {
             $p = [];
-            for ($i = 0; $i < count($params); $i++) {
+            for ($i = 0; $i < strlen($types); $i++) {
                 $p[$i] = &$params[$i];
             }
             call_user_func_array(array($stmt, 'bind_param'), array_merge(array($types), $p));
@@ -119,21 +120,6 @@ class CommLib {
         $db = new MySQLi(DB_HOST, DB_USER, DB_PASS, DB_NAME);
         $db->set_charset('utf8');
         return ($db);
-    }
-
-    public static function query($sql, $type = null, $param = null) {
-        // e.g. CommLib::query('select * from data where ip=? and port=?','s',[&$ip,&$port]);
-        $db = CommLib::open_db();
-        $stmt = $db->prepare($sql);
-        if (is_string($type) && is_array($param) && count($param) > 0) {
-            call_user_func_array(array($stmt, 'bind_param'), array_merge(array($type), $param));
-        }
-        $stat = $stmt->execute();
-        $stmt->store_result();
-        $count = $stmt->num_rows;
-        $stmt->free_result();
-        //error_log($count);
-        return (['status' => $stat, 'count' => $count]);
     }
 
     public static function utc_to_local($t) {

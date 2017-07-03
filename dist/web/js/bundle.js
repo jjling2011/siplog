@@ -4000,6 +4000,7 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
 /* global  Mustache,cardjs */
 
 cardjs.set({server_page: 'web/php/serv.php'});
+//cardjs.set({verbose: true});
 
 /*
  * cache share keys:
@@ -5868,9 +5869,9 @@ sip.o.AATest = function (cid) {
         return {
             't1': function () {
                 console.log('click t1');
-                var salt = "nothing";
-                var psw = "123456";
-                console.log(md5(salt + md5(sip.s.rainbow + md5(psw))));
+                var salt = this.el('input1',true).value;
+                var psw = this.el('input2',true).value;
+                console.log('salt:',salt,' psw:',psw,' enc_psw:',md5(salt + md5(sip.s.rainbow + md5(psw))));
             },
             't2': function () {
                 console.log('click t2');
@@ -5886,6 +5887,8 @@ sip.o.AATest = function (cid) {
 
     o.gen_html = function () {
         var html = '<div style="margin:10px;">' +
+                '<input type="text" id="'+this.el('input1')+'" ><br>'+
+                '<input type="text" id="'+this.el('input2')+'" ><br>'+
                 '<input type="button" id="' + this.el('t1') + '" class="btn btn-info" value="t1">' +
                 '<input type="button" id="' + this.el('t2') + '" class="btn btn-info" value="t2">' +
                 '<div id="' + this.el('child') + '"></div>' +

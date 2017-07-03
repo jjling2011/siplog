@@ -51,7 +51,7 @@ class Serv extends UserMgr {
             $this->fail('无权操作!');
             return;
         }
-        $data = CommLib::fetch_assoc('select * from pics');
+        $data = CommLib::query('select * from pics');
         if ($data === false) {
             $this->fail('导出数据出错，请看php错误日志！');
             return;
@@ -77,7 +77,7 @@ class Serv extends UserMgr {
             if ($datas !== false) {
                 foreach ($datas as $d) {
                     $sql = 'insert into pics set `id`=?,`url`=?,`uptime`=?,`deltime`=?,`path`=?,`atid`=?,`tag`=?';
-                    CommLib::fetch_assoc($sql, 'issssii', [
+                    CommLib::query($sql, 'issssii', [
                         $d['id'],
                         $d['url'],
                         $d['uptime'],
@@ -107,7 +107,7 @@ class Serv extends UserMgr {
                     $sql = 'insert into article set '
                             . '`id`=?,`userid`=?,`type`=?,`title`=?,`content`=?,'
                             . '`tag`=?,`ctime`=?,`mtime`=?,`name`=?,`lock`=?,`top`=? ';
-                    CommLib::fetch_assoc($sql, 'iiississsii', [
+                    CommLib::query($sql, 'iiississsii', [
                         $d['id'] + 0,
                         $d['userid'] + 0,
                         $d['type'] + 0,
@@ -154,13 +154,13 @@ class Serv extends UserMgr {
     }
 
     private function export_article($year, $month) {
-        $top_articles = CommLib::fetch_assoc('select * from article where `top`=1 order by mtime desc ');
-        $recent_articles = CommLib::fetch_assoc('select * from article where `top`=0 order by mtime desc limit 5');
+        $top_articles = CommLib::query('select * from article where `top`=1 order by mtime desc ');
+        $recent_articles = CommLib::query('select * from article where `top`=0 order by mtime desc limit 5');
         file_put_contents(EXPORT_PATH, $this->article_array_to_json($top_articles, $recent_articles));
         //$this->ok('完成!');
         if ($year > 0 && $month > 0 && $month < 13) {
             $sql = 'select * from article where year(ctime)=? and month(ctime)=? order by mtime desc';
-            $articles = CommLib::fetch_assoc($sql, 'ii', [$year, $month]);
+            $articles = CommLib::query($sql, 'ii', [$year, $month]);
             if ($articles !== false) {
                 CommLib::mkdir(ARTICLE_PATH . $year);
                 file_put_contents(ARTICLE_PATH . $year . '/' . $month . '.json', $this->article_array_to_json($articles));
@@ -170,7 +170,7 @@ class Serv extends UserMgr {
                         . ' FROM `article` '
                         . ' group by year(ctime),month(ctime) '
                         . ' order by k desc';
-                $rs = CommLib::fetch_assoc($sql);
+                $rs = CommLib::query($sql);
                 foreach ($rs as $r) {
                     $files[$r['k']] = $r['c'];
                 }
@@ -349,9 +349,9 @@ class Serv extends UserMgr {
         $pn = $param['pn'] + 0;
         $page_size = $param['page_size'] + 0;
         $sql = $this->gen_sql($param['kw'], $pn, $page_size);
-        $data = CommLib::fetch_assoc($sql['query']);
+        $data = CommLib::query($sql['query']);
         $total = -1;
-        $r = CommLib::fetch_assoc($sql['total']);
+        $r = CommLib::query($sql['total']);
         if ($r !== false) {
             $total = $r[0]['total'];
         }
@@ -362,7 +362,7 @@ class Serv extends UserMgr {
         $param = json_decode($raw_param, true);
         $aid = $param['id'] + 0;
         $sql = 'select id,type,title,content,`top`,`lock` from article where id=?';
-        $r = CommLib::fetch_assoc($sql, 'i', [$aid]);
+        $r = CommLib::query($sql, 'i', [$aid]);
         if ($r && count($r) > 0) {
             $d = $r[0];
             $d['title'] = CommLib::encode_utf8($d['title']);
@@ -383,13 +383,13 @@ class Serv extends UserMgr {
             $name = '';
         }
         $ip = CommLib::get_ip();
-        $r = CommLib::fetch_assoc('insert into msg set msg=?,name=?,ip=?,ctime=utc_timestamp()', 'sss', [$msg, $name, $ip]);
+        $r = CommLib::query('insert into msg set msg=?,name=?,ip=?,ctime=utc_timestamp()', 'sss', [$msg, $name, $ip]);
 //        error_log(print_r($r,true));
 //        error_log(($r)?'true':'false');
 //        error_log((!$r)?'true':'false');
 //        error_log((!!$r)?'true':'false');
         if ($r !== false) {
-            $data = CommLib::fetch_assoc('select name,ctime,msg as text from msg order by ctime desc limit ' . MSG_KEEP);
+            $data = CommLib::query('select name,ctime,msg as text from msg order by ctime desc limit ' . MSG_KEEP);
             if ($data !== false) {
                 file_put_contents(MSG_PATH, json_encode($data));
             }
@@ -435,15 +435,15 @@ class Serv extends UserMgr {
         }
         $id = $raw_id + 0;
 
-        $t = CommLib::fetch_assoc('select `lock`,month(ctime) as m,year(ctime) as y from article where id=?', 'i', [$id]);
+        $t = CommLib::query('select `lock`,month(ctime) as m,year(ctime) as y from article where id=?', 'i', [$id]);
 
         if (!($user_info['prv']['ARTL']) && $t !== false) {
             $this->fail('文件已经锁定，不能删除！');
             return;
         }
 
-        CommLib::fetch_assoc('update pics set  tag=4 where atid=?', 'i', [$id]);
-        $r = CommLib::fetch_assoc('delete from article where id=?', 'i', [$id]);
+        CommLib::query('update pics set  tag=4 where atid=?', 'i', [$id]);
+        $r = CommLib::query('delete from article where id=?', 'i', [$id]);
 
         $this->haste($r !== false);
         if ($t !== false) {
@@ -483,7 +483,7 @@ class Serv extends UserMgr {
         if ($data['id'] + 0 > 0) {
             //modify
             $id = $data['id'] + 0;
-            $temp_d = CommLib::fetch_assoc('select `lock`,`top` from article where id=?', 'i', [$id]);
+            $temp_d = CommLib::query('select `lock`,`top` from article where id=?', 'i', [$id]);
             //error_log(print_r($temp_d,true));
 
             if ($temp_d !== false) {
@@ -493,7 +493,7 @@ class Serv extends UserMgr {
                 }
                 if ($user_info['prv']['ARTL'] || $temp_d[0]['lock'] === 0) {
                     //can modify
-                    CommLib::fetch_assoc('update article set mtime=utc_timestamp(),title=?,content=?,type=?,userid=?,name=?,`top`=?,`lock`=? where id=?', 'ssiisiii', [
+                    CommLib::query('update article set mtime=utc_timestamp(),title=?,content=?,type=?,userid=?,name=?,`top`=?,`lock`=? where id=?', 'ssiisiii', [
                         $title,
                         $content,
                         $data['type'] + 0,
@@ -529,13 +529,13 @@ class Serv extends UserMgr {
         $tags = $doc->getElementsByTagName('img');
         foreach ($tags as $tag) {
             $url = $tag->getAttribute('src');
-            CommLib::fetch_assoc('update pics set atid=? where url=?', 'is', [$id, $url]);
+            CommLib::query('update pics set atid=? where url=?', 'is', [$id, $url]);
         }
 
         $this->haste($r !== false);
 
         if ($id > 0) {
-            $t = CommLib::fetch_assoc('select month(ctime) as m,year(ctime) as y from article where id=?', 'i', [$id]);
+            $t = CommLib::query('select month(ctime) as m,year(ctime) as y from article where id=?', 'i', [$id]);
             if ($t !== false) {
                 $this->export_article($t[0]['y'], $t[0]['m']);
             }
