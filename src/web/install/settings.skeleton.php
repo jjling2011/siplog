@@ -1,6 +1,6 @@
 <?php
 
-set_time_limit(30);
+# set_time_limit(30);
 
 define('DEBUG_MODE', false);
 
