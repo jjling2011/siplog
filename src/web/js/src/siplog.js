@@ -1061,7 +1061,7 @@ sip.o.art.editor = function (cid) {
                     this.el(8, true).style.display = 'none';
                 } else {
                     var pos = cardjs.lib.get_DOM_offset(this.el(7, true));
-                    this.el(8, true).style.left = (pos.left - parseInt(this.el(8, true).style.width)) + "px";
+                    this.el(8, true).style.left = (pos.left - window.Math.floor(this.el(8, true).style.width)) + "px";
                     this.el(8, true).style.top = (pos.top + 8) + "px";
                     this.el(8, true).style.display = 'block';
                 }
@@ -1124,7 +1124,7 @@ sip.o.art.editor = function (cid) {
         cid = cache.cache_id;
         sid = this.f.restore('art_select_id') || 0;
 
-        uid = parseInt(cardjs.lib.url_get_param('id'));
+        uid = window.Math.floor(cardjs.lib.url_get_param('id'));
         if (!sid && uid > 0) {
             sid = uid;
         }
@@ -2259,7 +2259,7 @@ sip.o.main.article_board = function (cid) {
     function get_url_keyid() {
         var y = null, m = null,
                 key = cardjs.lib.url_get_param('key'),
-                id = parseInt(cardjs.lib.url_get_param('id'));
+                id = window.Math.floor(cardjs.lib.url_get_param('id'));
         if (key.length > 4) {
             y = key.substr(0, 4);
             m = key.substr(4);

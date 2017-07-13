@@ -21,10 +21,16 @@
     var root = window;
 
     var Package = function (params) {
-
+        
+        var key;
+        
         this.settings = {
             key: 'pkgshare'
         };
+        
+        for (key in gset) {
+            this.settings[key] = gset[key];
+        }
 
         Lib.expand(this.settings, params.settings);
 
@@ -33,7 +39,9 @@
             cevs: {}
         };
 
-        this.f = {};
+        this.f = {
+            fetch:funcs.fetch.bind(this)
+        };
 
         for (var k in Database) {
             this.f[k] = Database[k].bind(this);
