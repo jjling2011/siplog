@@ -148,11 +148,11 @@ class CommLib {
             $stmt->free_result();
             if ($fail < DDOS) {
                 //error_log('check_ddos: increase!');
-                CommLib::query('update ip set fail=fail+1 where ip=?', 's', [&$ip]);
+                CommLib::query('update ip set fail=fail+1 where ip=?', 's', [$ip]);
             } else {
                 if ($dt > 30) {
                     //error_log('check_ddos: clear');
-                    CommLib::query('update ip set fail=0,stamp=utc_timestamp() where ip=?', 's', [&$ip]);
+                    CommLib::query('update ip set fail=0,stamp=utc_timestamp() where ip=?', 's', [$ip]);
                 } else {
                     error_log("check_ddos: true ip=$ip");
                     return(true);
@@ -160,7 +160,7 @@ class CommLib {
             }
         } else {
             //error_log('check_ddos: insert');
-            CommLib::query('insert into ip set fail=0,stamp=utc_timestamp(),ip=?', 's', [&$ip]);
+            CommLib::query('insert into ip set fail=0,stamp=utc_timestamp(),ip=?', 's', [$ip]);
         }
         return(false);
     }
