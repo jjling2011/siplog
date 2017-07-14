@@ -98,7 +98,7 @@ function gen_sql() {
 
     $sql['user'] = "CREATE TABLE IF NOT EXISTS `user` (
   `user` char(50) NOT NULL,
-  `prv` tinyint(4) NOT NULL,
+  `prv` int(11) NOT NULL,
   `psw` char(50) NOT NULL,
   `salt` char(50) NOT NULL,
   `last` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

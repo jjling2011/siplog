@@ -336,23 +336,24 @@ class UserMgr extends Reply {
         $stmt->bind_result($ban, $fail, $db_psw, $db_salt);
         $stmt->fetch();
         $stmt->free_result();
-//        error_log($psw);
-//        error_log(hash('md5','hello'));
-//        error_log($db_salt);
-//        error_log($db_psw);
-        if ($fail > 10) {
+
+        if (false && $fail > 10) {
+            // 预防admin被恶意锁定
             $this->fail('尝试次数过多，账号已锁定，请与管理员联系！');
             return false;
         }
+        
         if($ban!==0){
             $this->fail('账号已被停用,请与管理员联系!');
             return false;
         }
+        
         if (strcmp(hash('md5', "$db_salt$psw"), $db_psw) !== 0) {
             $this->fail('账号密码不符！');
             CommLib::query('update user set fail=fail+1 where user=?', 's', [$user]);
             return false;
         }
+        
         CommLib::query('update user set fail=0 where user=?', 's', [$user]);
         return true;
     }

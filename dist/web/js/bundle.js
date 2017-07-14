@@ -5156,6 +5156,7 @@ sip.o.art.editor = function (cid) {
                 //console.log('loadhtml', sip.cache.article.html);
                 this.load_cache();
             }, false, function (r) {
+                this.f.trigger('new');
                 this.editor.txt.html('<font color="red">' + r + '</font>');
             });
         } else {
@@ -6278,14 +6279,19 @@ sip.o.main.article_board = function (cid) {
             return '<div id="' + this.el(0) + '"></div>';
         },
         update: function (data) {
-            if (data === undefined || (data.length && data.length === 0)) {
+            
+            if (data === undefined){
+                data = null;
+            }
+            
+            if(data !== null && data.length && data.length === 0) {
                 data = null;
             }
 
             //console.log('call main_art_board_update:', data);
             this.f.cache(data);
             if (!data) {
-                this.el(0, true).innerHTML = "<font color=red>没有数据</font>";
+                this.el(0, true).innerHTML = "<font color=red>查无此“文”</font>";
                 return;
             }
             if (cardjs.lib.isArray(data)) {
