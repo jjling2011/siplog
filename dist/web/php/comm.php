@@ -16,15 +16,16 @@ class CommLib {
         }
     }
 
-    public static function fetch_assoc($sql, $types = false, $params = false) {
+    public static function query($sql, $types = false, $params = false) {
 
         $db = CommLib::open_db();
         $stmt = $db->prepare($sql);
-
+        
+        //error_log('query('.$sql.','.$types.','.print_r($params,true));
         // bind params
         if (is_string($types) && is_array($params) && count($params) === strlen($types)) {
             $p = [];
-            for ($i = 0; $i < count($params); $i++) {
+            for ($i = 0; $i < strlen($types); $i++) {
                 $p[$i] = &$params[$i];
             }
             call_user_func_array(array($stmt, 'bind_param'), array_merge(array($types), $p));
@@ -121,21 +122,6 @@ class CommLib {
         return ($db);
     }
 
-    public static function query($sql, $type = null, $param = null) {
-        // e.g. CommLib::query('select * from data where ip=? and port=?','s',[&$ip,&$port]);
-        $db = CommLib::open_db();
-        $stmt = $db->prepare($sql);
-        if (is_string($type) && is_array($param) && count($param) > 0) {
-            call_user_func_array(array($stmt, 'bind_param'), array_merge(array($type), $param));
-        }
-        $stat = $stmt->execute();
-        $stmt->store_result();
-        $count = $stmt->num_rows;
-        $stmt->free_result();
-        //error_log($count);
-        return (['status' => $stat, 'count' => $count]);
-    }
-
     public static function utc_to_local($t) {
         // select convert_tz(utc_timestamp(),'+00:00','+08:00');
         $s = 'convert_tz(' . $t . ',"' . TZ_UTC . '","' . TZ_LOCAL . '")';
@@ -162,11 +148,11 @@ class CommLib {
             $stmt->free_result();
             if ($fail < DDOS) {
                 //error_log('check_ddos: increase!');
-                CommLib::query('update ip set fail=fail+1 where ip=?', 's', [&$ip]);
+                CommLib::query('update ip set fail=fail+1 where ip=?', 's', [$ip]);
             } else {
                 if ($dt > 30) {
                     //error_log('check_ddos: clear');
-                    CommLib::query('update ip set fail=0,stamp=utc_timestamp() where ip=?', 's', [&$ip]);
+                    CommLib::query('update ip set fail=0,stamp=utc_timestamp() where ip=?', 's', [$ip]);
                 } else {
                     error_log("check_ddos: true ip=$ip");
                     return(true);
@@ -174,7 +160,7 @@ class CommLib {
             }
         } else {
             //error_log('check_ddos: insert');
-            CommLib::query('insert into ip set fail=0,stamp=utc_timestamp(),ip=?', 's', [&$ip]);
+            CommLib::query('insert into ip set fail=0,stamp=utc_timestamp(),ip=?', 's', [$ip]);
         }
         return(false);
     }

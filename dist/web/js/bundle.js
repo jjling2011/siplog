@@ -2853,10 +2853,16 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
     var root = window;
 
     var Package = function (params) {
-
+        
+        var key;
+        
         this.settings = {
             key: 'pkgshare'
         };
+        
+        for (key in gset) {
+            this.settings[key] = gset[key];
+        }
 
         Lib.expand(this.settings, params.settings);
 
@@ -2865,7 +2871,9 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
             cevs: {}
         };
 
-        this.f = {};
+        this.f = {
+            fetch:funcs.fetch.bind(this)
+        };
 
         for (var k in Database) {
             this.f[k] = Database[k].bind(this);
@@ -4000,6 +4008,7 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
 /* global  Mustache,cardjs */
 
 cardjs.set({server_page: 'web/php/serv.php'});
+//cardjs.set({verbose: true});
 
 /*
  * cache share keys:
@@ -5053,7 +5062,7 @@ sip.o.art.editor = function (cid) {
                     this.el(8, true).style.display = 'none';
                 } else {
                     var pos = cardjs.lib.get_DOM_offset(this.el(7, true));
-                    this.el(8, true).style.left = (pos.left - parseInt(this.el(8, true).style.width)) + "px";
+                    this.el(8, true).style.left = (pos.left - window.Math.floor(this.el(8, true).style.width)) + "px";
                     this.el(8, true).style.top = (pos.top + 8) + "px";
                     this.el(8, true).style.display = 'block';
                 }
@@ -5116,7 +5125,7 @@ sip.o.art.editor = function (cid) {
         cid = cache.cache_id;
         sid = this.f.restore('art_select_id') || 0;
 
-        uid = parseInt(cardjs.lib.url_get_param('id'));
+        uid = window.Math.floor(cardjs.lib.url_get_param('id'));
         if (!sid && uid > 0) {
             sid = uid;
         }
@@ -5147,6 +5156,7 @@ sip.o.art.editor = function (cid) {
                 //console.log('loadhtml', sip.cache.article.html);
                 this.load_cache();
             }, false, function (r) {
+                this.f.trigger('new');
                 this.editor.txt.html('<font color="red">' + r + '</font>');
             });
         } else {
@@ -5868,9 +5878,9 @@ sip.o.AATest = function (cid) {
         return {
             't1': function () {
                 console.log('click t1');
-                var salt = "nothing";
-                var psw = "123456";
-                console.log(md5(salt + md5(sip.s.rainbow + md5(psw))));
+                var salt = this.el('input1',true).value;
+                var psw = this.el('input2',true).value;
+                console.log('salt:',salt,' psw:',psw,' enc_psw:',md5(salt + md5(sip.s.rainbow + md5(psw))));
             },
             't2': function () {
                 console.log('click t2');
@@ -5886,6 +5896,8 @@ sip.o.AATest = function (cid) {
 
     o.gen_html = function () {
         var html = '<div style="margin:10px;">' +
+                '<input type="text" id="'+this.el('input1')+'" ><br>'+
+                '<input type="text" id="'+this.el('input2')+'" ><br>'+
                 '<input type="button" id="' + this.el('t1') + '" class="btn btn-info" value="t1">' +
                 '<input type="button" id="' + this.el('t2') + '" class="btn btn-info" value="t2">' +
                 '<div id="' + this.el('child') + '"></div>' +
@@ -6249,7 +6261,7 @@ sip.o.main.article_board = function (cid) {
     function get_url_keyid() {
         var y = null, m = null,
                 key = cardjs.lib.url_get_param('key'),
-                id = parseInt(cardjs.lib.url_get_param('id'));
+                id = window.Math.floor(cardjs.lib.url_get_param('id'));
         if (key.length > 4) {
             y = key.substr(0, 4);
             m = key.substr(4);
@@ -6267,14 +6279,19 @@ sip.o.main.article_board = function (cid) {
             return '<div id="' + this.el(0) + '"></div>';
         },
         update: function (data) {
-            if (data === undefined || (data.length && data.length === 0)) {
+            
+            if (data === undefined){
+                data = null;
+            }
+            
+            if(data !== null && data.length && data.length === 0) {
                 data = null;
             }
 
             //console.log('call main_art_board_update:', data);
             this.f.cache(data);
             if (!data) {
-                this.el(0, true).innerHTML = "<font color=red>没有数据</font>";
+                this.el(0, true).innerHTML = "<font color=red>查无此“文”</font>";
                 return;
             }
             if (cardjs.lib.isArray(data)) {
