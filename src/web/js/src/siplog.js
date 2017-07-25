@@ -496,7 +496,7 @@ sip.o.main.pager = cardjs.create({
         var evs = [];
         evs.push(function () {
             sip.db.d.page.cur_page = 0;
-            this.refresh();
+            this.show();
             //this.show_page(0);
         });
 
@@ -505,7 +505,7 @@ sip.o.main.pager = cardjs.create({
                 var num = i;
                 return(function () {
                     sip.db.d.page.cur_page = num;
-                    this.refresh();
+                    this.show();
                     //this.show_page(num);
                 }.bind(this));
             }.bind(this)()));
@@ -568,7 +568,7 @@ sip.o.main.msg = cardjs.create({
                             msg.pop();
                         }
                         this.f.cache(msg);
-                        this.refresh();
+                        this.show();
                     }, function (r) {
                         alert(r);
                     });
@@ -701,7 +701,7 @@ sip.o.Main_wrap = cardjs.create({
     },
     
     reload: function () {
-        //console.log('call main_page.refresh()');
+        //console.log('call main_page.show()');
         this.f.cache(null, 'um_cur_user_info');
         this.f.cache(null, 'um_all_user_info');
         this.clear_contents();
@@ -793,7 +793,7 @@ sip.o.art.search_result = function (cid, key) {
                 function (data) {
                     var cache = this.f.restore();
                     cache.content = data.data;
-                    this.refresh();
+                    this.show();
                 });
     };
 
@@ -918,7 +918,7 @@ sip.o.art.list_orphan_img = function (cid) {
                             'path': e.path && e.path.substr(3, e.path.length)
                         });
                     }.bind(this));
-                    this.refresh();
+                    this.show();
                     if (this.data.length === 0) {
                         alert('没有孤儿图片');
                     }
@@ -1243,7 +1243,7 @@ sip.o.art.types = function (cid) {
 
                 o.f.fetch('update_uset', sip.uset, function () {
                     alert('分类信息修改成功！');
-                    this.refresh();
+                    this.show();
                 });
             },
             //key  up enter
@@ -1265,7 +1265,7 @@ sip.o.art.types = function (cid) {
                 //console.log(types);
                 sip.uset.atypes = types;
                 types = null;
-                this.refresh();
+                this.show();
             }
         ];
     };
@@ -2243,7 +2243,7 @@ sip.o.main.group_view = function (cid) {
         }
         this.data = Object.keys(sip.db.get('files'));
         this.f.cache(this.data);
-        this.refresh();
+        this.show();
     };
 
     return o;
