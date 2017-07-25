@@ -2899,7 +2899,7 @@ function call_method(fn, debug) {
         return(this[fn]());
     }
     if (debug && this.settings.verbose) {
-        log('Call undefine method: Card.prototype.funcs.' + fn + '()');
+        log('Call undefine method: this.f.' + fn + '()');
     }
     return false;
 }
@@ -3189,7 +3189,7 @@ Lib.gen_key = (function () {
 
 // cardjs.card.f
 
-var funcs = {
+var Funcs = {
     trigger: function (key) {
         //log(this);
         if (!(key in this.cjsv.ev_handler)) {
@@ -3373,11 +3373,9 @@ var funcs = {
     }
 };/* global root, Lib */
 
-var Cache = (function () {
-    var d = {};  // 缓存数据
-    var e = {};  // 清除缓存的神奇字符串
+var Event = (function () {
     var f = {};  // event的神奇字符串和对应函数
-    var r={
+    var r = {
         event: function (ev, func, status) {
             /**
              * 如果 status=false 则 delete e[ev][this.settings.key]
@@ -3452,10 +3450,17 @@ var Cache = (function () {
             }
             el = null;
             return flag;
-        },
-        cc_debug: function () {
-            log('d:', d, ' e:', e);
-        },
+        }
+    };
+    return r;
+}());/* global root, Lib */
+
+var Cache = (function () {
+    var d = {};  // 缓存数据
+    var e = {};  // 清除缓存的神奇字符串
+    
+    var r = {
+
         clear_cache: function (ev, status) {
             /**
              * 如果 status=undefined 触发ev定义的事件
@@ -3506,7 +3511,7 @@ var Cache = (function () {
                 key = this.settings.key;
             }
             if (!Lib.isString(key)) {
-                throw new Error('CardJS.Cache.save(data,key) key must be string.');
+                throw new Error('this.f.cache(data,key) key should be string.');
             }
             d[key] = data;
             key = null;
@@ -3525,97 +3530,36 @@ var Cache = (function () {
         }
     };
     return (r);
-}());/* global gvars, Lib, funcs, Cache, call_method */
+}());/* global root, gvars, Cache, Event, Lib, call_method, Funcs, bind_params */
 
-var Package = function (params) {
+// card对象的你对象
 
-    this.self = true; // 兼容destroy()
-
-    this.settings = {
-        key: 'pkgshare'
-    };
-
-    Lib.expand(this.settings, gvars.settings, params.settings);
-
-    this.cjsv = {
-        // 登记 this.f.event()的时候记录下事件名.close的时候销毁事件.
-        cevs: {}
-    };
-
-    this.f = {
-        fetch: funcs.fetch.bind(this)
-    };
-
-    for (var k in Cache) {
-        this.f[k] = Cache[k].bind(this);
-    }
-
-    bind_params(this, params, ['type']);
-
-    this.init();
-
-};
-
-Package.prototype.init = function () {
-    // please redefine this function
-};
-
-Package.prototype.destroy = function () {
-    call_method.bind(this)('clean_up');
-    var key;
-    for (key in this.cjsv.cevs) {
-        this.f.event(key, false);
-        delete this.cjsv.cevs[key];
-    }
-    for (key in this.f) {
-        this.f[key] = null;
-        delete this.f[key];
-    }
-    for (key in this) {
-        this[key] = null;
-    }
-    this.self = false;
-};/* global root, gvars, Cache, Lib, call_method, funcs, bind_params */
-
-// card对象
-
-var Card = function (params) {
-
-    this.construct(params);
-    this.init(params);
-
-};
-
-/*
- * 每个派生对象都需要重写此方法
- * 里面是该对象特有的初始化代码
- */
-Card.prototype.init = function (params) {
-    bind_params(this, params);
-};
-
-Card.prototype.construct = function (params) {
+var Paper = function (params) {
 
     var cid = params.cid;
 
     this.self = root.document.getElementById(cid);
 
     this.settings = {
+
         // 服务页面url
         server_page: 'serv.php',
+
+        // 缓存/共亨数据时使用的神奇字符串
         key: 'share',
-        // 自动生成的id以什么开头（方便调试）
+
+        // 自动生成的id首字符串（方便调试）
         header: 'card',
-        // 这个卡片是否需要绑定事件
+
+        // 是否需要绑定事件
         add_event: false,
+
         // 显示debug信息 
         verbose: false
     };
 
-    /* 
-     * CARD内部使用的变量，设个奇怪的名包装起来不用占太多变量名。
-     * fyi. cjsv = cardjs_variables
-     */
+    // CARD内部使用的变量，设个奇怪的名包装起来不用占太多变量名。
+    // fyi. cjsv = cardjs_variables
     this.cjsv = {
         timer: {},
         evs: [], // this.f.on 绑定的事件
@@ -3627,24 +3571,21 @@ Card.prototype.construct = function (params) {
         event_flag: false
     };
 
-
-
     Lib.expand(this.settings, gvars.settings, params.settings);
 
     this.f = {};
 
-    var key;
-
-    for (key in funcs) {
-        this.f[key] = funcs[key].bind(this);
+    var d = [Funcs, Cache, Event];
+    for (var i = 0; i < d.length; i++) {
+        for (var k in d[i]) {
+            this.f[k] = d[i][k].bind(this);
+        }
     }
 
-    for (key in Cache) {
-        this.f[key] = Cache[key].bind(this);
-    }
-
-    key = null;
 };
+
+// 我真的不知道为什么我喜欢给他设个根本用不上的名字 ...
+Paper.prototype.name = 'Paper';
 
 /**
  * 如果 key = undefine 返回当前id数量.
@@ -3655,20 +3596,27 @@ Card.prototype.construct = function (params) {
  * @param {boolean} obj
  * @returns {num/string/DOM object}
  */
-Card.prototype.el = function (key, obj) {
-    // Card.el() return current elements number;
+Paper.prototype.el = function (key, obj) {
+
     if (key === undefined) {
         return Object.keys(this.cjsv.ids).length;
     }
-    // Card.el('name') return { id: header_name_GlobalCounter_randstr, obj: documnet.getElementById(id)};
+
     if (obj === undefined) {
-        var id;
-        if (!(key in this.cjsv.ids)) {
-            id = this.settings.header + '_' + key + '_' + (gvars.cur_serial_id++) + '_' + Lib.rand(8);
-            this.cjsv.ids[key] = id;
-        } else {
-            id = this.cjsv.ids[key];
+
+        if (key in this.cjsv.ids) {
+            return (this.cjsv.ids[key]);
         }
+
+        var id = [
+            this.settings.header,
+            key,
+            (gvars.cur_serial_id)++,
+            Lib.rand(8)
+        ].join('_');
+
+        this.cjsv.ids[key] = id;
+
         return id;
     }
 
@@ -3687,7 +3635,7 @@ Card.prototype.el = function (key, obj) {
     return dom;
 };
 
-Card.prototype.__clean = function (everything) {
+Paper.prototype.__clean = function (everything) {
     var key;
     if (this.cjsv.event_flag) {
         call_method.bind(this)('remove_event', true);
@@ -3719,11 +3667,11 @@ Card.prototype.__clean = function (everything) {
         this.f.event(key, false);
         delete this.cjsv.cevs[key];
     }
-    
+
     if (everything) {
         call_method.bind(this)('clean_up');
     }
-    
+
     //this.cjsv.timer={};
     for (key in this.cjsv.ids) {
         if (this.cjsv.objs[key]) {
@@ -3734,7 +3682,7 @@ Card.prototype.__clean = function (everything) {
     }
 };
 
-Card.prototype.show = function () {
+Paper.prototype.show = function () {
 
     this.__clean(false);
 
@@ -3745,7 +3693,7 @@ Card.prototype.show = function () {
         var evh = call_method.bind(this)('gen_ev_handler', true);
 
         if (!(Lib.isArray(evh) || Lib.isObject(evh))) {
-            throw new Error('Card.cjsv.ev_handler should be [func1(), ... ] or { name1:func1(), ... }');
+            throw new Error('gen_ev_handler should return func_arr or func_dict.');
         }
 
         for (var key in evh) {
@@ -3772,7 +3720,7 @@ Card.prototype.show = function () {
  *   ... 你想清理的东西 ...
  * };
  */
-Card.prototype.destroy = function () {
+Paper.prototype.destroy = function () {
 
     this.__clean(true);
 
@@ -3784,40 +3732,107 @@ Card.prototype.destroy = function () {
     }
 };
 
-// 我真的不知道为什么我喜欢给他设个根本用不上的名字 ...
-Card.prototype.name = 'CARD';
-
-Card.prototype.gen_html = function () {
-    throw new Error('Card.prototype.gen_html(): Please rewrite this function.');
+Paper.prototype.gen_html = function () {
+    throw new Error('gen_html() must be redefined!');
     return '';
 };
 
 
-/* global Lib, Card, root */
+/* global gvars, Lib, Funcs, Cache, call_method, Event */
+
+var Package = function (params) {
+
+    // 配合this.f.fetch()
+    this.self = true;
+
+    this.settings = {
+        key: 'pkgshare'
+    };
+
+    Lib.expand(this.settings, gvars.settings, params.settings);
+
+    this.cjsv = {
+        // 登记 this.f.event()的时候记录下事件名.close的时候销毁事件.
+        cevs: {}
+    };
+
+    this.f = {
+        fetch: Funcs.fetch.bind(this)
+    };
+
+    var d = [Cache, Event];
+    for (var i = 0; i < d.length; i++) {
+        for (var k in d[i]) {
+            this.f[k] = d[i][k].bind(this);
+        }
+    }
+
+    bind_params(this, params, ['type']);
+
+    this.init();
+
+};
+
+Package.prototype.init = function () {
+    // please redefine this function
+};
+
+Package.prototype.destroy = function () {
+    call_method.bind(this)('clean_up');
+    var key;
+    for (key in this.cjsv.cevs) {
+        this.f.event(key, false);
+        delete this.cjsv.cevs[key];
+    }
+    for (key in this.f) {
+        this.f[key] = null;
+        delete this.f[key];
+    }
+    for (key in this) {
+        this[key] = null;
+    }
+    this.self = false;
+};/* global root, gvars, Cache, Lib, call_method, bind_params, Paper */
+
+// card对象
+
+var Card = function (params) {
+
+    Paper.call(this,params);
+    bind_params(this, params);
+ 
+};
+
+inherit(Card, Paper);
+
+Card.prototype.name = 'CARD';
+
+
+
+/* global Lib, root, Paper */
 
 //var Page = function (cid, cards, style) {
 var Page = function (params) {
     // style={'cards':css_name,'card':css_name};
-    var cid = params['cid'],
+    var cid = params.cid,
             cards = params.cards;
 
     if (!(Lib.isString(cid) && Lib.isArray(cards))) {
-        // log('cid:', cid, ' cards:', cards);
-        throw new Error('Error: new Page(cid,[ card1, card2, ...] )');
+        log('cid:', cid, ' cards:', cards);
+        throw new Error('Please check params!');
     }
-    Card.call(this, params);
 
-};
+    Paper.call(this, params);
 
-inherit(Page, Card);
-
-Page.prototype.init = function (params) {
     this.style = params.style || null;
     this.cards = params.cards;
     this.settings.header = 'page';
     this.children = [];
     bind_params(this, params, ['style', 'cards']);
+
 };
+
+inherit(Page, Paper);
 
 Page.prototype.name = 'PAGE';
 
@@ -3834,8 +3849,8 @@ Page.prototype.gen_html = function () {
 
     for (var i = 0; i < this.cards.length; i++) {
         html += '<div id="' + this.el(i) + '" ';
-        if (this.style && this.style['card']) {
-            html += ' class="' + this.style['card'] + '" ';
+        if (this.style && this.style.card) {
+            html += ' class="' + this.style.card + '" ';
         }
         html += '></div>';
     }
@@ -3843,6 +3858,7 @@ Page.prototype.gen_html = function () {
 };
 
 Page.prototype.after_add_event = function () {
+    
     this.clean_up();
     //log('page.this', this);
 
@@ -3858,44 +3874,46 @@ Page.prototype.after_add_event = function () {
     for (var i = 0; i < this.cards.length; i++) {
         var c = get_obj_from_string(this.cards[i]);
         var o = c(this.el(i));
-        // log('str', this.cards[i], ' c', c, ' o', o);
         this.children.push(o.show());
     }
-};
-/* global Card, Lib */
+};/* global Paper, Lib */
 
 var Panel = function (params) {
-    //log('pages.type:', Lib.type(pages));
+
     var cid = params.cid,
             pages = params.pages,
             style = params.style;
 
     if (!(Lib.isString(cid) && Lib.type(pages) === 'Object')) {
         log('cid:', cid, ' pages:', pages, ' style:', style);
-        throw new Error('Error: new Panel(cid,{name1:[card1, card2, ...],name2:[card, ...], ... )');
+        throw new Error('Please check params!');
     }
 
-    Card.call(this, params);
+    Paper.call(this, params);
 
-
-
-};
-
-inherit(Panel, Card);
-
-Panel.prototype.init = function (params) {
     var pages = params.pages;
-    // style={'tags':css,'tag_active':css,'tag_normal':css,'page':css,'card':css};
+
+//    style={
+//        'tags':css,
+//        'tag_active':css,
+//        'tag_normal':css,
+//        'page':css,
+//        'card':css
+//    };
+
     this.style = params.style || null;
     this.tags = Object.keys(pages);
     this.pages = pages;
     this.child = null;
     this.settings.header = 'panel';
     this.settings.add_event = true;
+
     bind_params(this, params, ['style', 'pages']);
+
 };
 
-// I really don't know why I like to set a name.
+inherit(Panel, Paper);
+
 Panel.prototype.name = 'PANEL';
 
 Panel.prototype.clean_up = function () {
@@ -3905,52 +3923,64 @@ Panel.prototype.clean_up = function () {
 
 Panel.prototype.gen_html = function () {
     var html = '<div ';
-    if (this.style && this.style['tags']) {
-        html += ' class="' + this.style['tags'] + '"';
+    if (this.style && this.style.tags) {
+        html += ' class="' + this.style.tags + '"';
     }
     html += '>';
     for (var i = 0; i < this.tags.length; i++) {
-        html += '<input type="button" id="' + this.el(i) + '" value="' + this.tags[i] + '" >';
+        html += '<input type="button" id="' + this.el(i)
+                + '" value="' + this.tags[i] + '" >';
     }
     html += '</div><div id="' + this.el(i) + '" ';
-    if (this.style && this.style['page']) {
-        html += ' class="' + this.style['page'] + '"';
+    if (this.style && this.style.page) {
+        html += ' class="' + this.style.page + '"';
     }
     html += '></div>';
     return html;
 };
 
 Panel.prototype.gen_ev_handler = function () {
+
     var evs = [];
-    //log('gen_ev_handler.this:',this);
-    for (var i = 0; i < this.tags.length; i++) {
-        (function () {
-            var id = i;
-            evs.push(function () {
-                //log('panel_switch:',this);
-                this.clean_up();
-                if (this.style && this.style['tag_active'] && this.style['tag_normal']) {
-                    for (var j = 0; j < this.tags.length; j++) {
-                        //pn.objs[i].setAttribute('class',
-                        this.el(j, true).setAttribute('class', this.style['tag_normal']);
-                    }
-                    this.el(id, true).setAttribute('class', this.style['tag_active']);
-                }
-                var page;
-                var p = {
-                    cid: this.el(this.tags.length),
-                    cards: this.pages[this.tags[id]]
-                };
-                if (this.style && this.style['card']) {
-                    p['style'] = {'card': this.style['card']};
-                }
-                page = new Page(p);
-                this.child = page.show();
-                page = null;
-            });
-        }());
+
+    function change_style(id) {
+
+        if (!this.style || !this.style.tag_active || !this.style.tag_normal) {
+            return;
+        }
+
+        for (var i = 0; i < this.tags.length; i++) {
+            this.el(i, true).setAttribute('class', this.style.tag_normal);
+        }
+
+        this.el(id, true).setAttribute('class', this.style.tag_active);
     }
-    //log('panel.gen_ev_handler:',evs);
+
+    function clicked(id) {
+        var f = function () {
+            //log('panel_switch:',this);
+            this.clean_up();
+
+            change_style.bind(this)(id);
+
+            var p = {
+                cid: this.el(this.tags.length),
+                cards: this.pages[this.tags[id]]
+            };
+
+            if (this.style && this.style.card) {
+                p.style = {'card': this.style.card};
+            }
+
+            this.child = (new Page(p)).show();
+        };
+        return f;
+    }
+
+    for (var i = 0; i < this.tags.length; i++) {
+        evs.push(clicked(i));
+    }
+
     return evs;
 };
 
