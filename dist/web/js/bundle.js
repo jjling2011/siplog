@@ -4344,7 +4344,7 @@ sip.db = cardjs.create({
 
         console.log('Load data:' + key + '.json');
 
-        $.getJSON(path , this.got_json.bind(this, callback, key));
+        $.getJSON(path, this.got_json.bind(this, callback, key));
 
     },
 
@@ -4397,7 +4397,7 @@ sip.db = cardjs.create({
         this.d.file_key = [];
         this.d.total_article = 0;
 
-        $.getJSON(sip.s.files_path , function (data) {
+        $.getJSON(sip.s.files_path, function (data) {
             // console.log('files.json:', data);
             if ('files' in data) {
                 this.d.files = data.files;
@@ -4630,7 +4630,7 @@ sip.o.main.msg = cardjs.create({
             this.el(2, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-mp-msg-list'), {msg: msg});
             return;
         }
-        $.getJSON(sip.s.msg_path , function (data) {
+        $.getJSON(sip.s.msg_path, function (data) {
             var msg = [];
             data.forEach(function (e) {
                 msg.push({
@@ -4657,8 +4657,8 @@ sip.o.Main_wrap = cardjs.create({
         header: 'main_wrap',
         add_event: true
     },
-    
-    contents:[],
+
+    contents: [],
 
     pager: null,
 
@@ -4689,7 +4689,7 @@ sip.o.Main_wrap = cardjs.create({
             this.contents.push(sip.o.main.msg(this.el(cnum++)).show());
         }
     },
-    
+
     show_mgr_page: function () {
         //console.log('show_mgr_page developing');
         //return;
@@ -4697,7 +4697,7 @@ sip.o.Main_wrap = cardjs.create({
         this.contents.push(sip.o.art.art_wrap(this.el(4)).show());
         this.contents.push(sip.o.mgr.user_panel(this.el(6)).show());
     },
-    
+
     add_event: function () {
         this.f.on('click', 0);
         this.f.on('click', 1);
@@ -4724,7 +4724,7 @@ sip.o.Main_wrap = cardjs.create({
     clear_contents: function () {
 
         this.clear_pager();
-        
+
         //console.log('clear_contents:',this.contents);
 
         if (this.contents && this.contents.length > 0) {
@@ -4734,14 +4734,14 @@ sip.o.Main_wrap = cardjs.create({
                 e.destroy();
             });
         }
-        
+
         this.contents = [];
-        
+
         for (var i = 4; i < 10; i++) {
             this.el(i, true).innerHTML = '';
         }
     },
-    
+
     reload: function () {
         //console.log('call main_page.show()');
         this.f.cache(null, 'um_cur_user_info');
@@ -4781,7 +4781,7 @@ sip.o.Main_wrap = cardjs.create({
     after_add_event: function () {
         this.clear_contents();
         this.show_main_page();
-        
+
         this.f.event('main_update_banner', this.update_banner);
         this.f.event('main_clear_pager', this.clear_pager);
         this.f.event('main_show_pager', this.show_pager);
@@ -5046,13 +5046,15 @@ sip.o.art.editor = function (cid) {
                 cardjs.lib.url_set_params('index.html');
 
                 this.el(5, true).innerHTML = '正在提交数据 ...';
-                this.f.fetch('post_article', data, function () {
+                this.f.fetch('post_article', data, function (d) {
                     alert('提交成功!');
-                    this.f.trigger('new');
+                    //this.f.trigger('new');
                     sip.db.load_files();
-                }, function (r) {
+                    this.el(5, true).innerHTML = '修改文章: #' + d.id;
+                    //console.log(d);
+                }, function () {
                     this.el(5, true).innerHTML = '提交失败！';
-                    alert(r + '\n提交失败！');
+                    alert('\n提交失败！');
                 });
             },
             'new': function () {
@@ -5919,9 +5921,9 @@ sip.o.AATest = function (cid) {
         return {
             't1': function () {
                 console.log('click t1');
-                var salt = this.el('input1',true).value;
-                var psw = this.el('input2',true).value;
-                console.log('salt:',salt,' psw:',psw,' enc_psw:',md5(salt + md5(sip.s.rainbow + md5(psw))));
+                var salt = this.el('input1', true).value;
+                var psw = this.el('input2', true).value;
+                console.log('salt:', salt, ' psw:', psw, ' enc_psw:', md5(salt + md5(sip.s.rainbow + md5(psw))));
             },
             't2': function () {
                 console.log('click t2');
@@ -5937,8 +5939,8 @@ sip.o.AATest = function (cid) {
 
     o.gen_html = function () {
         var html = '<div style="margin:10px;">' +
-                '<input type="text" id="'+this.el('input1')+'" ><br>'+
-                '<input type="text" id="'+this.el('input2')+'" ><br>'+
+                '<input type="text" id="' + this.el('input1') + '" ><br>' +
+                '<input type="text" id="' + this.el('input2') + '" ><br>' +
                 '<input type="button" id="' + this.el('t1') + '" class="btn btn-info" value="t1">' +
                 '<input type="button" id="' + this.el('t2') + '" class="btn btn-info" value="t2">' +
                 '<div id="' + this.el('child') + '"></div>' +
@@ -6320,12 +6322,12 @@ sip.o.main.article_board = function (cid) {
             return '<div id="' + this.el(0) + '"></div>';
         },
         update: function (data) {
-            
-            if (data === undefined){
+
+            if (data === undefined) {
                 data = null;
             }
-            
-            if(data !== null && data.length && data.length === 0) {
+
+            if (data !== null && data.length && data.length === 0) {
                 data = null;
             }
 
@@ -6363,7 +6365,7 @@ sip.o.main.article_board = function (cid) {
             }
             var param = get_url_keyid();
             if (param.y && param.m && param.id) {
-                var path=sip.s.json_path + param.y + '/' + param.m + '.json';
+                var path = sip.s.json_path + param.y + '/' + param.m + '.json';
                 $.getJSON(path, function (data) {
                     //console.log(data,tid);
                     for (var i = 0; i < data.length; i++) {
@@ -6377,7 +6379,7 @@ sip.o.main.article_board = function (cid) {
                 return;
             }
             // no cache, no url params 
-            $.getJSON(sip.s.top_art_path , function (data) {
+            $.getJSON(sip.s.top_art_path, function (data) {
                 var d = [];
                 data.forEach(function (e) {
                     d.push(sip.f.filter_json(e));
