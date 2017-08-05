@@ -1001,19 +1001,24 @@ sip.o.art.editor = function (cid) {
 
                 this.f.clear_cache('update_article');
 
-                cardjs.lib.url_set_params('index.html');
+                //cardjs.lib.url_set_params('index.html');
 
                 this.el(5, true).innerHTML = '正在提交数据 ...';
                 this.f.fetch('post_article', data, function (d) {
-                    alert('提交成功!');
                     //this.f.trigger('new');
                     sip.db.load_files();
                     this.el(5, true).innerHTML = '修改文章: #' + d.id;
-                    //console.log(d);
-                }, function () {
+                    this.save_cache();
+                    this.f.cache(d.id,'art_select_id');
+                    var cache=this.f.restore();
+                    cache.cache_id=d.id;
+                    this.f.cache(cache);
+                    //console.log(cache);
+                    alert('提交成功!');
+                }.bind(this), function () {
                     this.el(5, true).innerHTML = '提交失败！';
                     alert('\n提交失败！');
-                });
+                }.bind(this));
             },
             'new': function () {
                 var cache = this.f.restore() || {};
