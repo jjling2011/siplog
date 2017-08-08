@@ -4040,13 +4040,7 @@ var exports = {
     create: Create
 };
     return (exports);
-});/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* global  Mustache,cardjs */
+});/* global  cardjs */
 
 cardjs.set({server_page: 'web/php/serv.php'});
 //cardjs.set({verbose: true});
@@ -4103,8 +4097,11 @@ var sip = {
 
         msg_keep: 5
     },
-    del: {}
+    del: {
+        // for debug
+    }
 };
+/* global sip, cardjs, Mustache */
 
 sip.f.merge_uset = function (settings) {
     for (var key in settings) {
@@ -4169,7 +4166,7 @@ sip.f.filter_json = function (e) {
     }
 
     return d;
-};
+};/* global cardjs, sip */
 
 sip.db = cardjs.create({
     type: 'package',
@@ -4426,230 +4423,7 @@ sip.db = cardjs.create({
 
         this.load_files();
     }
-});
-
-sip.o.art.art_wrap = cardjs.create({
-    type: 'panel',
-    pages: {
-        '编辑': ['sip.o.art.editor'],
-        '搜索': ['sip.o.art.search_box'],
-        '图片': ['sip.o.art.list_orphan_img'],
-        '设置': ['sip.o.art.set_wrap'],
-        '备份': ['sip.o.art.backup'],
-        'MDE': ['sip.o.art.simplemde'],
-        '说明': ['sip.o.art.help']
-    },
-    style: {
-        'tags': ' ',
-        'tag_active': 'tag-active',
-        'tag_normal': 'tag-normal',
-        'page': 'page',
-        'card': ' '
-    }
-});
-
-sip.o.main.pager = cardjs.create({
-    settings: {
-        header: 'pager',
-        add_event: true
-    },
-    btn_num: 5,
-    d: {},
-    data_parser: function () {
-        var cur = sip.db.d.page.cur_page;
-        var size = sip.db.d.page.size;
-        var max = Math.ceil(sip.db.d.total_article / size);
-        var first = Math.max(0, (cur - Math.floor(this.btn_num / 2)));
-        var last = Math.min(first + this.btn_num, max);
-        first = Math.min(first, last - this.btn_num);
-        first = Math.max(first, 0);
-        if (cur > last) {
-            cur = last;
-        }
-        if (cur < first) {
-            cur = first;
-        }
-        sip.db.d.page.cur_page = cur;
-        this.d.first = first;
-        this.d.last = last;
-        this.d.cur = cur;
-        //console.log('data parser:', this.d);
-    },
-    gen_html: function () {
-        var v = [];
-        for (var i = this.d.first; i < this.d.last; i++) {
-            v.push({id: this.el(i - this.d.first + 1), value: i + 1});
-        }
-        var first = {id: this.el(0), value: '首页'};
-        return (Mustache.render(cardjs.lib.load_html('tp-main-pager'), {first: first, v: v}));
-    },
-    show_page: function (num) {
-        //console.log('show page ' + num);
-        //sip.db.d.page.cur_page = num;
-        var min = Math.max(num * sip.db.d.page.size, 0);
-        var first = 0, sum = 0, key = 0, skip = 0, per_sum = 0;
-        var d = sip.db.d;
-
-        while (sum <= min && key < d.file_key.length) {
-            first = key;
-            per_sum = sum;
-            sum += d.files[d.file_key[key]];
-            key++;
-        }
-
-        skip = Math.max(min - per_sum, 0);
-        //var k = d.file_key[first];
-        //console.log('show page: num/min/first/key/skip', num, min, first, k, skip);
-        d = null;
-        this.d.data = [];
-        this.get_data.bind(this)(first, skip);
-    },
-
-    get_data: function (key_index, skip) {
-        if (key_index >= sip.db.d.file_key.length) {
-            console.log('Last page!');
-            this.f.event('main_article_board_update', this.d.data);
-            return;
-        }
-        var size = sip.db.d.page.size;
-        var key = sip.db.d.file_key[key_index];
-        //console.log('call get data:key/idx/skip', key, key_index, skip);
-        if (key in sip.db.d.data) {
-            var ids = Object.keys(sip.db.d.data[key]).sort(function (a, b) {
-                return (a - b);
-            }).reverse();
-            //console.log(ids);
-            for (var i = skip; i < ids.length && this.d.data.length < size; i++) {
-                //console.log('push(key,idx)', key, i);
-                this.d.data.push(sip.db.d.data[key][ids[i]]);
-            }
-            if (this.d.data.length < size) {
-                this.get_data.bind(this, key_index + 1, 0)();
-                return;
-            }
-            this.f.event('main_article_board_update', this.d.data);
-        } else {
-            //console.log('load json:', key);
-            sip.db.load_json(key, this.get_data.bind(this, key_index, skip));
-        }
-    },
-
-    gen_ev_handler: function () {
-        var evs = [];
-        evs.push(function () {
-            sip.db.d.page.cur_page = 0;
-            this.show();
-            //this.show_page(0);
-        });
-
-        for (var i = this.d.first; i < this.d.last; i++) {
-            evs.push((function () {
-                var num = i;
-                return(function () {
-                    sip.db.d.page.cur_page = num;
-                    this.show();
-                    //this.show_page(num);
-                }.bind(this));
-            }.bind(this)()));
-        }
-
-        return evs;
-    },
-
-    add_event: function () {
-        for (var i = 0; i < this.el(); i++) {
-            this.f.on('click', i);
-        }
-    },
-
-    after_add_event: function () {
-        //this.f.trigger(0);
-        this.el(this.d.cur - this.d.first + 1, true).style.backgroundColor = 'skyblue';
-        this.show_page(sip.db.d.page.cur_page);
-    }
-});
-
-sip.o.main.msg = cardjs.create({
-    settings: {
-        key: cardjs.lib.gen_key(),
-        header: 'main_mbox',
-        add_event: true
-    },
-    gen_html: function () {
-        var content = Mustache.render(cardjs.lib.load_html('tp-mp-msg'), {ids: [this.el(0), this.el(1), this.el(2)]});
-        return sip.f.add_frame('tp-frame-tag-card', content, "", 'margin-bottom:8px;margin-top:0px;');
-    },
-    gen_ev_handler: function () {
-        return [
-            //enter
-            function (e) {
-                //console.log('enter key!');
-                var k = e || window.event;
-                if (k.keyCode !== 13) {
-                    return;
-                }
-                this.f.trigger(1);
-            },
-            //click
-            function () {
-                //console.log('click');
-                var d = this.el(0, true).value;
-                //console.log('msg:', d);
-                if (d.length > 0) {
-                    this.f.fetch('post_msg', d, function () {
-                        var msg = this.f.restore();
-                        if (!msg) {
-                            msg = [];
-                        }
-                        msg.unshift({
-                            ctime: new Date().toJSON().slice(0, 10),
-                            name: 'me',
-                            text: filterXSS(d)
-                        });
-                        while (msg.length > sip.uset.msg_keep) {
-                            msg.pop();
-                        }
-                        this.f.cache(msg);
-                        this.show();
-                    }, function (r) {
-                        alert(r);
-                    });
-                }
-            }
-        ];
-    },
-    add_event: function () {
-        this.f.on('click', 1);
-        this.f.on('keyup', 0);
-    },
-    after_add_event: function () {
-        this.el(0, true).focus();
-        var msg = this.f.restore();
-        if (msg && msg.length > 0) {
-            //console.log('using cache.');
-            this.el(2, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-mp-msg-list'), {msg: msg});
-            return;
-        }
-        $.getJSON(sip.s.msg_path, function (data) {
-            var msg = [];
-            data.forEach(function (e) {
-                msg.push({
-                    text: filterXSS(e.text),
-                    ctime: cardjs.lib.getYMD(e.ctime),
-                    name: filterXSS(e.name)
-                });
-            });
-            this.f.cache(msg);
-        }.bind(this)).fail(function () {
-            console.log('留言文件加载失败！');
-        }).always(function () {
-            if (sip.uset.show_mbox) {
-                var msg = this.f.restore();
-                this.el(2, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-mp-msg-list'), {msg: msg});
-            }
-        }.bind(this));
-    }
-});
+});/* global cardjs, sip, Mustache */
 
 sip.o.Main_wrap = cardjs.create({
 
@@ -4787,6 +4561,82 @@ sip.o.Main_wrap = cardjs.create({
         this.f.event('main_show_pager', this.show_pager);
 
         this.f.event('main_update_banner');
+    }
+});/* global sip, cardjs */
+
+sip.o.AATest = function (cid) {
+    var key = cardjs.lib.gen_key();
+
+    var o = new cardjs.card(cid);
+    o.f.merge({
+        key: key,
+        header: 'test',
+        add_event: true
+    });
+
+    o.func1 = function () {
+        console.log('click t1');
+    };
+
+    o.child = null;
+    o.gen_ev_handler = function () {
+        return {
+            't1': function () {
+                console.log('click t1');
+                var salt = this.el('input1', true).value;
+                var psw = this.el('input2', true).value;
+                console.log('salt:', salt, ' psw:', psw, ' enc_psw:', md5(salt + md5(sip.s.rainbow + md5(psw))));
+            },
+            't2': function () {
+                console.log('click t2');
+
+            }
+        };
+    };
+
+    o.add_event = function () {
+        o.f.on('click', 't1');
+        o.f.on('click', 't2');
+    };
+
+    o.gen_html = function () {
+        var html = '<div style="margin:10px;">' +
+                '<input type="text" id="' + this.el('input1') + '" ><br>' +
+                '<input type="text" id="' + this.el('input2') + '" ><br>' +
+                '<input type="button" id="' + this.el('t1') + '" class="btn btn-info" value="t1">' +
+                '<input type="button" id="' + this.el('t2') + '" class="btn btn-info" value="t2">' +
+                '<div id="' + this.el('child') + '"></div>' +
+                '</div>';
+        return html;
+    };
+
+    o.clean_up = function () {
+        o.child && o.child.destroy();
+        o.child = null;
+    };
+
+
+    return o;
+
+};/* global cardjs, sip, Mustache */
+
+sip.o.art.art_wrap = cardjs.create({
+    type: 'panel',
+    pages: {
+        '编辑': ['sip.o.art.editor'],
+        '搜索': ['sip.o.art.search_box'],
+        '图片': ['sip.o.art.list_orphan_img'],
+        '设置': ['sip.o.art.set_wrap'],
+        '备份': ['sip.o.art.backup'],
+        'MDE': ['sip.o.art.simplemde'],
+        '说明': ['sip.o.art.help']
+    },
+    style: {
+        'tags': ' ',
+        'tag_active': 'tag-active',
+        'tag_normal': 'tag-normal',
+        'page': 'page',
+        'card': ' '
     }
 });
 
@@ -5351,268 +5201,6 @@ sip.o.art.types = function (cid) {
 
 };
 
-sip.o.mgr.logout = function (cid, parent_update, key) {
-    return(cardjs.create({
-        cid: cid,
-        update: parent_update,
-        child: null,
-        settings: {
-            key: key,
-            header: 'mgr_logout',
-            add_event: true
-        },
-        gen_html: function () {
-            var info = this.f.restore();
-            var content = Mustache.render(cardjs.lib.load_html('tp-um-logout'), {
-                ids: [this.el(0), this.el(1), this.el(2)],
-                name: info.name
-            });
-            return sip.f.add_frame('tp-frame-tag-card', content, '', 'margin-bottom:8px;');
-        },
-        clean_up: function () {
-            this.child && this.child.destroy();
-        },
-        add_event: function () {
-            this.f.on('click', 0);
-            this.f.on('click', 1);
-        },
-        gen_ev_handler: function () {
-            return [
-                //change password
-                function () {
-                    this.child = sip.o.mgr.change_psw(this.el(2), this.update).show();
-                },
-                // logout
-                function () {
-                    this.f.clear_cache('clear_all_user_data');
-                    this.f.fetch('logout', function (r) {
-                        console.log(r);
-                        this.update();
-                    });
-                }
-            ];
-        }
-    }));
-};
-
-sip.o.mgr.change_psw = function (cid, parent_update) {
-
-    var o = new cardjs.card(cid);
-
-    o.f.merge({
-        header: 'mgr_chpsw',
-        add_event: true
-    });
-
-    o.update = parent_update;
-
-    o.gen_html = function () {
-        var id = [];
-        for (var i = 0; i < 6; i++) {
-            id.push(this.el(i));
-        }
-        return Mustache.render(cardjs.lib.load_html('tp-um-change-password'), {ids: id});
-        //return sip.f.add_frame('tp-frame-tag-card', content, '修改信息', 'margin-top:8px;');
-    };
-
-    o.gen_ev_handler = function () {
-        return [
-            function () {
-                //console.log('hello');
-                var name = "" + this.el(0, true).value;
-                var org_psw = "" + this.el(1, true).value;
-                var new_psw = "" + this.el(2, true).value;
-                var re_psw = "" + this.el(3, true).value;
-
-                if (new_psw !== re_psw) {
-                    this.el(5, true).innerHTML = '两次输出密码不同！';
-                    return;
-                }
-
-                if (new_psw.length <= 0 || org_psw.length <= 0) {
-                    this.el(5, true).innerHTML = '内容过短！';
-                    return;
-                }
-                // console.log(new_psw, org_psw, name);
-                var data = {'name': name, 'opsw': md5(sip.s.rainbow + md5(org_psw)), 'npsw': md5(sip.s.rainbow + md5(new_psw))};
-                this.f.fetch('user_modify', data, function (r) {
-                    this.el(5, true).innerHTML = cardjs.lib.html_escape(r);
-                    o.update();
-                }, false, function (r) {
-                    this.el(5, true).innerHTML = cardjs.lib.html_escape(r);
-                });
-            }
-        ];
-    };
-
-    o.add_event = function () {
-        //console.log(o.ids[4]);
-        this.f.on('click', 4, 0);
-        //o.f.on('click',1,0);
-    };
-
-    return o;
-
-};
-
-sip.o.mgr.user_mgr_wrap = cardjs.create({
-    child: null,
-    settings: {
-        header: 'mgr_umgr_wrap',
-        key: cardjs.lib.gen_key()
-    },
-    gen_html: function () {
-        var html = '<div id="' + this.el(0) + '">正在读取数据 ...</div>';
-        return sip.f.add_frame('tp-frame-tag-card', html, '账号管理');
-    },
-    update: function () {
-        this.el(0, true).innerHTML = '更新数据中 ... ';
-        this.f.cache(null);
-        this.after_add_event();
-    },
-    after_add_event: function () {
-        this.f.clear_cache('clear_all_user_data', true);
-        this.clean_up();
-        var cache = this.f.restore();
-        if (cache) {
-            this.child = sip.o.mgr.user_mgr(this.el(0), this.settings.key, this.update.bind(this)).show();
-            return;
-        }
-        this.f.fetch('fetch_all_user_info', function (data) {
-            this.f.cache(data);
-            this.child = sip.o.mgr.user_mgr(this.el(0), this.settings.key, this.update.bind(this)).show();
-        });
-    },
-    clean_up: function () {
-        this.child && this.child.destroy();
-        //this.f.cache(null);
-    }
-});
-
-sip.o.mgr.user_mgr = function (cid, key, parent_update) {
-
-    var o = new cardjs.card(cid);
-
-    o.f.merge({
-        key: key,
-        header: "um_manage",
-        add_event: true
-    });
-
-    o.update = parent_update;
-
-    o.after_add_event = function () {
-        o.f.trigger(0);
-    };
-
-    o.gen_ev_handler = function () {
-        return [
-            // select change
-            function () {
-                var id = this.el(0, true).value,
-                        uinfo = this.f.restore();
-
-                this.el(1, true).value = cardjs.lib.html_escape(uinfo.name_list[id]);
-                this.el(8, true).value = cardjs.lib.html_escape(uinfo.user_list[id]);
-                if (uinfo.ban_list[id]) {
-                    this.el(8, true).style.backgroundColor = 'lightgray';
-                } else {
-                    this.el(8, true).style.backgroundColor = 'transparent';
-                }
-                var pv = cardjs.lib.get_elsbyname(this.el(3));
-                for (var i = 0; i < pv.length; i++) {
-                    pv[i].checked = uinfo.user_prv[id][uinfo.prv_list[i]];
-                }
-            },
-            // reset psw
-            function () {
-                var id = this.el(0, true).value;
-                o.f.fetch('user_reset', id, function (d) {
-                    //console.log(d);
-                    alert(d);
-                    this.update();
-                }, function (r) {
-                    alert(r);
-                });
-            },
-            //ban
-            function () {
-                var id = this.el(0, true).value;
-                o.f.fetch('user_ban', id, function (d) {
-                    alert(d);
-
-                    this.update();
-                }, function (r) {
-                    alert(r);
-                });
-            },
-            //modify user
-            function () {
-                var cache = this.f.restore();
-                var id = this.el(0, true).value,
-                        name = this.el(1, true).value,
-                        user = this.el(8, true).value,
-                        pv = cardjs.lib.get_elsbyname(this.el(3)),
-                        p = [];
-                for (var i = 0; i < pv.length; i++) {
-                    if (pv[i].checked) {
-                        p.push(cache.prv_list[i]);
-                    }
-                }
-                o.f.fetch('user_management', {'id': id, 'name': name, 'user': user, 'prv_list': p},
-                        function (r) {
-                            alert(r);
-                            this.update();
-                        }, function (r) {
-                    alert(r);
-                });
-                //console.log(p);
-            },
-            // add user
-            function () {
-                var param = {
-                    user: this.el(8, true).value,
-                    name: this.el(1, true).value,
-                    prv: []
-                };
-                var cache = this.f.restore();
-                var pv = cardjs.lib.get_elsbyname(this.el(3));
-                for (var i = 0; i < pv.length; i++) {
-                    if (pv[i].checked) {
-                        param.prv.push(cache.prv_list[i]);
-                    }
-                }
-                //console.log(param);
-                this.f.fetch('user_add', param, function (r) {
-                    alert(r);
-                    this.update();
-                }, function (r) {
-                    alert(r);
-                });
-            }
-        ];
-    };
-
-    o.add_event = function () {
-        o.f.on('change', 0);
-        o.f.on('click', 5, 1);
-        o.f.on('click', 6, 2);
-        o.f.on('click', 4, 3);
-        o.f.on('click', 7, 4);
-    };
-
-    o.gen_html = function () {
-        var cache = this.f.restore();
-        cache.ids = [];
-        for (var i = 0; i < 9; i++) {
-            cache.ids.push(this.el(i));
-        }
-        return Mustache.render(cardjs.lib.load_html("tp-um-modify"), cache);
-    };
-
-    return o;
-};
-
 sip.o.art.set_wrap = function (cid) {
     var o = new cardjs.card(cid);
     o.f.merge({
@@ -5907,114 +5495,253 @@ sip.o.art.simplemde = function (cid) {
     return o;
 };
 
-sip.o.AATest = function (cid) {
-    var key = cardjs.lib.gen_key();
-
+sip.o.art.backup = function (cid) {
     var o = new cardjs.card(cid);
     o.f.merge({
-        key: key,
-        header: 'test',
+        header: 'art_backup',
         add_event: true
     });
 
-    o.func1 = function () {
-        console.log('click t1');
+    o.gen_html = function () {
+        return Mustache.render(cardjs.lib.load_html('tp-uma-backup'), {ids: [this.el(0), this.el(1)]});
     };
 
-    o.child = null;
     o.gen_ev_handler = function () {
-        return {
-            't1': function () {
-                console.log('click t1');
-                var salt = this.el('input1', true).value;
-                var psw = this.el('input2', true).value;
-                console.log('salt:', salt, ' psw:', psw, ' enc_psw:', md5(salt + md5(sip.s.rainbow + md5(psw))));
+        return [
+            function () {
+                o.f.fetch('export_picdb', function (r) {
+                    alert(r);
+                }, function (r) {
+                    alert(r);
+                });
             },
-            't2': function () {
-                console.log('click t2');
-
+            function () {
+                if (confirm('现有数据将被清除，确定要导入数据？')) {
+                    o.f.fetch('import_from_json', function (r) {
+                        alert(r);
+                        cardjs.lib.url_set_params('index.html', {});
+                        window.location.reload(true);
+                    }, function (r) {
+                        alert(r);
+                        cardjs.lib.url_set_params('index.html', {});
+                        window.location.reload(true);
+                    });
+                }
             }
-        };
+        ];
     };
 
     o.add_event = function () {
-        o.f.on('click', 't1');
-        o.f.on('click', 't2');
+        o.f.on('click', 0);
+        o.f.on('click', 1);
     };
-
-    o.gen_html = function () {
-        var html = '<div style="margin:10px;">' +
-                '<input type="text" id="' + this.el('input1') + '" ><br>' +
-                '<input type="text" id="' + this.el('input2') + '" ><br>' +
-                '<input type="button" id="' + this.el('t1') + '" class="btn btn-info" value="t1">' +
-                '<input type="button" id="' + this.el('t2') + '" class="btn btn-info" value="t2">' +
-                '<div id="' + this.el('child') + '"></div>' +
-                '</div>';
-        return html;
-    };
-
-    o.clean_up = function () {
-        o.child && o.child.destroy();
-        o.child = null;
-    };
-
 
     return o;
 
-};
+};/* global cardjs, Mustache, sip */
 
-sip.o.mgr.login = function (cid, parent_update) {
-    return (cardjs.create({
-        cid: cid,
-        update: parent_update,
-        settings: {
-            header: 'mgr_login',
-            add_event: true
-        },
-        gen_html: function () {
-            var id = [];
-            for (var i = 0; i < 5; i++) {
-                id.push(this.el(i));
-            }
-            var content = Mustache.render(cardjs.lib.load_html('tp-um-login'), {ids: id});
-            return(sip.f.add_frame('tp-frame-tag-card', content, "登录", "margin-bottom:8px;"));
-        },
-        add_event: function () {
-            this.f.on('click', 2, 1);
-            this.f.on('click', 3, 0);
-            this.f.on('keyup', 1, 2);
-        },
-        gen_ev_handler: function () {
-            return [
-                function () {
-                    this.el(0, true).value = '';
-                    this.el(1, true).value = '';
-                },
-                function () {
-                    var user_info = {
-                        user: this.el(0, true).value,
-                        psw: md5(sip.s.rainbow + md5(this.el(1, true).value))
-                    };
-                    //console.log(user_info);
-                    this.f.fetch('login', user_info,
-                            function () {
-                                //console.log('parent_update');
-                                this.update();
-                            },
-                            function (d) {
-                                this.el(4, true).innerHTML = d;
-                            });
-                },
-                function (e) {
-                    var k = e || window.event;
-                    if (k.keyCode === 13) {
-                        this.f.trigger(1);
-                    }
-                }
-            ];
+sip.o.main.pager = cardjs.create({
+    settings: {
+        header: 'pager',
+        add_event: true
+    },
+    btn_num: 5,
+    d: {},
+    data_parser: function () {
+        var cur = sip.db.d.page.cur_page;
+        var size = sip.db.d.page.size;
+        var max = Math.ceil(sip.db.d.total_article / size);
+        var first = Math.max(0, (cur - Math.floor(this.btn_num / 2)));
+        var last = Math.min(first + this.btn_num, max);
+        first = Math.min(first, last - this.btn_num);
+        first = Math.max(first, 0);
+        if (cur > last) {
+            cur = last;
         }
-    }));
-};
+        if (cur < first) {
+            cur = first;
+        }
+        sip.db.d.page.cur_page = cur;
+        this.d.first = first;
+        this.d.last = last;
+        this.d.cur = cur;
+        //console.log('data parser:', this.d);
+    },
+    gen_html: function () {
+        var v = [];
+        for (var i = this.d.first; i < this.d.last; i++) {
+            v.push({id: this.el(i - this.d.first + 1), value: i + 1});
+        }
+        var first = {id: this.el(0), value: '首页'};
+        return (Mustache.render(cardjs.lib.load_html('tp-main-pager'), {first: first, v: v}));
+    },
+    show_page: function (num) {
+        //console.log('show page ' + num);
+        //sip.db.d.page.cur_page = num;
+        var min = Math.max(num * sip.db.d.page.size, 0);
+        var first = 0, sum = 0, key = 0, skip = 0, per_sum = 0;
+        var d = sip.db.d;
+
+        while (sum <= min && key < d.file_key.length) {
+            first = key;
+            per_sum = sum;
+            sum += d.files[d.file_key[key]];
+            key++;
+        }
+
+        skip = Math.max(min - per_sum, 0);
+        //var k = d.file_key[first];
+        //console.log('show page: num/min/first/key/skip', num, min, first, k, skip);
+        d = null;
+        this.d.data = [];
+        this.get_data.bind(this)(first, skip);
+    },
+
+    get_data: function (key_index, skip) {
+        if (key_index >= sip.db.d.file_key.length) {
+            console.log('Last page!');
+            this.f.event('main_article_board_update', this.d.data);
+            return;
+        }
+        var size = sip.db.d.page.size;
+        var key = sip.db.d.file_key[key_index];
+        //console.log('call get data:key/idx/skip', key, key_index, skip);
+        if (key in sip.db.d.data) {
+            var ids = Object.keys(sip.db.d.data[key]).sort(function (a, b) {
+                return (a - b);
+            }).reverse();
+            //console.log(ids);
+            for (var i = skip; i < ids.length && this.d.data.length < size; i++) {
+                //console.log('push(key,idx)', key, i);
+                this.d.data.push(sip.db.d.data[key][ids[i]]);
+            }
+            if (this.d.data.length < size) {
+                this.get_data.bind(this, key_index + 1, 0)();
+                return;
+            }
+            this.f.event('main_article_board_update', this.d.data);
+        } else {
+            //console.log('load json:', key);
+            sip.db.load_json(key, this.get_data.bind(this, key_index, skip));
+        }
+    },
+
+    gen_ev_handler: function () {
+        var evs = [];
+        evs.push(function () {
+            sip.db.d.page.cur_page = 0;
+            this.show();
+            //this.show_page(0);
+        });
+
+        for (var i = this.d.first; i < this.d.last; i++) {
+            evs.push((function () {
+                var num = i;
+                return(function () {
+                    sip.db.d.page.cur_page = num;
+                    this.show();
+                    //this.show_page(num);
+                }.bind(this));
+            }.bind(this)()));
+        }
+
+        return evs;
+    },
+
+    add_event: function () {
+        for (var i = 0; i < this.el(); i++) {
+            this.f.on('click', i);
+        }
+    },
+
+    after_add_event: function () {
+        //this.f.trigger(0);
+        this.el(this.d.cur - this.d.first + 1, true).style.backgroundColor = 'skyblue';
+        this.show_page(sip.db.d.page.cur_page);
+    }
+});
+
+sip.o.main.msg = cardjs.create({
+    settings: {
+        key: cardjs.lib.gen_key(),
+        header: 'main_mbox',
+        add_event: true
+    },
+    gen_html: function () {
+        var content = Mustache.render(cardjs.lib.load_html('tp-mp-msg'), {ids: [this.el(0), this.el(1), this.el(2)]});
+        return sip.f.add_frame('tp-frame-tag-card', content, "", 'margin-bottom:8px;margin-top:0px;');
+    },
+    gen_ev_handler: function () {
+        return [
+            //enter
+            function (e) {
+                //console.log('enter key!');
+                var k = e || window.event;
+                if (k.keyCode !== 13) {
+                    return;
+                }
+                this.f.trigger(1);
+            },
+            //click
+            function () {
+                //console.log('click');
+                var d = this.el(0, true).value;
+                //console.log('msg:', d);
+                if (d.length > 0) {
+                    this.f.fetch('post_msg', d, function () {
+                        var msg = this.f.restore();
+                        if (!msg) {
+                            msg = [];
+                        }
+                        msg.unshift({
+                            ctime: new Date().toJSON().slice(0, 10),
+                            name: 'me',
+                            text: filterXSS(d)
+                        });
+                        while (msg.length > sip.uset.msg_keep) {
+                            msg.pop();
+                        }
+                        this.f.cache(msg);
+                        this.show();
+                    }, function (r) {
+                        alert(r);
+                    });
+                }
+            }
+        ];
+    },
+    add_event: function () {
+        this.f.on('click', 1);
+        this.f.on('keyup', 0);
+    },
+    after_add_event: function () {
+        this.el(0, true).focus();
+        var msg = this.f.restore();
+        if (msg && msg.length > 0) {
+            //console.log('using cache.');
+            this.el(2, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-mp-msg-list'), {msg: msg});
+            return;
+        }
+        $.getJSON(sip.s.msg_path, function (data) {
+            var msg = [];
+            data.forEach(function (e) {
+                msg.push({
+                    text: filterXSS(e.text),
+                    ctime: cardjs.lib.getYMD(e.ctime),
+                    name: filterXSS(e.name)
+                });
+            });
+            this.f.cache(msg);
+        }.bind(this)).fail(function () {
+            console.log('留言文件加载失败！');
+        }).always(function () {
+            if (sip.uset.show_mbox) {
+                var msg = this.f.restore();
+                this.el(2, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-mp-msg-list'), {msg: msg});
+            }
+        }.bind(this));
+    }
+});
 
 sip.o.main.match_list = function (cid) {
 
@@ -6094,86 +5821,6 @@ sip.o.main.match_list = function (cid) {
 
     return o;
 
-};
-
-sip.o.mgr.user_panel = function (cid) {
-    var key = cardjs.lib.gen_key();
-    var o = new cardjs.card(cid);
-    o.f.merge({
-        header: 'user_panel',
-        //add_event: true,
-        key: key
-    });
-
-    o.children = [];
-
-    o.gen_html = function () {
-        var html = '';
-        for (var i = 0; i < 4; i++) {
-            html += '<div id="' + this.el(i) + '"></div>';
-        }
-        return html;
-    };
-
-    o.gen_ev_handler = function () {
-        return ([]);
-    };
-
-    o.update = function () {
-        //console.log('user_panel: update()');
-        this.clean_up();
-        for (var i = 0; i < this.el(); i++) {
-            this.el(i, true).innerHTML = '';
-        }
-        this.f.cache(null);  //?
-        this.after_add_event();
-    }.bind(o);
-
-    o.show_user_panel = function () {
-        //console.log('developing: show_user_panel ');
-        var info = this.f.restore();
-        //console.log('user_info:', info);
-        var current_id = 0;
-        if (info && info.login) {
-            //window.setTimeout(function () {
-            //this.el(current_id++, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-um-welcome'), info);
-            //}.bind(this), 0);
-            this.children.push(sip.o.mgr.logout(o.el(current_id++), o.update, this.settings.key).show());
-
-            if (info.prv['USERM']) {
-                this.children.push(sip.o.mgr.user_mgr_wrap(o.el(current_id++)).show());
-            }
-
-        } else {
-            //console.log(info);
-            this.children.push(sip.o.mgr.login(o.el(current_id++), o.update).show());
-        }
-    };
-
-    o.after_add_event = function () {
-
-        var cache = this.f.restore();
-
-        if (cache) {
-            this.show_user_panel();
-            return;
-        }
-
-        //console.log('fetch user info.');
-        this.f.fetch('fetch_user_info', null, function (info) {
-            this.f.cache(info);
-            this.show_user_panel();
-        });
-    };
-
-    o.clean_up = function () {
-        o.children.forEach(function (e) {
-            e && e.destroy();
-        });
-        o.children = [];
-    };
-
-    return o;
 };
 
 sip.o.main.group_view = function (cid) {
@@ -6463,51 +6110,399 @@ sip.o.main.search_box = function (cid) {
     };
 
     return o;
+};/* global cardjs, Mustache, sip */
+
+sip.o.mgr.logout = function (cid, parent_update, key) {
+    return(cardjs.create({
+        cid: cid,
+        update: parent_update,
+        child: null,
+        settings: {
+            key: key,
+            header: 'mgr_logout',
+            add_event: true
+        },
+        gen_html: function () {
+            var info = this.f.restore();
+            var content = Mustache.render(cardjs.lib.load_html('tp-um-logout'), {
+                ids: [this.el(0), this.el(1), this.el(2)],
+                name: info.name
+            });
+            return sip.f.add_frame('tp-frame-tag-card', content, '', 'margin-bottom:8px;');
+        },
+        clean_up: function () {
+            this.child && this.child.destroy();
+        },
+        add_event: function () {
+            this.f.on('click', 0);
+            this.f.on('click', 1);
+        },
+        gen_ev_handler: function () {
+            return [
+                //change password
+                function () {
+                    this.child = sip.o.mgr.change_psw(this.el(2), this.update).show();
+                },
+                // logout
+                function () {
+                    this.f.clear_cache('clear_all_user_data');
+                    this.f.fetch('logout', function (r) {
+                        console.log(r);
+                        this.update();
+                    });
+                }
+            ];
+        }
+    }));
 };
 
-sip.o.art.backup = function (cid) {
+sip.o.mgr.change_psw = function (cid, parent_update) {
+
     var o = new cardjs.card(cid);
+
     o.f.merge({
-        header: 'art_backup',
+        header: 'mgr_chpsw',
         add_event: true
     });
 
+    o.update = parent_update;
+
     o.gen_html = function () {
-        return Mustache.render(cardjs.lib.load_html('tp-uma-backup'), {ids: [this.el(0), this.el(1)]});
+        var id = [];
+        for (var i = 0; i < 6; i++) {
+            id.push(this.el(i));
+        }
+        return Mustache.render(cardjs.lib.load_html('tp-um-change-password'), {ids: id});
+        //return sip.f.add_frame('tp-frame-tag-card', content, '修改信息', 'margin-top:8px;');
     };
 
     o.gen_ev_handler = function () {
         return [
             function () {
-                o.f.fetch('export_picdb', function (r) {
-                    alert(r);
-                }, function (r) {
-                    alert(r);
-                });
-            },
-            function () {
-                if (confirm('现有数据将被清除，确定要导入数据？')) {
-                    o.f.fetch('import_from_json', function (r) {
-                        alert(r);
-                        cardjs.lib.url_set_params('index.html', {});
-                        window.location.reload(true);
-                    }, function (r) {
-                        alert(r);
-                        cardjs.lib.url_set_params('index.html', {});
-                        window.location.reload(true);
-                    });
+                //console.log('hello');
+                var name = "" + this.el(0, true).value;
+                var org_psw = "" + this.el(1, true).value;
+                var new_psw = "" + this.el(2, true).value;
+                var re_psw = "" + this.el(3, true).value;
+
+                if (new_psw !== re_psw) {
+                    this.el(5, true).innerHTML = '两次输出密码不同！';
+                    return;
                 }
+
+                if (new_psw.length <= 0 || org_psw.length <= 0) {
+                    this.el(5, true).innerHTML = '内容过短！';
+                    return;
+                }
+                // console.log(new_psw, org_psw, name);
+                var data = {'name': name, 'opsw': md5(sip.s.rainbow + md5(org_psw)), 'npsw': md5(sip.s.rainbow + md5(new_psw))};
+                this.f.fetch('user_modify', data, function (r) {
+                    this.el(5, true).innerHTML = cardjs.lib.html_escape(r);
+                    o.update();
+                }, false, function (r) {
+                    this.el(5, true).innerHTML = cardjs.lib.html_escape(r);
+                });
             }
         ];
     };
 
     o.add_event = function () {
-        o.f.on('click', 0);
-        o.f.on('click', 1);
+        //console.log(o.ids[4]);
+        this.f.on('click', 4, 0);
+        //o.f.on('click',1,0);
     };
 
     return o;
 
 };
 
+sip.o.mgr.user_mgr_wrap = cardjs.create({
+    child: null,
+    settings: {
+        header: 'mgr_umgr_wrap',
+        key: cardjs.lib.gen_key()
+    },
+    gen_html: function () {
+        var html = '<div id="' + this.el(0) + '">正在读取数据 ...</div>';
+        return sip.f.add_frame('tp-frame-tag-card', html, '账号管理');
+    },
+    update: function () {
+        this.el(0, true).innerHTML = '更新数据中 ... ';
+        this.f.cache(null);
+        this.after_add_event();
+    },
+    after_add_event: function () {
+        this.f.clear_cache('clear_all_user_data', true);
+        this.clean_up();
+        var cache = this.f.restore();
+        if (cache) {
+            this.child = sip.o.mgr.user_mgr(this.el(0), this.settings.key, this.update.bind(this)).show();
+            return;
+        }
+        this.f.fetch('fetch_all_user_info', function (data) {
+            this.f.cache(data);
+            this.child = sip.o.mgr.user_mgr(this.el(0), this.settings.key, this.update.bind(this)).show();
+        });
+    },
+    clean_up: function () {
+        this.child && this.child.destroy();
+        //this.f.cache(null);
+    }
+});
 
+sip.o.mgr.user_mgr = function (cid, key, parent_update) {
+
+    var o = new cardjs.card(cid);
+
+    o.f.merge({
+        key: key,
+        header: "um_manage",
+        add_event: true
+    });
+
+    o.update = parent_update;
+
+    o.after_add_event = function () {
+        o.f.trigger(0);
+    };
+
+    o.gen_ev_handler = function () {
+        return [
+            // select change
+            function () {
+                var id = this.el(0, true).value,
+                        uinfo = this.f.restore();
+
+                this.el(1, true).value = cardjs.lib.html_escape(uinfo.name_list[id]);
+                this.el(8, true).value = cardjs.lib.html_escape(uinfo.user_list[id]);
+                if (uinfo.ban_list[id]) {
+                    this.el(8, true).style.backgroundColor = 'lightgray';
+                } else {
+                    this.el(8, true).style.backgroundColor = 'transparent';
+                }
+                var pv = cardjs.lib.get_elsbyname(this.el(3));
+                for (var i = 0; i < pv.length; i++) {
+                    pv[i].checked = uinfo.user_prv[id][uinfo.prv_list[i]];
+                }
+            },
+            // reset psw
+            function () {
+                var id = this.el(0, true).value;
+                o.f.fetch('user_reset', id, function (d) {
+                    //console.log(d);
+                    alert(d);
+                    this.update();
+                }, function (r) {
+                    alert(r);
+                });
+            },
+            //ban
+            function () {
+                var id = this.el(0, true).value;
+                o.f.fetch('user_ban', id, function (d) {
+                    alert(d);
+
+                    this.update();
+                }, function (r) {
+                    alert(r);
+                });
+            },
+            //modify user
+            function () {
+                var cache = this.f.restore();
+                var id = this.el(0, true).value,
+                        name = this.el(1, true).value,
+                        user = this.el(8, true).value,
+                        pv = cardjs.lib.get_elsbyname(this.el(3)),
+                        p = [];
+                for (var i = 0; i < pv.length; i++) {
+                    if (pv[i].checked) {
+                        p.push(cache.prv_list[i]);
+                    }
+                }
+                o.f.fetch('user_management', {'id': id, 'name': name, 'user': user, 'prv_list': p},
+                        function (r) {
+                            alert(r);
+                            this.update();
+                        }, function (r) {
+                    alert(r);
+                });
+                //console.log(p);
+            },
+            // add user
+            function () {
+                var param = {
+                    user: this.el(8, true).value,
+                    name: this.el(1, true).value,
+                    prv: []
+                };
+                var cache = this.f.restore();
+                var pv = cardjs.lib.get_elsbyname(this.el(3));
+                for (var i = 0; i < pv.length; i++) {
+                    if (pv[i].checked) {
+                        param.prv.push(cache.prv_list[i]);
+                    }
+                }
+                //console.log(param);
+                this.f.fetch('user_add', param, function (r) {
+                    alert(r);
+                    this.update();
+                }, function (r) {
+                    alert(r);
+                });
+            }
+        ];
+    };
+
+    o.add_event = function () {
+        o.f.on('change', 0);
+        o.f.on('click', 5, 1);
+        o.f.on('click', 6, 2);
+        o.f.on('click', 4, 3);
+        o.f.on('click', 7, 4);
+    };
+
+    o.gen_html = function () {
+        var cache = this.f.restore();
+        cache.ids = [];
+        for (var i = 0; i < 9; i++) {
+            cache.ids.push(this.el(i));
+        }
+        return Mustache.render(cardjs.lib.load_html("tp-um-modify"), cache);
+    };
+
+    return o;
+};
+
+sip.o.mgr.login = function (cid, parent_update) {
+    return (cardjs.create({
+        cid: cid,
+        update: parent_update,
+        settings: {
+            header: 'mgr_login',
+            add_event: true
+        },
+        gen_html: function () {
+            var id = [];
+            for (var i = 0; i < 5; i++) {
+                id.push(this.el(i));
+            }
+            var content = Mustache.render(cardjs.lib.load_html('tp-um-login'), {ids: id});
+            return(sip.f.add_frame('tp-frame-tag-card', content, "登录", "margin-bottom:8px;"));
+        },
+        add_event: function () {
+            this.f.on('click', 2, 1);
+            this.f.on('click', 3, 0);
+            this.f.on('keyup', 1, 2);
+        },
+        gen_ev_handler: function () {
+            return [
+                function () {
+                    this.el(0, true).value = '';
+                    this.el(1, true).value = '';
+                },
+                function () {
+                    var user_info = {
+                        user: this.el(0, true).value,
+                        psw: md5(sip.s.rainbow + md5(this.el(1, true).value))
+                    };
+                    //console.log(user_info);
+                    this.f.fetch('login', user_info,
+                            function () {
+                                //console.log('parent_update');
+                                this.update();
+                            },
+                            function (d) {
+                                this.el(4, true).innerHTML = d;
+                            });
+                },
+                function (e) {
+                    var k = e || window.event;
+                    if (k.keyCode === 13) {
+                        this.f.trigger(1);
+                    }
+                }
+            ];
+        }
+    }));
+};
+
+sip.o.mgr.user_panel = function (cid) {
+    var key = cardjs.lib.gen_key();
+    var o = new cardjs.card(cid);
+    o.f.merge({
+        header: 'user_panel',
+        //add_event: true,
+        key: key
+    });
+
+    o.children = [];
+
+    o.gen_html = function () {
+        var html = '';
+        for (var i = 0; i < 4; i++) {
+            html += '<div id="' + this.el(i) + '"></div>';
+        }
+        return html;
+    };
+
+    o.gen_ev_handler = function () {
+        return ([]);
+    };
+
+    o.update = function () {
+        //console.log('user_panel: update()');
+        this.clean_up();
+        for (var i = 0; i < this.el(); i++) {
+            this.el(i, true).innerHTML = '';
+        }
+        this.f.cache(null);  //?
+        this.after_add_event();
+    }.bind(o);
+
+    o.show_user_panel = function () {
+        //console.log('developing: show_user_panel ');
+        var info = this.f.restore();
+        //console.log('user_info:', info);
+        var current_id = 0;
+        if (info && info.login) {
+            //window.setTimeout(function () {
+            //this.el(current_id++, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-um-welcome'), info);
+            //}.bind(this), 0);
+            this.children.push(sip.o.mgr.logout(o.el(current_id++), o.update, this.settings.key).show());
+
+            if (info.prv['USERM']) {
+                this.children.push(sip.o.mgr.user_mgr_wrap(o.el(current_id++)).show());
+            }
+
+        } else {
+            //console.log(info);
+            this.children.push(sip.o.mgr.login(o.el(current_id++), o.update).show());
+        }
+    };
+
+    o.after_add_event = function () {
+
+        var cache = this.f.restore();
+
+        if (cache) {
+            this.show_user_panel();
+            return;
+        }
+
+        //console.log('fetch user info.');
+        this.f.fetch('fetch_user_info', null, function (info) {
+            this.f.cache(info);
+            this.show_user_panel();
+        });
+    };
+
+    o.clean_up = function () {
+        o.children.forEach(function (e) {
+            e && e.destroy();
+        });
+        o.children = [];
+    };
+
+    return o;
+};
