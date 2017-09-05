@@ -7,7 +7,7 @@ sip.db = cardjs.create({
     },
     d: {
         data: {},
-        files: [],
+        files: undefined,
         search: {
             kw_cache: null,
             kw_cur: '',
@@ -147,6 +147,7 @@ sip.db = cardjs.create({
             if (this.d.search.result.length > 15) {
                 break;
             }
+
         }
 
     },
@@ -178,9 +179,11 @@ sip.db = cardjs.create({
     },
 
     get: function (key) {
-        if (key === 'files') {
-            return this.d.files;
+        var pub = ['files'];
+        if (pub.indexOf(key)>=0) {
+            return this.d[key];
         }
+        return undefined;
     },
 
     got_json: function (callback, key, data) {
@@ -214,7 +217,7 @@ sip.db = cardjs.create({
 
     load_files: function () {
 
-        this.d.files = [];
+        this.d.files = undefined;
         this.d.search.kw_cache = null;
         this.d.search.kw_cur = null;
         this.d.result = [];
@@ -227,7 +230,7 @@ sip.db = cardjs.create({
         this.d.total_article = 0;
 
         $.getJSON(sip.s.files_path, function (data) {
-            // console.log('files.json:', data);
+           //console.log('files.json:', data);
             if ('files' in data) {
                 this.d.files = data.files;
                 //console.log('files', this.d.files);

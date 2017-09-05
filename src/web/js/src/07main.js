@@ -318,7 +318,12 @@ sip.o.main.group_view = function (cid) {
                 cat.push({v: types[j], id: this.el(j + i + 1)});
             }
             types = null;
-            content = Mustache.render(cardjs.lib.load_html('tp-group-view'), {tag: tag, cat: cat, all: this.el(j + i + 1)});
+            content = Mustache.render(cardjs.lib.load_html('tp-group-view'), {
+                tag: tag,
+                cat: cat,
+                all: this.el(j + i + 1),
+                front: this.el(j+i+2)
+            });
             tag = null;
         }
         return(sip.f.add_frame('tp-frame-tag-card', content, '分类浏览', 'margin-bottom:8px;'));
@@ -334,7 +339,7 @@ sip.o.main.group_view = function (cid) {
                 this.el(i, true).style.backgroundColor = 'skyblue';
             }
         }
-        for (; i < this.el() - 1; i++) {
+        for (; i < this.el() - 2; i++) {
             if (this.el(i, true).value === sip.db.d.page.filter) {
                 this.el(i, true).style.backgroundColor = 'skyblue';
             }
@@ -342,7 +347,7 @@ sip.o.main.group_view = function (cid) {
     };
 
     o.gen_ev_handler = function () {
-        var evs = [], i, j, id, last = this.el();
+        var evs = [], i, j;
 
         for (i = 0; i < this.data.length; i++) {
             var value = this.data[i];
@@ -380,8 +385,18 @@ sip.o.main.group_view = function (cid) {
             for (var k = 0; k < this.el(); k++) {
                 this.el(k, true).style.backgroundColor = 'white';
             }
-            this.el(this.el() - 1, true).style.backgroundColor = 'skyblue';
+            this.el(this.el() - 2, true).style.backgroundColor = 'skyblue';
             this.f.event('main_show_pager');
+        }.bind(this)));
+        evs.push((function () {
+            //console.log('clicked: all article');
+            for (var k = 0; k < this.el(); k++) {
+                this.el(k, true).style.backgroundColor = 'white';
+            }
+            this.el(this.el() - 1, true).style.backgroundColor = 'skyblue';
+            this.f.event('main_clear_pager');
+            this.f.event('main_article_board_show_front_page');
+            cardjs.lib.url_set_params('index.html');
         }.bind(this)));
 
         return evs;
@@ -397,7 +412,14 @@ sip.o.main.group_view = function (cid) {
         if (this.data) {
             return;
         }
-        this.data = Object.keys(sip.db.get('files'));
+        var files=sip.db.get('files');
+        //console.log('gv:files:',files);
+        if(files===undefined){
+            console.log('group view: reload in 3 seconds');
+            setTimeout(this.show.bind(this),3000);
+            return;
+        }
+        this.data = Object.keys(files);
         this.f.cache(this.data);
         this.show();
     };
@@ -462,6 +484,26 @@ sip.o.main.article_board = function (cid) {
                 });
             }
         },
+        show_front_page:function(){
+            $.getJSON(sip.s.top_art_path, function (data) {
+                //console.log('show_front_page');
+                var d = [];
+                data.forEach(function (e) {
+                    d.push(sip.f.filter_json(e));
+                });
+                if (!this.self) {
+                    console.log('sip.o.main.article_board: Object 已经销毁,取消更新操作');
+                    return;
+                }
+                if (d.length > 0) {
+                    this.update(d);
+                } else {
+                    this.update(null);
+                }
+            }.bind(this)).fail(function () {
+                this.el(0, true).innerHTML = "<font color=red>获取数据失败</font>";
+            }.bind(this));
+        },
         after_add_event: function () {
             // regist a clear_cache event for other module clear this cache;
             this.f.clear_cache('update_article', true);
@@ -469,6 +511,7 @@ sip.o.main.article_board = function (cid) {
 
             //export a function for other module
             this.f.event('main_article_board_update', this.update, true);
+            this.f.event('main_article_board_show_front_page', this.show_front_page, true);
 
             var cache = this.f.restore();
             if (cache) {
@@ -491,23 +534,7 @@ sip.o.main.article_board = function (cid) {
                 return;
             }
             // no cache, no url params 
-            $.getJSON(sip.s.top_art_path, function (data) {
-                var d = [];
-                data.forEach(function (e) {
-                    d.push(sip.f.filter_json(e));
-                });
-                if (!this.self) {
-                    console.log('sip.o.main.article_board: Object 已经销毁,取消更新操作');
-                    return;
-                }
-                if (d.length > 0) {
-                    this.update(d);
-                } else {
-                    this.update(null);
-                }
-            }.bind(this)).fail(function () {
-                this.el(0, true).innerHTML = "<font color=red>获取数据失败</font>";
-            }.bind(this));
+            this.show_front_page();
         }
     }));
 };

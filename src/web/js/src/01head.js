@@ -6,6 +6,7 @@ cardjs.set({server_page: 'web/php/serv.php'});
 /*
  * cache share keys:
  * event('main_article_board_update'): 主窗口文章框提供的 update 函数 
+ * event('main_article_board_show_front_page'): 主窗口文章框显示首页
  * event('main_show_pager');
  * event('main_clear_pager');
  * event('main_update_banner'); 更新bannery
