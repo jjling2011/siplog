@@ -306,7 +306,10 @@ sip.o.main.group_view = function (cid) {
     };
 
     o.gen_html = function () {
-        var content = '<div style="color:red;">无数据</div>';
+        var content = '<div style="color:red;">获取数据中</div>';
+        if (this.data && this.data.length <= 0) {
+            content = '<div style="color:red;">无数据</div>';
+        }
         if (this.data && this.data.length > 0) {
             var i, tag = [], cat = [], j, types;
             for (i = 0; i < this.data.length; i++) {
@@ -322,7 +325,7 @@ sip.o.main.group_view = function (cid) {
                 tag: tag,
                 cat: cat,
                 all: this.el(j + i + 1),
-                front: this.el(j+i+2)
+                front: this.el(j + i + 2)
             });
             tag = null;
         }
@@ -412,11 +415,11 @@ sip.o.main.group_view = function (cid) {
         if (this.data) {
             return;
         }
-        var files=sip.db.get('files');
-        //console.log('gv:files:',files);
-        if(files===undefined){
-            console.log('group view: reload in 3 seconds');
-            setTimeout(this.show.bind(this),3000);
+        var files = sip.db.get('files');
+        // console.log('gv:files:',files);
+        if (files === undefined) {
+            // console.log('group view: reload in 3 seconds');
+            setTimeout(this.show.bind(this), 5000);
             return;
         }
         this.data = Object.keys(files);
@@ -484,7 +487,7 @@ sip.o.main.article_board = function (cid) {
                 });
             }
         },
-        show_front_page:function(){
+        show_front_page: function () {
             $.getJSON(sip.s.top_art_path, function (data) {
                 //console.log('show_front_page');
                 var d = [];

@@ -4174,25 +4174,7 @@ sip.db = cardjs.create({
     settings: {
         key: cardjs.lib.gen_key()
     },
-    d: {
-        data: {},
-        files: undefined,
-        search: {
-            kw_cache: null,
-            kw_cur: '',
-            result: []
-        },
-        page: {
-            key: null,
-            filter: '',
-            size: 5,
-            cur_page: 0,
-            cur_key: 0,
-            id_loaded: 0
-        },
-        file_key: [],
-        total_article: 0
-    },
+    d: {},
     set: function (key, value) {
         //this[key] = value;
         //console.log('set :',key,value);
@@ -4245,7 +4227,9 @@ sip.db = cardjs.create({
 
     },
 
-    search: function (raw_keywords) {
+    search: function (user_keywords) {
+
+        var raw_keywords = user_keywords.toLowerCase();
 
         if (this.d.search.kw_cache === raw_keywords) {
             //console.log('using cache!');
@@ -4262,6 +4246,7 @@ sip.db = cardjs.create({
         this.d.search.result = [];
         this.search_recursive.bind(this)(keywords, 0);
     },
+
     search_recursive: function (keywords, index) {
         if (index >= this.d.file_key.length) {
             this.f.event('show_main_search_result');
@@ -4297,8 +4282,7 @@ sip.db = cardjs.create({
             mark = 0;
             e = this.d.data[key][idx[i]];
             for (kw_idx in keywords) {
-                if (e.title.indexOf(keywords[kw_idx]) >= 0
-                        || e.text.indexOf(keywords[kw_idx]) >= 0) {
+                if (e.text.indexOf(keywords[kw_idx]) >= 0) {
                     mark++;
                 }
                 //console.log('mark:',mark,' kw:',keywords[kw_idx],'e:',e);
@@ -4349,7 +4333,7 @@ sip.db = cardjs.create({
 
     get: function (key) {
         var pub = ['files'];
-        if (pub.indexOf(key)>=0) {
+        if (pub.indexOf(key) >= 0) {
             return this.d[key];
         }
         return undefined;
@@ -4369,11 +4353,12 @@ sip.db = cardjs.create({
          * }
          */
 
-        var d = {}, e, i, div = document.createElement("div");
+        var d = {}, e, content, i, div = document.createElement("div");
         for (i = 0; i < data.length; i++) {
             e = sip.f.filter_json(data[i]);
             div.innerHTML = e.content;
-            e.text = div.textContent || div.innerText || "";
+            content = div.textContent || div.innerText || "";
+            e.text = e.title.toLowerCase() + ' ' + content.toLowerCase();
             d[e.id] = e;
         }
         div = null;
@@ -4386,20 +4371,29 @@ sip.db = cardjs.create({
 
     load_files: function () {
 
-        this.d.files = undefined;
-        this.d.search.kw_cache = null;
-        this.d.search.kw_cur = null;
-        this.d.result = [];
-        this.d.page.key = null;
-        this.d.page.filter = '';
-        this.d.page.cur_page = 0;
-        this.d.page.cur_key = 0;
-        this.d.page.id_loaded = 0;
-        this.d.file_key = [];
-        this.d.total_article = 0;
+        this.d = {
+            data: {},
+            files: undefined,
+            search: {
+                kw_cache: null,
+                kw_cur: null,
+                result: []
+            },
+            page: {
+                key: null,
+                filter: '',
+                size: 5,
+                cur_page: 0,
+                cur_key: 0,
+                id_loaded: 0
+            },
+            file_key: [],
+            total_article: 0
+        };
 
         $.getJSON(sip.s.files_path, function (data) {
-           //console.log('files.json:', data);
+            //console.log('files.json:', data);
+            this.d.files = [];
             if ('files' in data) {
                 this.d.files = data.files;
                 //console.log('files', this.d.files);
@@ -5850,7 +5844,10 @@ sip.o.main.group_view = function (cid) {
     };
 
     o.gen_html = function () {
-        var content = '<div style="color:red;">无数据</div>';
+        var content = '<div style="color:red;">获取数据中</div>';
+        if (this.data && this.data.length <= 0) {
+            content = '<div style="color:red;">无数据</div>';
+        }
         if (this.data && this.data.length > 0) {
             var i, tag = [], cat = [], j, types;
             for (i = 0; i < this.data.length; i++) {
@@ -5866,7 +5863,7 @@ sip.o.main.group_view = function (cid) {
                 tag: tag,
                 cat: cat,
                 all: this.el(j + i + 1),
-                front: this.el(j+i+2)
+                front: this.el(j + i + 2)
             });
             tag = null;
         }
@@ -5956,11 +5953,11 @@ sip.o.main.group_view = function (cid) {
         if (this.data) {
             return;
         }
-        var files=sip.db.get('files');
-        //console.log('gv:files:',files);
-        if(files===undefined){
-            console.log('group view: reload in 3 seconds');
-            setTimeout(this.show.bind(this),3000);
+        var files = sip.db.get('files');
+        // console.log('gv:files:',files);
+        if (files === undefined) {
+            // console.log('group view: reload in 3 seconds');
+            setTimeout(this.show.bind(this), 5000);
             return;
         }
         this.data = Object.keys(files);
@@ -6028,7 +6025,7 @@ sip.o.main.article_board = function (cid) {
                 });
             }
         },
-        show_front_page:function(){
+        show_front_page: function () {
             $.getJSON(sip.s.top_art_path, function (data) {
                 //console.log('show_front_page');
                 var d = [];
