@@ -340,7 +340,8 @@ sip.o.art.editor = function (cid) {
                     this.el(8, true).style.display = 'none';
                 } else {
                     var pos = cardjs.lib.get_DOM_offset(this.el(7, true));
-                    this.el(8, true).style.left = (pos.left - window.Math.floor(this.el(8, true).style.width)) + "px";
+                    // style.width= "123px"
+                    this.el(8, true).style.left = (pos.left - window.parseInt(this.el(8, true).style.width)) + "px";
                     this.el(8, true).style.top = (pos.top + 8) + "px";
                     this.el(8, true).style.display = 'block';
                 }
