@@ -279,7 +279,7 @@ sip.o.art.editor = function (cid) {
                 this.f.fetch('post_article', data, function (d) {
                     //this.f.trigger('new');
                     sip.db.load_files();
-                    this.el(5, true).innerHTML = '修改文章: #' + d.id;
+                    this.el(5, true).innerHTML = '文章: #' + d.id;
                     this.save_cache();
                     this.f.cache(d.id,'art_select_id');
                     var cache=this.f.restore();
@@ -390,6 +390,13 @@ sip.o.art.editor = function (cid) {
 //                'Accept': 'text/x-json'
 //            };
         }
+        
+        var status_bar=this.el(5, true);
+        
+        this.editor.customConfig.onchange=function(){
+            status_bar.innerHTML="已修改，未保存";
+        };
+        
         this.editor.create();
 
         //console.log(sip.cache.article);
@@ -476,7 +483,7 @@ sip.o.art.editor = function (cid) {
             this.el(10, true).checked = cache.top;
             var cid = cache.cache_id;
             if (cid) {
-                this.el(5, true).innerHTML = "修改文章： #" + cid;
+                this.el(5, true).innerHTML = "文章： #" + cid;
             } else {
                 this.el(5, true).innerHTML = "新文章";
             }
