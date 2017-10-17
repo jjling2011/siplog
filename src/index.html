@@ -46,6 +46,14 @@ wangEditor 3.0.10 2017.10.16
                     });
                 });
             });
+            $('body').prepend('<a href="#" class="my-back-to-top" id="back2top">&#9650;</a>');
+            $(window).scroll(function () {
+                if ($(window).scrollTop() > 300) {
+                    $('#back2top').fadeIn('slow');
+                } else {
+                    $('#back2top').fadeOut('slow');
+                }
+            });
         </script>
     </body>
 </html>

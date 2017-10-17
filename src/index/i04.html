@@ -9,6 +9,14 @@
                         main_page = sip.o.Main_wrap("main-page-container").show();
                     });
             });
+            $('body').prepend('<a href="#" class="my-back-to-top" id="back2top">&#9650;</a>');
+            $(window).scroll(function () {
+                if ($(window).scrollTop() > 300) {
+                    $('#back2top').fadeIn('slow');
+                } else {
+                    $('#back2top').fadeOut('slow');
+                }
+            });
         </script>
     </body>
 </html>

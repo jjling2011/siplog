@@ -29,6 +29,26 @@ and open the template in the editor.
     Author     : luke2
 */
 
+.my-back-to-top {
+    display: none;
+    width: 60px;
+    height: 60px;
+    position: fixed;
+    font-size: 39px;
+    color: white;
+    text-decoration: none;
+    z-index: 999;
+    right: 20px;
+    bottom: 20px;
+    background: lightsteelblue no-repeat center 43%;
+    border-radius: 8px;
+}
+
+.my-back-to-top:hover, .my-back-to-top:active, .my-back-to-top:visited{
+    color:white;
+    text-decoration: none;
+}
+
 .CodeMirror {
 	height: 400px;
 }
@@ -764,6 +784,14 @@ body {
                     }).always(function () {
                         main_page = sip.o.Main_wrap("main-page-container").show();
                     });
+            });
+            $('body').prepend('<a href="#" class="my-back-to-top" id="back2top">&#9650;</a>');
+            $(window).scroll(function () {
+                if ($(window).scrollTop() > 300) {
+                    $('#back2top').fadeIn('slow');
+                } else {
+                    $('#back2top').fadeOut('slow');
+                }
             });
         </script>
     </body>
