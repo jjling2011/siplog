@@ -4721,6 +4721,7 @@ sip.o.art.search_result = function (cid, key) {
                         this.el(i, true).style.backgroundColor = '';
                     }
                     this.f.cache(id, 'art_select_id');
+                    cardjs.lib.url_set_params('index.html', {id: id});
                     //sip.cache.article.selected_id = id;
                     //console.log('select id=' + id);
                     this.el(idx, true).style.backgroundColor = 'lightsalmon';
@@ -5976,6 +5977,41 @@ sip.o.main.group_view = function (cid) {
     return o;
 };
 
+sip.o.main.article = function (cid, data, show_all) {
+    var init_style = 0;
+    if (show_all) {
+        init_style = 1;
+    }
+    return(cardjs.create({
+        cid: cid,
+        style: init_style,
+        styles: ['article-summary', 'article-all-content'],
+        data: data,
+        settings: {
+            header: 'single_art',
+            add_event: true
+        },
+        gen_html: function () {
+            this.data.els = [this.el('title'), this.el('content')];
+            this.data.style = this.styles[this.style];
+            return Mustache.render(cardjs.lib.load_html('tp-article-summary-container'), this.data);
+        },
+        gen_ev_handler: function () {
+            return {'title': function () {
+                    var id = this.data.id;
+                    cardjs.lib.url_set_params('index.html', {id: id});
+                    this.f.cache(id, 'art_select_id');
+                    this.style = (this.style + 1) % 2;
+                    this.el('content', true).className = this.styles[this.style];
+                }
+            };
+        },
+        add_event: function () {
+            this.f.on('click', 'title');
+        }
+    }));
+};
+
 sip.o.main.article_board = function (cid) {
 
     var key = cardjs.lib.gen_key();
@@ -6001,37 +6037,42 @@ sip.o.main.article_board = function (cid) {
             key: key,
             header: 'main_art_brd'
         },
+        children: [],
         gen_html: function () {
             return '<div id="' + this.el(0) + '"></div>';
         },
         update: function (data) {
 
-            if (data === undefined) {
+            if (!data || (data && data.length && data.length === 0)) {
                 data = null;
             }
 
-            if (data !== null && data.length && data.length === 0) {
-                data = null;
-            }
-
-            //console.log('call main_art_board_update:', data);
+            // console.log('call main_art_board_update:', data);
             this.f.cache(data);
             if (!data) {
                 this.el(0, true).innerHTML = "<font color=red>查无此“文”</font>";
                 return;
             }
-            if (cardjs.lib.isArray(data)) {
-                this.el(0, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-article-summary-container'), {
-                    recent: data,
-                    style: 'article-summary'
-                });
-            } else {
+
+            var datas = data;
+            if (!cardjs.lib.isArray(data)) {
                 this.f.event('main_clear_pager');
-                this.el(0, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-article-summary-container'), {
-                    recent: data,
-                    style: 'article-all-content'
-                });
+                datas = [data];
             }
+
+            var html = '', i;
+            for (i = 0; i < datas.length; i++) {
+                html += '<div id="' + this.el(i + 1) + '"></div>';
+            }
+            this.el(0, true).innerHTML = html;
+            for (i = 0; i < this.children.length; i++) {
+                this.children[i].destroy();
+            }
+            this.children = [];
+            for (i = 0; i < datas.length; i++) {
+                this.children.push(sip.o.main.article(this.el(i + 1), datas[i]).show());
+            }
+
         },
         show_front_page: function () {
             $.getJSON(sip.s.top_art_path, function (data) {

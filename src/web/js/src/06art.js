@@ -103,6 +103,7 @@ sip.o.art.search_result = function (cid, key) {
                         this.el(i, true).style.backgroundColor = '';
                     }
                     this.f.cache(id, 'art_select_id');
+                    cardjs.lib.url_set_params('index.html', {id: id});
                     //sip.cache.article.selected_id = id;
                     //console.log('select id=' + id);
                     this.el(idx, true).style.backgroundColor = 'lightsalmon';

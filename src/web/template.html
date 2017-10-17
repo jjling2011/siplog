@@ -445,20 +445,12 @@
 
 <script type="text/template" id="tp-article-summary-container">    
 <table style="width:100%;">
-    {{#recent}}
     <tr>
         <td style="width:100%;text-align:center;padding:0px 0px 8px 0px;">
 			<div style="width:100%;padding-top:8px;padding-bottom:20px;padding-left: 16px;padding-right: 16px;border-radius:3px;border: 1px solid #ddd;background:white;">
             <table style="width:100%;">
                 <tr>
-					<td style="text-align:left;font-size:20px;width:1%;white-space:nowrap;" onclick="(function(el){
-						var content=$(el).closest('tr').next().next().find('td:first').find('div:first');
-						content.dblclick();
-						//console.log(content.html());
-						if (window.history.pushState) {
-							window.history.pushState({}, null, 'index.html?id={{id}}');
-						}
-					}(this));">
+					<td style="text-align:left;font-size:20px;width:1%;white-space:nowrap;" id="{{els.0}}">
 						{{title}}
 						{{#top}}&nbsp;<input type="button" class="btn btn-xs " style="background:lightblue;color:#999;" value="📌">{{/top}}
 						{{#lock}}&nbsp;<input type="button" class="btn btn-xs " style="background:bisque;color:#999;" value="🔒">{{/lock}}
@@ -470,23 +462,14 @@
                     </td>
                 </tr>
                 <tr>
-                    <td style="">
-                        <div class="{{style}}" ondblclick="(function(el){
-							var cname=el.className;
-							//console.log(cname);
-							if(cname==='article-all-content'){
-								el.className='article-summary';
-							}else{
-								el.className='article-all-content';
-							}
-						}(this));">{{{content}}}</div>
+                    <td >
+                        <div class="{{style}}" id="{{els.1}}">{{{content}}}</div>
                     </td>
                 </tr>
             </table>
 			</div>
         </td>
     </tr>
-    {{/recent}}
 </table>
 </script>
 
