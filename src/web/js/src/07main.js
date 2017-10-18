@@ -507,23 +507,35 @@ sip.o.main.article_board = function (cid) {
                 return;
             }
 
-            var datas = data;
+            var datas = data, show_all = 0;
+
             if (!cardjs.lib.isArray(data)) {
                 this.f.event('main_clear_pager');
+                show_all = 1;
                 datas = [data];
             }
 
             var html = '', i;
-            for (i = 0; i < datas.length; i++) {
-                html += '<div id="' + this.el(i + 1) + '"></div>';
-            }
-            this.el(0, true).innerHTML = html;
+
             for (i = 0; i < this.children.length; i++) {
                 this.children[i].destroy();
             }
             this.children = [];
+
             for (i = 0; i < datas.length; i++) {
-                this.children.push(sip.o.main.article(this.el(i + 1), datas[i]).show());
+                html += '<div id="' + this.el(i + 1) + '"></div>';
+            }
+
+            this.el(0, true).innerHTML = html;
+
+            for (i = 0; i < datas.length; i++) {
+                this.children.push(
+                        sip.o.main.article(
+                                this.el(i + 1),
+                                datas[i],
+                                show_all
+                                ).show()
+                        );
             }
 
         },
