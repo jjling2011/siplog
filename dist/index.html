@@ -29,6 +29,30 @@ and open the template in the editor.
     Author     : luke2
 */
 
+div[name=art-content] table{
+    margin:8px;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+div[name=art-content] th{
+    padding:3px 8px;
+    border:1px solid lightgrey;
+    text-align: center;
+    background-color: lightgray;
+}
+
+div[name=art-content] tr:nth-of-type(odd){
+    background-color: #f9f9f9;
+}
+
+div[name=art-content] td{
+    padding:3px 8px;
+    height: 1.5em;
+    border:1px solid lightgrey;
+    text-align: left;
+}
+
 .my-back-to-top {
     display: none;
     width: 60px;
@@ -50,7 +74,7 @@ and open the template in the editor.
 }
 
 .CodeMirror {
-	height: 400px;
+    height: 400px;
 }
 
 .banner{
@@ -695,7 +719,7 @@ body {
                 </tr>
                 <tr>
                     <td >
-                        <div class="{{style}}" id="{{els.1}}">{{{content}}}</div>
+                        <div class="{{style}}" id="{{els.1}}" name="art-content">{{{content}}}</div>
                     </td>
                 </tr>
             </table>
