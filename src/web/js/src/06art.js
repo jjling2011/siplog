@@ -96,14 +96,17 @@ sip.o.art.search_result = function (cid, key) {
         for (i = start; i < end; i++) {
             evs[i] = (function () {
                 var s = start, e = end, idx = i;
-                //console.log(sip.cache.search.content);
-                var id = (cache.content[i - s].id);
+                //console.log(cache.content[i -s]);
+                var c = cache.content[i - s];
+                var id = (c.id);
+                var key = c.ctime.substr(0, 4) + parseInt(c.ctime.substr(5, 2));
                 return(function () {
                     for (var i = s; i < e; i++) {
                         this.el(i, true).style.backgroundColor = '';
                     }
                     this.f.cache(id, 'art_select_id');
-                    cardjs.lib.url_set_params('index.html', {id: id});
+                    cardjs.lib.url_set_params('index.html', {id: id, key: key});
+                    this.f.clear_cache('clear_art_board');
                     //sip.cache.article.selected_id = id;
                     //console.log('select id=' + id);
                     this.el(idx, true).style.backgroundColor = 'lightsalmon';
@@ -282,9 +285,9 @@ sip.o.art.editor = function (cid) {
                     sip.db.load_files();
                     this.el(5, true).innerHTML = '文章: #' + d.id;
                     this.save_cache();
-                    this.f.cache(d.id,'art_select_id');
-                    var cache=this.f.restore();
-                    cache.cache_id=d.id;
+                    this.f.cache(d.id, 'art_select_id');
+                    var cache = this.f.restore();
+                    cache.cache_id = d.id;
                     this.f.cache(cache);
                     //console.log(cache);
                     alert('提交成功!');
@@ -391,13 +394,13 @@ sip.o.art.editor = function (cid) {
 //                'Accept': 'text/x-json'
 //            };
         }
-        
-        var status_bar=this.el(5, true);
-        
-        this.editor.customConfig.onchange=function(){
-            status_bar.innerHTML="已修改，未保存";
+
+        var status_bar = this.el(5, true);
+
+        this.editor.customConfig.onchange = function () {
+            status_bar.innerHTML = "已修改，未保存";
         };
-        
+
         this.editor.create();
 
         //console.log(sip.cache.article);

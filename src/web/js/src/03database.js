@@ -190,6 +190,7 @@ sip.db = cardjs.create({
             div.innerHTML = e.content;
             content = div.textContent || div.innerText || "";
             e.text = e.title.toLowerCase() + ' ' + content.toLowerCase();
+            // e.key = key;
             d[e.id] = e;
         }
         div = null;

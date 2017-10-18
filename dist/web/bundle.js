@@ -4359,6 +4359,7 @@ sip.db = cardjs.create({
             div.innerHTML = e.content;
             content = div.textContent || div.innerText || "";
             e.text = e.title.toLowerCase() + ' ' + content.toLowerCase();
+            // e.key = key;
             d[e.id] = e;
         }
         div = null;
@@ -4714,14 +4715,17 @@ sip.o.art.search_result = function (cid, key) {
         for (i = start; i < end; i++) {
             evs[i] = (function () {
                 var s = start, e = end, idx = i;
-                //console.log(sip.cache.search.content);
-                var id = (cache.content[i - s].id);
+                //console.log(cache.content[i -s]);
+                var c = cache.content[i - s];
+                var id = (c.id);
+                var key = c.ctime.substr(0, 4) + parseInt(c.ctime.substr(5, 2));
                 return(function () {
                     for (var i = s; i < e; i++) {
                         this.el(i, true).style.backgroundColor = '';
                     }
                     this.f.cache(id, 'art_select_id');
-                    cardjs.lib.url_set_params('index.html', {id: id});
+                    cardjs.lib.url_set_params('index.html', {id: id, key: key});
+                    this.f.clear_cache('clear_art_board');
                     //sip.cache.article.selected_id = id;
                     //console.log('select id=' + id);
                     this.el(idx, true).style.backgroundColor = 'lightsalmon';
@@ -4900,9 +4904,9 @@ sip.o.art.editor = function (cid) {
                     sip.db.load_files();
                     this.el(5, true).innerHTML = '文章: #' + d.id;
                     this.save_cache();
-                    this.f.cache(d.id,'art_select_id');
-                    var cache=this.f.restore();
-                    cache.cache_id=d.id;
+                    this.f.cache(d.id, 'art_select_id');
+                    var cache = this.f.restore();
+                    cache.cache_id = d.id;
                     this.f.cache(cache);
                     //console.log(cache);
                     alert('提交成功!');
@@ -5009,13 +5013,13 @@ sip.o.art.editor = function (cid) {
 //                'Accept': 'text/x-json'
 //            };
         }
-        
-        var status_bar=this.el(5, true);
-        
-        this.editor.customConfig.onchange=function(){
-            status_bar.innerHTML="已修改，未保存";
+
+        var status_bar = this.el(5, true);
+
+        this.editor.customConfig.onchange = function () {
+            status_bar.innerHTML = "已修改，未保存";
         };
-        
+
         this.editor.create();
 
         //console.log(sip.cache.article);
@@ -5769,13 +5773,13 @@ sip.o.main.match_list = function (cid) {
         }
     };
 
-
     o.show_article = function (idx) {
         if (idx < 0 || idx >= sip.db.d.search.result.length) {
             console.log('Error: index out of range!');
             return;
         }
         var cache = sip.db.d.search.result;
+        // console.log('cache[id]:', cache[idx]);
         this.f.event('main_article_board_update', cache[idx].data);
         cardjs.lib.url_set_params('index.html', {key: cache[idx].key, id: cache[idx].id});
         this.f.cache(cache[idx].id, 'art_select_id');
@@ -5899,37 +5903,40 @@ sip.o.main.group_view = function (cid) {
     o.gen_ev_handler = function () {
         var evs = [], i, j;
 
+        // key 20179 201710 ...
         for (i = 0; i < this.data.length; i++) {
-            var value = this.data[i];
-            evs.push((function () {
-                var v = value;
+            evs.push((function (v) {
                 return (function () {
-                    //console.log(this);
                     sip.db.set('page_key', v);
                     this.set_btn_bgcolor();
+                    cardjs.lib.url_set_params('index.html');
                 }.bind(this));
-            }.bind(this)()));
+            }.bind(this)(this.data[i])));
         }
-        evs.push((function () {
-            var v = '全部';
+
+        // 全部
+        evs.push((function (v) {
+            //var v = '全部';
             return(function () {
                 //console.log('clicked:', v);
                 sip.db.set('filter', v);
                 this.set_btn_bgcolor();
+                cardjs.lib.url_set_params('index.html');
             }.bind(this));
-        }.bind(this)()));
+        }.bind(this)('全部')));
 
+        // 分类 vue js net prog ...
         for (j = 0; j < sip.uset.atypes.length; j++) {
-            var value = sip.uset.atypes[j];
-            evs.push((function () {
-                var v = value;
+            evs.push((function (v) {
                 return(function () {
-                    //console.log('clicked:', v);
                     sip.db.set('filter', v);
                     this.set_btn_bgcolor();
+                    cardjs.lib.url_set_params('index.html');
                 });
-            }.bind(this)()));
+            }.bind(this)(sip.uset.atypes[j])));
         }
+
+        // 所有文章
         evs.push((function () {
             //console.log('clicked: all article');
             for (var k = 0; k < this.el(); k++) {
@@ -5937,7 +5944,10 @@ sip.o.main.group_view = function (cid) {
             }
             this.el(this.el() - 2, true).style.backgroundColor = 'skyblue';
             this.f.event('main_show_pager');
+            cardjs.lib.url_set_params('index.html');
         }.bind(this)));
+
+        // 首页
         evs.push((function () {
             //console.log('clicked: all article');
             for (var k = 0; k < this.el(); k++) {
@@ -5999,7 +6009,9 @@ sip.o.main.article = function (cid, data, show_all) {
         gen_ev_handler: function () {
             return {'title': function () {
                     var id = this.data.id;
-                    cardjs.lib.url_set_params('index.html', {id: id});
+                    var key = this.data.ctime.substr(0, 4) +
+                            parseInt(this.data.ctime.substr(5, 2));
+                    cardjs.lib.url_set_params('index.html', {id: id, key: key});
                     this.f.cache(id, 'art_select_id');
                     this.style = (this.style + 1) % 2;
                     this.el('content', true).className = this.styles[this.style];
@@ -6043,14 +6055,20 @@ sip.o.main.article_board = function (cid) {
         },
         update: function (data) {
 
-            if (!data || (data && data.length && data.length === 0)) {
+            // data 可能会有这几种情况 undefine [] {key:value, ... } [{...},{...}, ... ] 
+
+            //console.log('call main_art_board_update:', data);
+
+            if (!data || (data && data.length === 0)) {
                 data = null;
             }
 
-            // console.log('call main_art_board_update:', data);
             this.f.cache(data);
             if (!data) {
-                this.el(0, true).innerHTML = "<font color=red>查无此“文”</font>";
+                this.el(0, true).innerHTML =
+                        '<div style="width: 100%;text-align: center;padding-top: 10px;">' +
+                        '<font color="red">没有相应数据</font>' +
+                        '</div>';
                 return;
             }
 
@@ -6121,9 +6139,14 @@ sip.o.main.article_board = function (cid) {
                 return;
             }
             var param = get_url_keyid();
+            var err = function () {
+                console.log('没有相应数据，转至首页');
+                cardjs.lib.url_set_params('index.html');
+                this.show_front_page();
+            }.bind(this);
             if (param.y && param.m && param.id) {
                 var path = sip.s.json_path + param.y + '/' + param.m + '.json';
-                $.getJSON(path, function (data) {
+                var success = function (data) {
                     //console.log(data,tid);
                     for (var i = 0; i < data.length; i++) {
                         if (data[i].id === param.id) {
@@ -6131,12 +6154,13 @@ sip.o.main.article_board = function (cid) {
                             return;
                         }
                     }
-                    this.update(null);
-                }.bind(this));
+                    err();
+                }.bind(this);
+                $.getJSON(path, success).fail(err);
                 return;
             }
             // no cache, no url params 
-            this.show_front_page();
+            err();
         }
     }));
 };

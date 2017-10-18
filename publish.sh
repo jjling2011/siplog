@@ -13,7 +13,7 @@ echo "copy index.html"
 cat ./src/index/i01.html > ./dist/index.html
 cat ./src/web/css/{bootstrap.min.css,simplemde.min.css,siplog.css} >> ./dist/index.html
 cat ./src/index/i02.html >> ./dist/index.html
-v=`md5sum ./dist/web/js/bundle.js`
+v=`md5sum ./dist/web/bundle.js`
 echo -n ${v:0:32} >> ./dist/index.html
 cat ./src/index/i03.html >> ./dist/index.html
 cat ./src/web/template.html >> ./dist/index.html
