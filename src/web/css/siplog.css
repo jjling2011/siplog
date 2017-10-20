@@ -122,7 +122,13 @@ div[name=art-content] td{
 body {
     text-align: center;
     background: ivory;
+    /*min-height:100vh;*/
 }
+
+/*html{
+    height:100vh;
+}*/
+
 #main-page-container{
     width:100%;
     min-height:100px;

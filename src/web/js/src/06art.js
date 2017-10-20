@@ -252,10 +252,10 @@ sip.o.art.editor = function (cid) {
         });
     }
 
-    o.data_parser = function () {
-        this.editor && this.editor.destroy();
-        this.editor = null;
-    };
+//    o.data_parser = function () {
+//        this.editor && this.editor.destroy();
+//        this.editor = null;
+//    };
 
     o.gen_ev_handler = function () {
         return {
@@ -370,40 +370,41 @@ sip.o.art.editor = function (cid) {
         return Mustache.render(cardjs.lib.load_html('tp-uma-editor'), {ids: ids, atype: atype});
     };
 
-    o.after_add_event = function () {
-        //this.editor && this.editor.destroy();
+    function create_editor(eid, status_bar, upload_support) {
+        
+        var e = new wangEditor('#' + eid);
 
-        this.editor = new wangEditor('#' + this.el(1));
-        //this.editor = new wangEditor(o.ids[1]);
-        if (sip.uset.upload) {
-            this.editor.customConfig.uploadImgServer = './web/php/upload.php';
-            this.editor.customConfig.uploadImgMaxSize = 4 * 1024 * 1024;
-            this.editor.customConfig.uploadImgMaxLength = 1;
+        if (upload_support) {
+            e.customConfig.uploadImgServer = './web/php/upload.php';
+            e.customConfig.uploadImgMaxSize = 4 * 1024 * 1024;
+            e.customConfig.uploadImgMaxLength = 1;
             var param = {tk: cardjs.lib.cookie_get('tk')};
 
-            this.editor.customConfig.uploadImgParams = param;
+            e.customConfig.uploadImgParams = param;
             var func = {
                 fail: function (xhr, editor, result) {
                     console.log(result.errno, result.msg);
                 }
             };
-            this.editor.customConfig.uploadImgHooks = func;
-            this.editor.customConfig.uploadFileName = 'upload';
-//            this.editor.customConfig.debug = true;
-//            this.editor.customConfig.uploadImgHeaders = {
-//                'Accept': 'text/x-json'
-//            };
+            e.customConfig.uploadImgHooks = func;
+            e.customConfig.uploadFileName = 'upload';
         }
 
-        var status_bar = this.el(5, true);
-
-        this.editor.customConfig.onchange = function () {
+        e.customConfig.onchange = function () {
             status_bar.innerHTML = "已修改，未保存";
         };
 
-        this.editor.create();
+        e.create();
 
-        //console.log(sip.cache.article);
+        // plugin full screen
+        window.wangEditor.fullscreen.init('#'+eid);
+
+        return e;
+    }
+
+    o.after_add_event = function () {
+
+        this.editor = create_editor(this.el(1), this.el(5, true), sip.uset.upload);
 
         //读取缓存
         var sid, cid, uid, cache;
