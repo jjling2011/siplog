@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-
+wangEditor 3.0.10 2017.10.16
 -->
 <html>
     <head>
@@ -10,15 +10,24 @@
         <script type="text/javascript" src="web/js/lib/jquery.min.js"></script> 
         <link rel="stylesheet" href="web/css/bootstrap.min.css" >
         <link rel="stylesheet" href="web/css/simplemde.min.css" >
+        <link rel="stylesheet" href="web/css/wangeditor.css" >
         <link rel="stylesheet" href="web/css/siplog.css?t=20170518001">
         <script type="text/javascript" src="web/js/lib/bootstrap.min.js"></script>
         <script type="text/javascript" src="web/js/lib/mustache.js"></script>
         <script type="text/javascript" src="web/js/lib/xss.js"></script>
         <script type="text/javascript" src="web/js/lib/md5.js"></script>
         <script type="text/javascript" src="web/js/lib/wangEditor.min.js"></script>
+        <script type="text/javascript" src="web/js/lib/wangEditor_fullscreen_plugin.js"></script>
         <script type="text/javascript" src="web/js/lib/simplemde.min.js"></script>
-        <script type="text/javascript" src="web/js/src/card.js?t=20170518001"></script>
-        <script type="text/javascript" src="web/js/src/siplog.js?t=20170518001"></script>
+        <script type="text/javascript" src="web/js/lib/card.js"></script>
+        <script type="text/javascript" src="web/js/src/01head.js"></script>
+        <script type="text/javascript" src="web/js/src/02function.js"></script>
+        <script type="text/javascript" src="web/js/src/03database.js"></script>
+        <script type="text/javascript" src="web/js/src/04main_page.js"></script>
+        <script type="text/javascript" src="web/js/src/05debug.js"></script>
+        <script type="text/javascript" src="web/js/src/06art.js"></script>
+        <script type="text/javascript" src="web/js/src/07main.js"></script>
+        <script type="text/javascript" src="web/js/src/08mgr.js"></script>
     </head>
     <body >
         <div style="width:100%;" id="main-page-container"></div>
@@ -38,6 +47,14 @@
                         main_page = sip.o.Main_wrap("main-page-container").show();
                     });
                 });
+            });
+            $('body').prepend('<a href="#" class="my-back-to-top" id="back2top">&#9650;</a>');
+            $(window).scroll(function () {
+                if ($(window).scrollTop() > 300) {
+                    $('#back2top').fadeIn('slow');
+                } else {
+                    $('#back2top').fadeOut('slow');
+                }
             });
         </script>
     </body>

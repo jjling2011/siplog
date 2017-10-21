@@ -2214,9 +2214,23 @@ module.exports = {
 };
 
 },{}]},{},[2]);
-!function(e,t){"object"==typeof exports&&"undefined"!=typeof module?module.exports=t():"function"==typeof define&&define.amd?define(t):e.wangEditor=t()}(this,function(){"use strict";function e(e){var t=void 0;return t=document.createElement("div"),t.innerHTML=e,t.children}function t(e){return!!e&&(e instanceof HTMLCollection||e instanceof NodeList)}function n(e){var n=document.querySelectorAll(e);return t(n)?n:[n]}function i(o){if(o){if(o instanceof i)return o;this.selector=o;var A=[];1===o.nodeType?A=[o]:t(o)?A=o:"string"==typeof o&&(o=o.replace("/\n/mg","").trim(),A=0===o.indexOf("<")?e(o):n(o));var c=A.length;if(!c)return this;var r=void 0;for(r=0;r<c;r++)this[r]=A[r];this.length=c}}function o(e){return new i(e)}function A(e,t){var n=void 0;for(n in e)if(e.hasOwnProperty(n)&&!1===t.call(e,n,e[n]))break}function c(e,t){var n=void 0,i=void 0,o=e.length||0;for(n=0;n<o&&(i=e[n],!1!==t.call(e,i,n));n++);}function r(e){return e+Math.random().toString().slice(2)}function a(e){return null==e?"":e.replace(/</gm,"&lt;").replace(/>/gm,"&gt;").replace(/"/gm,"&quot;")}function s(e){this.editor=e,this.$elem=o('<div class="w-e-menu">\n            <i class="w-e-icon-bold"><i/>\n        </div>'),this.type="click",this._active=!1}function l(e,t){var n=this;this.menu=e,this.opt=t;var i=o('<div class="w-e-droplist"></div>'),A=t.$title;A&&(A.addClass("w-e-dp-title"),i.append(A));var c=t.list||[],r=t.type||"list",a=t.onClick||P,s=o('<ul class="'+("list"===r?"w-e-list":"w-e-block")+'"></ul>');i.append(s),c.forEach(function(e){var t=e.$elem,i=e.value,A=o('<li class="w-e-item"></li>');t&&(A.append(t),s.append(A),t.on("click",function(e){a(i),n.hideTimeoutId=setTimeout(function(){n.hide()},0)}))}),i.on("mouseleave",function(e){n.hideTimeoutId=setTimeout(function(){n.hide()},0)}),this.$container=i,this._rendered=!1,this._show=!1}function d(e){var t=this;this.editor=e,this.$elem=o('<div class="w-e-menu"><i class="w-e-icon-header"><i/></div>'),this.type="droplist",this._active=!1,this.droplist=new l(this,{width:100,$title:o("<p>设置标题</p>"),type:"list",list:[{$elem:o("<h1>H1</h1>"),value:"<h1>"},{$elem:o("<h2>H2</h2>"),value:"<h2>"},{$elem:o("<h3>H3</h3>"),value:"<h3>"},{$elem:o("<h4>H4</h4>"),value:"<h4>"},{$elem:o("<h5>H5</h5>"),value:"<h5>"},{$elem:o("<p>正文</p>"),value:"<p>"}],onClick:function(e){t._command(e)}})}function u(e,t){this.menu=e,this.opt=t}function h(e){this.editor=e,this.$elem=o('<div class="w-e-menu"><i class="w-e-icon-link"><i/></div>'),this.type="panel",this._active=!1}function p(e){this.editor=e,this.$elem=o('<div class="w-e-menu">\n            <i class="w-e-icon-italic"><i/>\n        </div>'),this.type="click",this._active=!1}function f(e){this.editor=e,this.$elem=o('<div class="w-e-menu">\n            <i class="w-e-icon-redo"><i/>\n        </div>'),this.type="click",this._active=!1}function g(e){this.editor=e,this.$elem=o('<div class="w-e-menu">\n            <i class="w-e-icon-strikethrough"><i/>\n        </div>'),this.type="click",this._active=!1}function m(e){this.editor=e,this.$elem=o('<div class="w-e-menu">\n            <i class="w-e-icon-underline"><i/>\n        </div>'),this.type="click",this._active=!1}function w(e){this.editor=e,this.$elem=o('<div class="w-e-menu">\n            <i class="w-e-icon-undo"><i/>\n        </div>'),this.type="click",this._active=!1}function v(e){var t=this;this.editor=e,this.$elem=o('<div class="w-e-menu"><i class="w-e-icon-list2"><i/></div>'),this.type="droplist",this._active=!1,this.droplist=new l(this,{width:120,$title:o("<p>设置列表</p>"),type:"list",list:[{$elem:o('<span><i class="w-e-icon-list-numbered"></i> 有序列表</span>'),value:"insertOrderedList"},{$elem:o('<span><i class="w-e-icon-list2"></i> 无序列表</span>'),value:"insertUnorderedList"}],onClick:function(e){t._command(e)}})}function b(e){var t=this;this.editor=e,this.$elem=o('<div class="w-e-menu"><i class="w-e-icon-paragraph-left"><i/></div>'),this.type="droplist",this._active=!1,this.droplist=new l(this,{width:100,$title:o("<p>对齐方式</p>"),type:"list",list:[{$elem:o('<span><i class="w-e-icon-paragraph-left"></i> 靠左</span>'),value:"justifyLeft"},{$elem:o('<span><i class="w-e-icon-paragraph-center"></i> 居中</span>'),value:"justifyCenter"},{$elem:o('<span><i class="w-e-icon-paragraph-right"></i> 靠右</span>'),value:"justifyRight"}],onClick:function(e){t._command(e)}})}function E(e){var t=this;this.editor=e,this.$elem=o('<div class="w-e-menu"><i class="w-e-icon-pencil2"><i/></div>'),this.type="droplist",this._active=!1,this.droplist=new l(this,{width:120,$title:o("<p>文字颜色</p>"),type:"inline-block",list:[{$elem:o('<i style="color:#000000;" class="w-e-icon-pencil2"></i>'),value:"#000000"},{$elem:o('<i style="color:#eeece0;" class="w-e-icon-pencil2"></i>'),value:"#eeece0"},{$elem:o('<i style="color:#1c487f;" class="w-e-icon-pencil2"></i>'),value:"#1c487f"},{$elem:o('<i style="color:#4d80bf;" class="w-e-icon-pencil2"></i>'),value:"#4d80bf"},{$elem:o('<i style="color:#c24f4a;" class="w-e-icon-pencil2"></i>'),value:"#c24f4a"},{$elem:o('<i style="color:#8baa4a;" class="w-e-icon-pencil2"></i>'),value:"#8baa4a"},{$elem:o('<i style="color:#7b5ba1;" class="w-e-icon-pencil2"></i>'),value:"#7b5ba1"},{$elem:o('<i style="color:#46acc8;" class="w-e-icon-pencil2"></i>'),value:"#46acc8"},{$elem:o('<i style="color:#f9963b;" class="w-e-icon-pencil2"></i>'),value:"#f9963b"},{$elem:o('<i style="color:#ffffff;" class="w-e-icon-pencil2"></i>'),value:"#ffffff"}],onClick:function(e){t._command(e)}})}function y(e){var t=this;this.editor=e,this.$elem=o('<div class="w-e-menu"><i class="w-e-icon-paint-brush"><i/></div>'),this.type="droplist",this._active=!1,this.droplist=new l(this,{width:120,$title:o("<p>背景色</p>"),type:"inline-block",list:[{$elem:o('<i style="color:#000000;" class="w-e-icon-paint-brush"></i>'),value:"#000000"},{$elem:o('<i style="color:#eeece0;" class="w-e-icon-paint-brush"></i>'),value:"#eeece0"},{$elem:o('<i style="color:#1c487f;" class="w-e-icon-paint-brush"></i>'),value:"#1c487f"},{$elem:o('<i style="color:#4d80bf;" class="w-e-icon-paint-brush"></i>'),value:"#4d80bf"},{$elem:o('<i style="color:#c24f4a;" class="w-e-icon-paint-brush"></i>'),value:"#c24f4a"},{$elem:o('<i style="color:#8baa4a;" class="w-e-icon-paint-brush"></i>'),value:"#8baa4a"},{$elem:o('<i style="color:#7b5ba1;" class="w-e-icon-paint-brush"></i>'),value:"#7b5ba1"},{$elem:o('<i style="color:#46acc8;" class="w-e-icon-paint-brush"></i>'),value:"#46acc8"},{$elem:o('<i style="color:#f9963b;" class="w-e-icon-paint-brush"></i>'),value:"#f9963b"},{$elem:o('<i style="color:#ffffff;" class="w-e-icon-paint-brush"></i>'),value:"#ffffff"}],onClick:function(e){t._command(e)}})}function B(e){this.editor=e,this.$elem=o('<div class="w-e-menu">\n            <i class="w-e-icon-quotes-left"><i/>\n        </div>'),this.type="click",this._active=!1}function C(e){this.editor=e,this.$elem=o('<div class="w-e-menu">\n            <i class="w-e-icon-terminal"><i/>\n        </div>'),this.type="panel",this._active=!1}function x(e){this.editor=e,this.$elem=o('<div class="w-e-menu">\n            <i class="w-e-icon-happy"><i/>\n        </div>'),this.type="panel",this._active=!1}function I(e){this.editor=e,this.$elem=o('<div class="w-e-menu"><i class="w-e-icon-table2"><i/></div>'),this.type="panel",this._active=!1}function Q(e){this.editor=e,this.$elem=o('<div class="w-e-menu"><i class="w-e-icon-play"><i/></div>'),this.type="panel",this._active=!1}function D(e){this.editor=e,this.$elem=o('<div class="w-e-menu"><i class="w-e-icon-image"><i/></div>'),this.type="panel",this._active=!1}function M(e){this.editor=e,this.menus={}}function k(e){var t=e.clipboardData||e.originalEvent&&e.originalEvent.clipboardData,n=void 0;return n=null==t?window.clipboardData&&window.clipboardData.getData("text"):t.getData("text/plain"),a(n)}function _(e){var t=e.clipboardData||e.originalEvent&&e.originalEvent.clipboardData,n=void 0,i=void 0;if(null==t?n=window.clipboardData&&window.clipboardData.getData("text"):(n=t.getData("text/plain"),i=t.getData("text/html")),!i&&n&&(i="<p>"+a(n)+"</p>"),i){var o=i.split("</html>");return 2===o.length&&(i=o[0]),i=i.replace(/<(meta|script|link).+?>/gim,""),i=i.replace(/\s?(class|style)=('|").+?('|")/gim,"")}}function U(e){var t=[];if(k(e))return t;var n=e.clipboardData||e.originalEvent&&e.originalEvent.clipboardData||{},i=n.items;return i?(A(i,function(e,n){var i=n.type;/image/i.test(i)&&t.push(n.getAsFile())}),t):t}function S(e){this.editor=e}function R(e){this.editor=e}function F(e){this.editor=e,this._currentRange=null}function N(e){this.editor=e,this._time=0,this._isShow=!1,this._isRender=!1,this._timeoutId=0,this.$textContainer=e.$textContainerElem,this.$bar=o('<div class="w-e-progress"></div>')}function T(e){this.editor=e}function H(e,t){if(null==e)throw new Error("错误：初始化编辑器时候未传入任何参数，请查阅文档");this.id="wangEditor-"+G++,this.toolbarSelector=e,this.textSelector=t,this.customConfig={}}i.prototype={constructor:i,forEach:function(e){var t=void 0;for(t=0;t<this.length;t++){var n=this[t];if(!1===e.call(n,n,t))break}return this},get:function(e){var t=this.length;return e>=t&&(e%=t),o(this[e])},first:function(){return this.get(0)},last:function(){var e=this.length;return this.get(e-1)},on:function(e,t,n){n||(n=t,t=null);var i=[];return i=e.split(/\s+/),this.forEach(function(e){i.forEach(function(i){if(i)return t?void e.addEventListener(i,function(e){var i=e.target;i.matches(t)&&n.call(i,e)},!1):void e.addEventListener(i,n,!1)})})},off:function(e,t){return this.forEach(function(n){n.removeEventListener(e,t,!1)})},attr:function(e,t){return null==t?this[0].getAttribute(e):this.forEach(function(n){n.setAttribute(e,t)})},addClass:function(e){return e?this.forEach(function(t){var n=void 0;t.className?(n=t.className.split(/\s/),n=n.filter(function(e){return!!e.trim()}),n.indexOf(e)<0&&n.push(e),t.className=n.join(" ")):t.className=e}):this},removeClass:function(e){return e?this.forEach(function(t){var n=void 0;t.className&&(n=t.className.split(/\s/),n=n.filter(function(t){return!(!(t=t.trim())||t===e)}),t.className=n.join(" "))}):this},css:function(e,t){var n=e+":"+t+";";return this.forEach(function(t){var i=(t.getAttribute("style")||"").trim(),o=void 0,A=[];i?(o=i.split(";"),o.forEach(function(e){var t=e.split(":").map(function(e){return e.trim()});2===t.length&&A.push(t[0]+":"+t[1])}),A=A.map(function(t){return 0===t.indexOf(e)?n:t}),A.indexOf(n)<0&&A.push(n),t.setAttribute("style",A.join("; "))):t.setAttribute("style",n)})},show:function(){return this.css("display","block")},hide:function(){return this.css("display","none")},children:function(){var e=this[0];return e?o(e.children):null},append:function(e){return this.forEach(function(t){e.forEach(function(e){t.appendChild(e)})})},remove:function(){return this.forEach(function(e){if(e.remove)e.remove();else{var t=e.parentElement;t&&t.removeChild(e)}})},isContain:function(e){var t=this[0],n=e[0];return t.contains(n)},getSizeData:function(){return this[0].getBoundingClientRect()},getNodeName:function(){return this[0].nodeName},find:function(e){return o(this[0].querySelectorAll(e))},text:function(e){return e?this.forEach(function(t){t.innerHTML=e}):this[0].innerHTML.replace(/<.*?>/g,function(){return""})},html:function(e){var t=this[0];return null==e?t.innerHTML:(t.innerHTML=e,this)},val:function(){return this[0].value.trim()},focus:function(){return this.forEach(function(e){e.focus()})},parent:function(){return o(this[0].parentElement)},parentUntil:function(e,t){var n=document.querySelectorAll(e),i=n.length;if(!i)return null;var A=t||this[0];if("BODY"===A.nodeName)return null;var c=A.parentElement,r=void 0;for(r=0;r<i;r++)if(c===n[r])return o(c);return this.parentUntil(e,c)},equal:function(e){return 1===e.nodeType?this[0]===e:this[0]===e[0]},insertBefore:function(e){var t=o(e),n=t[0];return n?this.forEach(function(e){n.parentNode.insertBefore(e,n)}):this},insertAfter:function(e){var t=o(e),n=t[0];return n?this.forEach(function(e){var t=n.parentNode;t.lastChild===n?t.appendChild(e):t.insertBefore(e,n.nextSibling)}):this}};var Y={menus:["head","bold","italic","underline","strikeThrough","foreColor","backColor","link","list","justify","quote","emoticon","image","table","video","code","undo","redo"],zIndex:1e4,debug:!1,showLinkImg:!0,uploadImgMaxSize:5242880,uploadImgShowBase64:!1,uploadFileName:"",uploadImgParams:{token:"abcdef12345"},uploadImgHeaders:{},withCredentials:!1,uploadImgTimeout:5e3,uploadImgHooks:{before:function(e,t,n){},success:function(e,t,n){},fail:function(e,t,n){},error:function(e,t){},timeout:function(e,t){}}},L={_ua:navigator.userAgent,isWebkit:function(){return/webkit/i.test(this._ua)},isIE:function(){return"ActiveXObject"in window}};s.prototype={constructor:s,onClick:function(e){var t=this.editor,n=t.selection.isSelectionEmpty();n&&t.selection.createEmptyRange(),t.cmd.do("bold"),n&&(t.selection.collapseRange(),t.selection.restoreSelection())},tryChangeActive:function(e){var t=this.editor,n=this.$elem;t.cmd.queryCommandState("bold")?(this._active=!0,n.addClass("w-e-active")):(this._active=!1,n.removeClass("w-e-active"))}};var P=function(){};l.prototype={constructor:l,show:function(){this.hideTimeoutId&&clearTimeout(this.hideTimeoutId);var e=this.menu,t=e.$elem,n=this.$container;if(!this._show){if(this._rendered)n.show();else{var i=t.getSizeData().height||0,o=this.opt.width||100;n.css("margin-top",i+"px").css("width",o+"px"),t.append(n),this._rendered=!0}this._show=!0}},hide:function(){this.showTimeoutId&&clearTimeout(this.showTimeoutId);var e=this.$container;this._show&&(e.hide(),this._show=!1)}},d.prototype={constructor:d,_command:function(e){this.editor.cmd.do("formatBlock",e)},tryChangeActive:function(e){var t=this.editor,n=this.$elem,i=/^h/i,o=t.cmd.queryCommandValue("formatBlock");i.test(o)?(this._active=!0,n.addClass("w-e-active")):(this._active=!1,n.removeClass("w-e-active"))}};var j=function(){},z=[];u.prototype={constructor:u,show:function(){var e=this,t=this.menu;if(!(z.indexOf(t)>=0)){var n=t.editor,i=o("body"),A=n.$textContainerElem,c=this.opt,r=o('<div class="w-e-panel-container"></div>'),a=c.width||300;r.css("width",a+"px").css("margin-left",(0-a)/2+"px");var s=o('<i class="w-e-icon-close w-e-panel-close"></i>');r.append(s),s.on("click",function(){e.hide()});var l=o('<ul class="w-e-panel-tab-title"></ul>'),d=o('<div class="w-e-panel-tab-content"></div>');r.append(l).append(d);var u=c.height;u&&d.css("height",u+"px").css("overflow-y","auto");var h=c.tabs||[],p=[],f=[];h.forEach(function(e,t){if(e){var n=e.title||"",i=e.tpl||"",A=o('<li class="w-e-item">'+n+"</li>");l.append(A);var c=o(i);d.append(c),A._index=t,p.push(A),f.push(c),0===t?(A._active=!0,A.addClass("w-e-active")):c.hide(),A.on("click",function(e){A._active||(p.forEach(function(e){e._active=!1,e.removeClass("w-e-active")}),f.forEach(function(e){e.hide()}),A._active=!0,A.addClass("w-e-active"),c.show())})}}),r.on("click",function(e){e.stopPropagation()}),i.on("click",function(t){e.hide()}),A.append(r),h.forEach(function(t,n){if(t){(t.events||[]).forEach(function(t){var i=t.selector,o=t.type,A=t.fn||j;f[n].find(i).on(o,function(t){t.stopPropagation(),A(t)&&e.hide()})})}});var g=r.find("input[type=text],textarea");g.length&&g.get(0).focus(),this.$container=r,this._hideOtherPanels(),z.push(t)}},hide:function(){var e=this.menu,t=this.$container;t&&t.remove(),z=z.filter(function(t){return t!==e})},_hideOtherPanels:function(){z.length&&z.forEach(function(e){var t=e.panel||{};t.hide&&t.hide()})}},h.prototype={constructor:h,onClick:function(e){var t=this.editor,n=void 0;if(this._active){if(!(n=t.selection.getSelectionContainerElem()))return;t.selection.createRangeByElem(n),t.selection.restoreSelection(),this._createPanel(n.text(),n.attr("href"))}else t.selection.isSelectionEmpty()?this._createPanel("",""):this._createPanel(t.selection.getSelectionText(),"")},_createPanel:function(e,t){var n=this,i=r("input-link"),A=r("input-text"),c=r("btn-ok"),a=r("btn-del"),s=this._active?"inline-block":"none",l=new u(this,{width:300,tabs:[{title:"链接",tpl:'<div>\n                            <input id="'+A+'" type="text" class="block" value="'+e+'" placeholder="链接文字"/></td>\n                            <input id="'+i+'" type="text" class="block" value="'+t+'" placeholder="http://..."/></td>\n                            <div class="w-e-button-container">\n                                <button id="'+c+'" class="right">插入</button>\n                                <button id="'+a+'" class="gray right" style="display:'+s+'">删除链接</button>\n                            </div>\n                        </div>',events:[{selector:"#"+c,type:"click",fn:function(){var e=o("#"+i),t=o("#"+A),c=e.val(),r=t.val();return n._insertLink(r,c),!0}},{selector:"#"+a,type:"click",fn:function(){return n._delLink(),!0}}]}]});l.show(),this.panel=l},_delLink:function(){if(this._active){var e=this.editor;if(e.selection.getSelectionContainerElem()){var t=e.selection.getSelectionText();e.cmd.do("insertHTML","<span>"+t+"</span>")}}},_insertLink:function(e,t){if(e&&t){this.editor.cmd.do("insertHTML",'<a href="'+t+'" target="_blank">'+e+"</a>")}},tryChangeActive:function(e){var t=this.editor,n=this.$elem,i=t.selection.getSelectionContainerElem();i&&("A"===i.getNodeName()?(this._active=!0,n.addClass("w-e-active")):(this._active=!1,n.removeClass("w-e-active")))}},p.prototype={constructor:p,onClick:function(e){var t=this.editor,n=t.selection.isSelectionEmpty();n&&t.selection.createEmptyRange(),t.cmd.do("italic"),n&&(t.selection.collapseRange(),t.selection.restoreSelection())},tryChangeActive:function(e){var t=this.editor,n=this.$elem;t.cmd.queryCommandState("italic")?(this._active=!0,n.addClass("w-e-active")):(this._active=!1,n.removeClass("w-e-active"))}},f.prototype={constructor:f,onClick:function(e){this.editor.cmd.do("redo")}},g.prototype={constructor:g,onClick:function(e){var t=this.editor,n=t.selection.isSelectionEmpty();n&&t.selection.createEmptyRange(),t.cmd.do("strikeThrough"),n&&(t.selection.collapseRange(),t.selection.restoreSelection())},tryChangeActive:function(e){var t=this.editor,n=this.$elem;t.cmd.queryCommandState("strikeThrough")?(this._active=!0,n.addClass("w-e-active")):(this._active=!1,n.removeClass("w-e-active"))}},m.prototype={constructor:m,onClick:function(e){var t=this.editor,n=t.selection.isSelectionEmpty();n&&t.selection.createEmptyRange(),t.cmd.do("underline"),n&&(t.selection.collapseRange(),t.selection.restoreSelection())},tryChangeActive:function(e){var t=this.editor,n=this.$elem;t.cmd.queryCommandState("underline")?(this._active=!0,n.addClass("w-e-active")):(this._active=!1,n.removeClass("w-e-active"))}},w.prototype={constructor:w,onClick:function(e){this.editor.cmd.do("undo")}},v.prototype={constructor:v,_command:function(e){var t=this.editor,n=t.$textElem;if(t.selection.restoreSelection(),!t.cmd.queryCommandState(e)){t.cmd.do(e);var i=t.selection.getSelectionContainerElem();if("LI"===i.getNodeName()&&(i=i.parent()),!1!==/^ol|ul$/i.test(i.getNodeName())&&!i.equal(n)){var o=i.parent();o.equal(n)||(i.insertAfter(o),o.remove())}}},tryChangeActive:function(e){var t=this.editor,n=this.$elem;t.cmd.queryCommandState("insertUnOrderedList")||t.cmd.queryCommandState("insertOrderedList")?(this._active=!0,n.addClass("w-e-active")):(this._active=!1,n.removeClass("w-e-active"))}},b.prototype={constructor:b,_command:function(e){this.editor.cmd.do(e)}},E.prototype={constructor:E,_command:function(e){this.editor.cmd.do("foreColor",e)}},y.prototype={constructor:y,_command:function(e){this.editor.cmd.do("backColor",e)}},B.prototype={constructor:B,onClick:function(e){this.editor.cmd.do("formatBlock","<BLOCKQUOTE>")},tryChangeActive:function(e){var t=this.editor,n=this.$elem,i=/^BLOCKQUOTE$/i,o=t.cmd.queryCommandValue("formatBlock");i.test(o)?(this._active=!0,n.addClass("w-e-active")):(this._active=!1,n.removeClass("w-e-active"))}},C.prototype={constructor:C,onClick:function(e){var t=this.editor,n=t.selection.getSelectionStartElem(),i=t.selection.getSelectionEndElem(),A=t.selection.isSelectionEmpty(),c=t.selection.getSelectionText(),r=void 0;return n.equal(i)?A?void(this._active?this._createPanel(n.html()):this._createPanel()):(r=o("<code>"+c+"</code>"),t.cmd.do("insertElem",r),t.selection.createRangeByElem(r,!1),void t.selection.restoreSelection()):void t.selection.restoreSelection()},_createPanel:function(e){var t=this;e=e||"";var n=e?"edit":"new",i=r("texxt"),A=r("btn"),c=new u(this,{width:500,tabs:[{title:"插入代码",tpl:'<div>\n                        <textarea id="'+i+'" style="height:145px;;">'+e+'</textarea>\n                        <div class="w-e-button-container">\n                            <button id="'+A+'" class="right">插入</button>\n                        </div>\n                    <div>',events:[{selector:"#"+A,type:"click",fn:function(){var e=o("#"+i),A=e.val()||e.html();return A=a(A),"new"===n?t._insertCode(A):t._updateCode(A),!0}}]}]});c.show(),this.panel=c},_insertCode:function(e){this.editor.cmd.do("insertHTML","<pre><code>"+e+"</code></pre><p><br></p>")},_updateCode:function(e){var t=this.editor,n=t.selection.getSelectionContainerElem();n&&(n.html(e),t.selection.restoreSelection())},tryChangeActive:function(e){var t=this.editor,n=this.$elem,i=t.selection.getSelectionContainerElem();if(i){var o=i.parent();"CODE"===i.getNodeName()&&"PRE"===o.getNodeName()?(this._active=!0,n.addClass("w-e-active")):(this._active=!1,n.removeClass("w-e-active"))}}},x.prototype={constructor:x,onClick:function(){this._createPanel()},_createPanel:function(){var e=this,t="";"😀 😃 😄 😁 😆 😅 😂  😊 😇 🙂 🙃 😉 😌 😍 😘 😗 😙 😚 😋 😜 😝 😛 🤑 🤗 🤓 😎 😏 😒 😞 😔 😟 😕 🙁  😣 😖 😫 😩 😤 😠 😡 😶 😐 😑 😯 😦 😧 😮 😲 😵 😳 😱 😨 😰 😢 😥 😭 😓 😪 😴 🙄 🤔 😬 🤐".split(/\s/).forEach(function(e){e&&(t+='<span class="w-e-item">'+e+"</span>")});var n="";"🙌 👏 👋 👍 👎 👊 ✊ ️👌 ✋ 👐 💪 🙏 ️👆 👇 👈 👉 🖕 🖐 🤘 🖖".split(/\s/).forEach(function(e){e&&(n+='<span class="w-e-item">'+e+"</span>")});var i=new u(this,{width:300,height:200,tabs:[{title:"表情",tpl:'<div class="w-e-emoticon-container">'+t+"</div>",events:[{selector:"span.w-e-item",type:"click",fn:function(t){var n=t.target;return e._insert(n.innerHTML),!0}}]},{title:"手势",tpl:'<div class="w-e-emoticon-container">'+n+"</div>",events:[{selector:"span.w-e-item",type:"click",fn:function(t){var n=t.target;return e._insert(n.innerHTML),!0}}]}]});i.show(),this.panel=i},_insert:function(e){this.editor.cmd.do("insertHTML","<span>"+e+"</span>")}},I.prototype={constructor:I,onClick:function(){this._active?this._createEditPanel():this._createInsertPanel()},_createInsertPanel:function(){var e=this,t=r("btn"),n=r("row"),i=r("col"),A=new u(this,{width:250,tabs:[{title:"插入表格",tpl:'<div>\n                        <p style="text-align:left; padding:5px 0;">\n                            创建\n                            <input id="'+n+'" type="text" value="5" style="width:40px;text-align:center;"/>\n                            行\n                            <input id="'+i+'" type="text" value="5" style="width:40px;text-align:center;"/>\n                            列的表格\n                        </p>\n                        <div class="w-e-button-container">\n                            <button id="'+t+'" class="right">插入</button>\n                        </div>\n                    </div>',events:[{selector:"#"+t,type:"click",fn:function(){var t=parseInt(o("#"+n).val()),A=parseInt(o("#"+i).val());return t&&A&&t>0&&A>0&&e._insert(t,A),!0}}]}]});A.show(),this.panel=A},_insert:function(e,t){var n=void 0,i=void 0,o='<table border="0" width="100%" cellpadding="0" cellspacing="0">';for(n=0;n<e;n++){if(o+="<tr>",0===n)for(i=0;i<t;i++)o+="<th>&nbsp;</th>";else for(i=0;i<t;i++)o+="<td>&nbsp;</td>";o+="</tr>"}o+="</table><p><br></p>";var A=this.editor;A.cmd.do("insertHTML",o),A.cmd.do("enableObjectResizing",!1),A.cmd.do("enableInlineTableEditing",!1)},_createEditPanel:function(){var e=this,t=r("add-row"),n=r("add-col"),i=r("del-row"),o=r("del-col"),A=r("del-table");new u(this,{width:320,tabs:[{title:"编辑表格",tpl:'<div>\n                        <div class="w-e-button-container" style="border-bottom:1px solid #f1f1f1;padding-bottom:5px;margin-bottom:5px;">\n                            <button id="'+t+'" class="left">增加行</button>\n                            <button id="'+i+'" class="red left">删除行</button>\n                            <button id="'+n+'" class="left">增加列</button>\n                            <button id="'+o+'" class="red left">删除列</button>\n                        </div>\n                        <div class="w-e-button-container">\n                            <button id="'+A+'" class="gray left">删除表格</button>\n                        </dv>\n                    </div>',events:[{selector:"#"+t,type:"click",fn:function(){return e._addRow(),!0}},{selector:"#"+n,type:"click",fn:function(){return e._addCol(),!0}},{selector:"#"+i,type:"click",fn:function(){return e._delRow(),!0}},{selector:"#"+o,type:"click",fn:function(){return e._delCol(),!0}},{selector:"#"+A,type:"click",fn:function(){return e._delTable(),!0}}]}]}).show()},_getLocationData:function(){var e={},t=this.editor,n=t.selection.getSelectionContainerElem();if(n){var i=n.getNodeName();if("TD"===i||"TH"===i){var o=n.parent(),A=o.children(),c=A.length;A.forEach(function(t,i){if(t===n[0])return e.td={index:i,elem:t,length:c},!1});var r=o.parent(),a=r.children(),s=a.length;return a.forEach(function(t,n){if(t===o[0])return e.tr={index:n,elem:t,length:s},!1}),e}}},_addRow:function(){var e=this._getLocationData();if(e){var t=e.tr,n=o(t.elem),i=e.td,A=i.length,c=document.createElement("tr"),r="",a=void 0;for(a=0;a<A;a++)r+="<td>&nbsp;</td>";c.innerHTML=r,o(c).insertAfter(n)}},_addCol:function(){var e=this._getLocationData();if(e){var t=e.tr,n=e.td,i=n.index;o(t.elem).parent().children().forEach(function(e){var t=o(e),n=t.children(),A=n.get(i),c=A.getNodeName().toLowerCase();o(document.createElement(c)).insertAfter(A)})}},_delRow:function(){var e=this._getLocationData();if(e){o(e.tr.elem).remove()}},_delCol:function(){var e=this._getLocationData();if(e){var t=e.tr,n=e.td,i=n.index;o(t.elem).parent().children().forEach(function(e){o(e).children().get(i).remove()})}},_delTable:function(){var e=this.editor,t=e.selection.getSelectionContainerElem();if(t){var n=t.parentUntil("table");n&&n.remove()}},tryChangeActive:function(e){var t=this.editor,n=this.$elem,i=t.selection.getSelectionContainerElem();if(i){var o=i.getNodeName();"TD"===o||"TH"===o?(this._active=!0,n.addClass("w-e-active")):(this._active=!1,n.removeClass("w-e-active"))}}},Q.prototype={constructor:Q,onClick:function(){this._createPanel()},_createPanel:function(){var e=this,t=r("text-val"),n=r("btn"),i=new u(this,{width:350,tabs:[{title:"插入视频",tpl:'<div>\n                        <input id="'+t+'" type="text" class="block" placeholder="格式如：<iframe src=... ></iframe>"/>\n                        <div class="w-e-button-container">\n                            <button id="'+n+'" class="right">插入</button>\n                        </div>\n                    </div>',events:[{selector:"#"+n,type:"click",fn:function(){var n=o("#"+t),i=n.val().trim();return i&&e._insert(i),!0}}]}]});i.show(),this.panel=i},_insert:function(e){this.editor.cmd.do("insertHTML",e+"<p><br></p>")}},D.prototype={constructor:D,onClick:function(){this._active?this._createEditPanel():this._createInsertPanel()},_createEditPanel:function(){var e=this.editor,t=r("width-30"),n=r("width-50"),i=r("width-100"),o=r("del-btn"),A=[{title:"编辑图片",tpl:'<div>\n                    <div class="w-e-button-container" style="border-bottom:1px solid #f1f1f1;padding-bottom:5px;margin-bottom:5px;">\n                        <span style="float:left;font-size:14px;margin:4px 5px 0 5px;color:#333;">最大宽度：</span>\n                        <button id="'+t+'" class="left">30%</button>\n                        <button id="'+n+'" class="left">50%</button>\n                        <button id="'+i+'" class="left">100%</button>\n                    </div>\n                    <div class="w-e-button-container">\n                        <button id="'+o+'" class="gray left">删除图片</button>\n                    </dv>\n                </div>',events:[{selector:"#"+t,type:"click",fn:function(){var t=e._selectedImg;return t&&t.css("max-width","30%"),!0}},{selector:"#"+n,type:"click",fn:function(){var t=e._selectedImg;return t&&t.css("max-width","50%"),!0}},{selector:"#"+i,type:"click",fn:function(){var t=e._selectedImg;return t&&t.css("max-width","100%"),!0}},{selector:"#"+o,type:"click",fn:function(){var t=e._selectedImg;return t&&t.remove(),!0}}]}],c=new u(this,{width:300,tabs:A});c.show(),this.panel=c},_createInsertPanel:function(){var e=this.editor,t=e.uploadImg,n=e.config,i=r("up-trigger"),A=r("up-file"),c=r("link-url"),a=r("link-btn"),s=[{title:"上传图片",tpl:'<div class="w-e-up-img-container">\n                    <div id="'+i+'" class="w-e-up-btn">\n                        <i class="w-e-icon-upload2"></i>\n                    </div>\n                    <div style="display:none;">\n                        <input id="'+A+'" type="file" multiple="multiple" accept="image/jpg,image/jpeg,image/png,image/gif,image/bmp"/>\n                    </div>\n                </div>',events:[{selector:"#"+i,type:"click",fn:function(){var e=o("#"+A),t=e[0];if(!t)return!0;t.click()}},{selector:"#"+A,type:"change",fn:function(){var e=o("#"+A),n=e[0];if(!n)return!0;var i=n.files;return i.length&&t.uploadImg(i),!0}}]},{title:"网络图片",tpl:'<div>\n                    <input id="'+c+'" type="text" class="block" placeholder="图片链接"/></td>\n                    <div class="w-e-button-container">\n                        <button id="'+a+'" class="right">插入</button>\n                    </div>\n                </div>',events:[{selector:"#"+a,type:"click",fn:function(){var e=o("#"+c),n=e.val().trim();return n&&t.insertLinkImg(n),!0}}]}],l=[];(n.uploadImgShowBase64||n.uploadImgServer)&&window.FileReader&&l.push(s[0]),n.showLinkImg&&l.push(s[1]);var d=new u(this,{width:300,tabs:l});d.show(),this.panel=d},tryChangeActive:function(e){var t=this.editor,n=this.$elem;t._selectedImg?(this._active=!0,n.addClass("w-e-active")):(this._active=!1,n.removeClass("w-e-active"))}};var $={};$.bold=s,$.head=d,$.link=h,$.italic=p,$.redo=f,$.strikeThrough=g,$.underline=m,$.undo=w,$.list=v,$.justify=b,$.foreColor=E,$.backColor=y,$.quote=B,$.code=C,$.emoticon=x,$.table=I,$.video=Q,$.image=D,M.prototype={constructor:M,init:function(){var e=this,t=this.editor;((t.config||{}).menus||[]).forEach(function(n){var i=$[n];i&&"function"==typeof i&&(e.menus[n]=new i(t))}),this._addToToolbar(),this._bindEvent()},_addToToolbar:function(){var e=this.editor,t=e.$toolbarElem;A(this.menus,function(e,n){var i=n.$elem;i&&t.append(i)})},_bindEvent:function(){var e=this.menus,t=this.editor;A(e,function(e,n){var i=n.type;if(i){var o=n.$elem,A=n.droplist;n.panel;"click"===i&&n.onClick&&o.on("click",function(e){null!=t.selection.getRange()&&n.onClick(e)}),"droplist"===i&&A&&o.on("mouseenter",function(e){null!=t.selection.getRange()&&(A.showTimeoutId=setTimeout(function(){A.show()},200))}).on("mouseleave",function(e){A.hideTimeoutId=setTimeout(function(){A.hide()},0)}),"panel"===i&&n.onClick&&o.on("click",function(e){e.stopPropagation(),null!=t.selection.getRange()&&n.onClick(e)})}})},changeActive:function(){A(this.menus,function(e,t){t.tryChangeActive&&setTimeout(function(){t.tryChangeActive()},100)})}},S.prototype={constructor:S,init:function(){this._bindEvent()},clear:function(){this.html("<p><br></p>")},html:function(e){var t=this.editor,n=t.$textElem;if(null==e)return n.html();n.html(e),t.initSelection()},text:function(e){var t=this.editor,n=t.$textElem;if(null==e)return n.text();n.text("<p>"+e+"</p>"),t.initSelection()},append:function(e){var t=this.editor;t.$textElem.append(o(e)),t.initSelection()},_bindEvent:function(){this._saveRangeRealTime(),this._enterKeyHandle(),this._clearHandle(),this._pasteHandle(),this._tabHandle(),this._imgHandle()},_saveRangeRealTime:function(){function e(e){t.selection.saveRange(),
-t.menus.changeActive()}var t=this.editor,n=t.$textElem;n.on("keyup",e),n.on("mousedown",function(t){n.on("mouseleave",e)}),n.on("mouseup",function(t){e(),n.off("mouseleave",e)})},_enterKeyHandle:function(){function e(e){var t=n.selection.getSelectionContainerElem();if(t.parent().equal(i)&&("P"!==t.getNodeName()&&!t.text())){var A=o("<p><br></p>");A.insertBefore(t),n.selection.createRangeByElem(A,!0),n.selection.restoreSelection(),t.remove()}}function t(e){var t=n.selection.getSelectionContainerElem();if(t){var i=t.parent(),o=t.getNodeName(),A=i.getNodeName();if("CODE"===o&&"PRE"===A&&n.cmd.queryCommandSupported("insertHTML")){var c=n.selection.getRange().startOffset;n.cmd.do("insertHTML","\n"),n.selection.saveRange(),n.selection.getRange().startOffset===c&&n.cmd.do("insertHTML","\n"),e.preventDefault()}}}var n=this.editor,i=n.$textElem;i.on("keyup",function(t){13===t.keyCode&&e(t)}),i.on("keydown",function(e){13===e.keyCode&&t(e)})},_clearHandle:function(){var e=this.editor,t=e.$textElem;t.on("keydown",function(e){if(8===e.keyCode){return"<p><br></p>"===t.html().toLowerCase().trim()?void e.preventDefault():void 0}}),t.on("keyup",function(n){if(8===n.keyCode){var i=void 0,A=t.html().toLowerCase().trim();A&&"<br>"!==A||(i=o("<p><br/></p>"),t.html(""),t.append(i),e.selection.createRangeByElem(i,!1,!0),e.selection.restoreSelection())}})},_pasteHandle:function(){var e=this.editor,t=e.$textElem;t.on("paste",function(n){if(!L.isIE()){n.preventDefault();var i=_(n),o=k(n);o=o.replace(/\n/gm,"<br>");var A=e.selection.getSelectionContainerElem();if(A){var c=A.getNodeName();if("CODE"!==c&&"PRE"!==c&&"TD"!==c&&"TH"!==c)if("DIV"===c||"<p><br></p>"===t.html()){if(!i)return;try{e.cmd.do("insertHTML",i)}catch(t){e.cmd.do("insertHTML","<p>"+o+"</p>")}}else{if(!o)return;e.cmd.do("insertHTML","<p>"+o+"</p>")}}}}),t.on("paste",function(t){t.preventDefault();var n=U(t);if(n&&n.length){var i=e.selection.getSelectionContainerElem();if(i){var o=i.getNodeName();if("CODE"!==o&&"PRE"!==o){e.uploadImg.uploadImg(n)}}}})},_tabHandle:function(){var e=this.editor;e.$textElem.on("keydown",function(t){if(9===t.keyCode&&e.cmd.queryCommandSupported("insertHTML")){var n=e.selection.getSelectionContainerElem();if(n){var i=n.parent(),o=n.getNodeName(),A=i.getNodeName();"CODE"===o&&"PRE"===A?e.cmd.do("insertHTML","    "):e.cmd.do("insertHTML","&nbsp;&nbsp;&nbsp;&nbsp;"),t.preventDefault()}}})},_imgHandle:function(){var e=this.editor,t=e.$textElem;t.on("click","img",function(n){var i=this,A=o(i);t.find("img").removeClass("w-e-selected"),A.addClass("w-e-selected"),e._selectedImg=A,e.selection.createRangeByElem(A)}),t.on("click  keyup",function(n){n.target.matches("img")||(t.find("img").removeClass("w-e-selected"),e._selectedImg=null)})}},R.prototype={constructor:R,do:function(e,t){var n=this.editor;if(n.selection.getRange()){n.selection.restoreSelection();var i="_"+e;this[i]?this[i](t):this._execCommand(e,t),n.menus.changeActive(),n.selection.saveRange(),n.selection.restoreSelection(),n.change&&n.change()}},_insertHTML:function(e){var t=this.editor,n=t.selection.getRange();if(!/^<.+>$/.test(e)&&!L.isWebkit())throw new Error("执行 insertHTML 命令时传入的参数必须是 html 格式");this.queryCommandSupported("insertHTML")?this._execCommand("insertHTML",e):n.insertNode?(n.deleteContents(),n.insertNode(o(e)[0])):n.pasteHTML&&n.pasteHTML(e)},_insertElem:function(e){var t=this.editor,n=t.selection.getRange();n.insertNode&&(n.deleteContents(),n.insertNode(e[0]))},_execCommand:function(e,t){document.execCommand(e,!1,t)},queryCommandValue:function(e){return document.queryCommandValue(e)},queryCommandState:function(e){return document.queryCommandState(e)},queryCommandSupported:function(e){return document.queryCommandSupported(e)}},F.prototype={constructor:F,getRange:function(){return this._currentRange},saveRange:function(e){if(e)return void(this._currentRange=e);var t=window.getSelection();if(0!==t.rangeCount){var n=t.getRangeAt(0),i=this.getSelectionContainerElem(n);if(i){this.editor.$textElem.isContain(i)&&(this._currentRange=n)}}},collapseRange:function(e){null==e&&(e=!1);var t=this._currentRange;t&&t.collapse(e)},getSelectionText:function(){return this._currentRange?this._currentRange.toString():""},getSelectionContainerElem:function(e){e=e||this._currentRange;var t=void 0;if(e)return t=e.commonAncestorContainer,o(1===t.nodeType?t:t.parentNode)},getSelectionStartElem:function(e){e=e||this._currentRange;var t=void 0;if(e)return t=e.startContainer,o(1===t.nodeType?t:t.parentNode)},getSelectionEndElem:function(e){e=e||this._currentRange;var t=void 0;if(e)return t=e.endContainer,o(1===t.nodeType?t:t.parentNode)},isSelectionEmpty:function(){var e=this._currentRange;return!(!e||!e.startContainer||e.startContainer!==e.endContainer||e.startOffset!==e.endOffset)},restoreSelection:function(){var e=window.getSelection();e.removeAllRanges(),e.addRange(this._currentRange)},createEmptyRange:function(){var e=this.editor,t=this.getRange(),n=void 0;t&&this.isSelectionEmpty()&&(L.isWebkit()?(e.cmd.do("insertHTML","&#8203;"),t.setEnd(t.endContainer,t.endOffset+1),this.saveRange(t)):(n=o("<strong>&#8203;</strong>"),e.cmd.do("insertElem",n),this.createRangeByElem(n,!0)))},createRangeByElem:function(e,t,n){if(e.length){var i=e[0],o=document.createRange();n?o.selectNodeContents(i):o.selectNode(i),"boolean"==typeof t&&o.collapse(t),this.saveRange(o)}}},N.prototype={constructor:N,show:function(e){var t=this;if(!this._isShow){this._isShow=!0;var n=this.$bar;if(this._isRender)this._isRender=!0;else{this.$textContainer.append(n)}Date.now()-this._time>100&&e<=1&&(n.css("width",100*e+"%"),this._time=Date.now());var i=this._timeoutId;i&&clearTimeout(i),i=setTimeout(function(){t._hide()},500)}},_hide:function(){this.$bar.remove(),this._time=0,this._isShow=!1,this._isRender=!1}};var J="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e};T.prototype={constructor:T,_alert:function(e,t){if(this.editor.config.debug)throw new Error("wangEditor: "+(t||e));alert(e)},insertLinkImg:function(e){var t=this;if(e){var n=this.editor,i=document.createElement("img");i.onload=function(){i=null,n.cmd.do("insertHTML",'<img src="'+e+'" style="max-width:100%;"/>')},i.onerror=function(){i=null,t._alert("插入图片错误",'wangEditor: 插入图片出错，图片链接是 "'+e+'"，下载该链接失败')},i.onabort=function(){i=null},i.src=e}},uploadImg:function(e){var t=this;if(e&&e.length){var n=this.editor,i=n.config,o=i.uploadImgMaxSize,r=o/1e3/1e3,a=i.uploadImgMaxLength||1e4,s=i.uploadImgServer,l=i.uploadImgShowBase64,d=i.uploadFileName||"",u=i.uploadImgParams||{},h=i.uploadImgHeaders||{},p=i.uploadImgHooks||{},f=i.uploadImgTimeout||3e3,g=i.withCredentials;null==g&&(g=!1);var m=[],w=[];if(c(e,function(e){var t=e.name,n=e.size;return!1===/\.(jpg|jpeg|png|bmp|gif)$/i.test(t)?void w.push("【"+t+"】不是图片"):o<n?void w.push("【"+t+"】大于 "+r+"M"):void m.push(e)}),w.length)return void this._alert("图片验证未通过: \n"+w.join("\n"));if(m.length>a)return void this._alert("一次最多上传"+a+"张图片");var v=new FormData;if(c(m,function(e){var t=d||e.name;v.append(t,e)}),s&&"string"==typeof s){var b=s.split("#");s=b[0];var E=b[1]||"";A(u,function(e,t){t=encodeURIComponent(t),s.indexOf("?")>0?s+="&":s+="?",s=s+e+"="+t,v.append(e,t)}),E&&(s+="#"+E);var y=new XMLHttpRequest;return y.open("POST",s),y.timeout=f,y.ontimeout=function(){p.timeout&&"function"==typeof p.timeout&&p.timeout(y,n),t._alert("上传图片超时")},y.upload&&(y.upload.onprogress=function(e){var t=void 0,i=new N(n);e.lengthComputable&&(t=e.loaded/e.total,i.show(t))}),y.onreadystatechange=function(){var e=void 0;if(4===y.readyState){if(y.status<200||y.status>=300)return p.error&&"function"==typeof p.error&&p.error(y,n),void t._alert("上传图片发生错误","上传图片发生错误，服务器返回状态是 "+y.status);if(e=y.responseText,"object"!==(void 0===e?"undefined":J(e)))try{e=JSON.parse(e)}catch(i){return p.fail&&"function"==typeof p.fail&&p.fail(y,n,e),void t._alert("上传图片失败","上传图片返回结果错误，返回结果是: "+e)}if(p.customInsert||"0"==e.errno){if(p.customInsert&&"function"==typeof p.customInsert)p.customInsert(t.insertLinkImg.bind(t),e,n);else{(e.data||[]).forEach(function(e){t.insertLinkImg(e)})}p.success&&"function"==typeof p.success&&p.success(y,n,e)}else p.fail&&"function"==typeof p.fail&&p.fail(y,n,e),t._alert("上传图片失败","上传图片返回结果错误，返回结果 errno="+e.errno)}},p.before&&"function"==typeof p.before&&p.before(y,n,m),A(h,function(e,t){y.setRequestHeader(e,t)}),y.withCredentials=g,void y.send(v)}l&&c(e,function(e){var n=t,i=new FileReader;i.readAsDataURL(e),i.onload=function(){n.insertLinkImg(this.result)}})}}};var G=1;H.prototype={constructor:H,_initConfig:function(){var e={};this.config=Object.assign(e,Y,this.customConfig)},_initDom:function(){var e=this,t=this.toolbarSelector,n=o(t),i=this.textSelector,A=this.config,c=A.zIndex||"10000",r=void 0,a=void 0,s=void 0,l=void 0;null==i?(r=o("<div></div>"),a=o("<div></div>"),l=n.children(),n.append(r).append(a),r.css("background-color","#f1f1f1").css("border","1px solid #ccc"),a.css("border","1px solid #ccc").css("border-top","none").css("height","300px")):(r=n,a=o(i),l=a.children()),s=o("<div></div>"),s.attr("contenteditable","true").css("width","100%").css("height","100%"),l&&l.length?s.append(l):s.append(o("<p><br></p>")),a.append(s),r.addClass("w-e-toolbar"),a.addClass("w-e-text-container"),a.css("z-index",c),s.addClass("w-e-text"),this.$toolbarElem=r,this.$textContainerElem=a,this.$textElem=s,a.on("click keyup",function(){e.change&&e.change()}),r.on("click",function(){this.change&&this.change()})},_initCommand:function(){this.cmd=new R(this)},_initSelectionAPI:function(){this.selection=new F(this)},_initUploadImg:function(){this.uploadImg=new T(this)},_initMenus:function(){this.menus=new M(this),this.menus.init()},_initText:function(){this.txt=new S(this),this.txt.init()},initSelection:function(){var e=this.$textElem,t=e.children();if(!t.length)return e.append(o("<p><br></p>")),void this.initSelection();var n=t.last(),i=n.html().toLowerCase(),A=n.getNodeName();if("<br>"!==i&&"<br/>"!==i||"P"!==A)return e.append(o("<p><br></p>")),void this.initSelection();this.selection.createRangeByElem(n,!0),this.selection.restoreSelection()},_bindEvent:function(){var e=0,t=this.txt.html(),n=this.config,i=n.onchange;i&&"function"==typeof i&&(this.change=function(){var n=this.txt.html();n.length!==t.length&&(e&&clearTimeout(e),e=setTimeout(function(){i(n),t=n},200))})},create:function(){this._initConfig(),this._initDom(),this._initCommand(),this._initSelectionAPI(),this._initText(),this._initMenus(),this._initUploadImg(),this.initSelection(),this._bindEvent()}};try{document}catch(e){throw new Error("请在浏览器环境下运行")}!function(){"function"!=typeof Object.assign&&(Object.assign=function(e,t){if(null==e)throw new TypeError("Cannot convert undefined or null to object");for(var n=Object(e),i=1;i<arguments.length;i++){var o=arguments[i];if(null!=o)for(var A in o)Object.prototype.hasOwnProperty.call(o,A)&&(n[A]=o[A])}return n}),Element.prototype.matches||(Element.prototype.matches=Element.prototype.matchesSelector||Element.prototype.mozMatchesSelector||Element.prototype.msMatchesSelector||Element.prototype.oMatchesSelector||Element.prototype.webkitMatchesSelector||function(e){for(var t=(this.document||this.ownerDocument).querySelectorAll(e),n=t.length;--n>=0&&t.item(n)!==this;);return n>-1})}();var O=document.createElement("style");return O.type="text/css",O.innerHTML='.w-e-toolbar,.w-e-text-container,.w-e-menu-panel {  padding: 0;  margin: 0;  box-sizing: border-box;}.w-e-toolbar *,.w-e-text-container *,.w-e-menu-panel * {  padding: 0;  margin: 0;  box-sizing: border-box;}.w-e-clear-fix:after {  content: "";  display: table;  clear: both;}.w-e-toolbar .w-e-droplist {  position: absolute;  left: 0;  top: 0;  background-color: #fff;  border: 1px solid #f1f1f1;  border-right-color: #ccc;  border-bottom-color: #ccc;}.w-e-toolbar .w-e-droplist .w-e-dp-title {  text-align: center;  color: #999;  line-height: 2;  border-bottom: 1px solid #f1f1f1;  font-size: 13px;}.w-e-toolbar .w-e-droplist ul.w-e-list {  list-style: none;  line-height: 1;}.w-e-toolbar .w-e-droplist ul.w-e-list li.w-e-item {  color: #333;  padding: 5px 0;}.w-e-toolbar .w-e-droplist ul.w-e-list li.w-e-item:hover {  background-color: #f1f1f1;}.w-e-toolbar .w-e-droplist ul.w-e-block {  list-style: none;  text-align: left;  padding: 5px;}.w-e-toolbar .w-e-droplist ul.w-e-block li.w-e-item {  display: inline-block;  *display: inline;  *zoom: 1;  padding: 3px 5px;}.w-e-toolbar .w-e-droplist ul.w-e-block li.w-e-item:hover {  background-color: #f1f1f1;}@font-face {  font-family: \'icomoon\';  src: url(data:application/x-font-woff;charset=utf-8;base64,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) format(\'truetype\');  font-weight: normal;  font-style: normal;}[class^="w-e-icon-"],[class*=" w-e-icon-"] {  /* use !important to prevent issues with browser extensions that change fonts */  font-family: \'icomoon\' !important;  speak: none;  font-style: normal;  font-weight: normal;  font-variant: normal;  text-transform: none;  line-height: 1;  /* Better Font Rendering =========== */  -webkit-font-smoothing: antialiased;  -moz-osx-font-smoothing: grayscale;}.w-e-icon-close:before {  content: "\\f00d";}.w-e-icon-upload2:before {  content: "\\e9c6";}.w-e-icon-trash-o:before {  content: "\\f014";}.w-e-icon-header:before {  content: "\\f1dc";}.w-e-icon-pencil2:before {  content: "\\e906";}.w-e-icon-paint-brush:before {  content: "\\f1fc";}.w-e-icon-image:before {  content: "\\e90d";}.w-e-icon-play:before {  content: "\\e912";}.w-e-icon-location:before {  content: "\\e947";}.w-e-icon-undo:before {  content: "\\e965";}.w-e-icon-redo:before {  content: "\\e966";}.w-e-icon-quotes-left:before {  content: "\\e977";}.w-e-icon-list-numbered:before {  content: "\\e9b9";}.w-e-icon-list2:before {  content: "\\e9bb";}.w-e-icon-link:before {  content: "\\e9cb";}.w-e-icon-happy:before {  content: "\\e9df";}.w-e-icon-bold:before {  content: "\\ea62";}.w-e-icon-underline:before {  content: "\\ea63";}.w-e-icon-italic:before {  content: "\\ea64";}.w-e-icon-strikethrough:before {  content: "\\ea65";}.w-e-icon-table2:before {  content: "\\ea71";}.w-e-icon-paragraph-left:before {  content: "\\ea77";}.w-e-icon-paragraph-center:before {  content: "\\ea78";}.w-e-icon-paragraph-right:before {  content: "\\ea79";}.w-e-icon-terminal:before {  content: "\\f120";}.w-e-icon-page-break:before {  content: "\\ea68";}.w-e-icon-cancel-circle:before {  content: "\\ea0d";}.w-e-toolbar {  display: -webkit-box;  display: -ms-flexbox;  display: flex;  padding: 0 5px;  /* 单个菜单 */}.w-e-toolbar .w-e-menu {  position: relative;  z-index: 10001;  text-align: center;  padding: 5px 10px;  cursor: pointer;}.w-e-toolbar .w-e-menu i {  color: #999;}.w-e-toolbar .w-e-menu:hover i {  color: #333;}.w-e-toolbar .w-e-active i {  color: #1e88e5;}.w-e-toolbar .w-e-active:hover i {  color: #1e88e5;}.w-e-text-container .w-e-panel-container {  position: absolute;  top: 0;  left: 50%;  border: 1px solid #ccc;  border-top: 0;  box-shadow: 1px 1px 2px #ccc;  color: #333;  background-color: #fff;  /* 为 emotion panel 定制的样式 */  /* 上传图片的 panel 定制样式 */}.w-e-text-container .w-e-panel-container .w-e-panel-close {  position: absolute;  right: 0;  top: 0;  padding: 5px;  margin: 2px 5px 0 0;  cursor: pointer;  color: #999;}.w-e-text-container .w-e-panel-container .w-e-panel-close:hover {  color: #333;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-title {  list-style: none;  display: -webkit-box;  display: -ms-flexbox;  display: flex;  font-size: 14px;  margin: 2px 10px 0 10px;  border-bottom: 1px solid #f1f1f1;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-title .w-e-item {  padding: 3px 5px;  color: #999;  cursor: pointer;  margin: 0 3px;  position: relative;  top: 1px;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-title .w-e-active {  color: #333;  border-bottom: 1px solid #333;  cursor: default;  font-weight: 700;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content {  padding: 10px 15px 10px 15px;  font-size: 16px;  /* 输入框的样式 */  /* 按钮的样式 */}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content input:focus,.w-e-text-container .w-e-panel-container .w-e-panel-tab-content textarea:focus,.w-e-text-container .w-e-panel-container .w-e-panel-tab-content button:focus {  outline: none;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content textarea {  width: 100%;  border: 1px solid #ccc;  padding: 5px;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content textarea:focus {  border-color: #1e88e5;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content input[type=text] {  border: none;  border-bottom: 1px solid #ccc;  font-size: 14px;  height: 20px;  color: #333;  text-align: left;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content input[type=text].small {  width: 30px;  text-align: center;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content input[type=text].block {  display: block;  width: 100%;  margin: 10px 0;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content input[type=text]:focus {  border-bottom: 2px solid #1e88e5;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content .w-e-button-container button {  font-size: 14px;  color: #1e88e5;  border: none;  padding: 5px 10px;  background-color: #fff;  cursor: pointer;  border-radius: 3px;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content .w-e-button-container button.left {  float: left;  margin-right: 10px;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content .w-e-button-container button.right {  float: right;  margin-left: 10px;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content .w-e-button-container button.gray {  color: #999;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content .w-e-button-container button.red {  color: #c24f4a;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content .w-e-button-container button:hover {  background-color: #f1f1f1;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content .w-e-button-container:after {  content: "";  display: table;  clear: both;}.w-e-text-container .w-e-panel-container .w-e-emoticon-container .w-e-item {  cursor: pointer;  font-size: 18px;  padding: 0 3px;  display: inline-block;  *display: inline;  *zoom: 1;}.w-e-text-container .w-e-panel-container .w-e-up-img-container {  text-align: center;}.w-e-text-container .w-e-panel-container .w-e-up-img-container .w-e-up-btn {  display: inline-block;  *display: inline;  *zoom: 1;  color: #999;  cursor: pointer;  font-size: 60px;  line-height: 1;}.w-e-text-container .w-e-panel-container .w-e-up-img-container .w-e-up-btn:hover {  color: #333;}.w-e-text-container {  position: relative;}.w-e-text-container .w-e-progress {  position: absolute;  background-color: #1e88e5;  bottom: 0;  left: 0;  height: 1px;}.w-e-text {  padding: 0 10px;  overflow-y: scroll;}.w-e-text p,.w-e-text h1,.w-e-text h2,.w-e-text h3,.w-e-text h4,.w-e-text h5,.w-e-text table,.w-e-text pre {  margin: 10px 0;  line-height: 1.5;}.w-e-text ul,.w-e-text ol {  margin: 10px 0 10px 20px;}.w-e-text blockquote {  display: block;  border-left: 8px solid #d0e5f2;  padding: 5px 10px;  margin: 10px 0;  line-height: 1.4;  font-size: 100%;  background-color: #f1f1f1;}.w-e-text code {  display: inline-block;  *display: inline;  *zoom: 1;  background-color: #f1f1f1;  border-radius: 3px;  padding: 3px 5px;  margin: 0 3px;}.w-e-text pre code {  display: block;}.w-e-text table {  border-top: 1px solid #ccc;  border-left: 1px solid #ccc;}.w-e-text table td,.w-e-text table th {  border-bottom: 1px solid #ccc;  border-right: 1px solid #ccc;  padding: 3px 5px;}.w-e-text table th {  border-bottom: 2px solid #ccc;  text-align: center;}.w-e-text:focus {  outline: none;}.w-e-text img {  cursor: pointer;}.w-e-text img:hover {  box-shadow: 0 0 5px #333;}.w-e-text img.w-e-selected {  border: 2px solid #1e88e5;}.w-e-text img.w-e-selected:hover {  box-shadow: none;}',document.getElementsByTagName("HEAD").item(0).appendChild(O),window.wangEditor||H});
+!function(e,t){"object"==typeof exports&&"undefined"!=typeof module?module.exports=t():"function"==typeof define&&define.amd?define(t):e.wangEditor=t()}(this,function(){"use strict";function e(e){var t=void 0;return t=document.createElement("div"),t.innerHTML=e,t.children}function t(e){return!!e&&(e instanceof HTMLCollection||e instanceof NodeList)}function n(e){var n=document.querySelectorAll(e);return t(n)?n:[n]}function i(o){if(o){if(o instanceof i)return o;this.selector=o;var A=o.nodeType,r=[];9===A?r=[o]:1===A?r=[o]:t(o)?r=o:"string"==typeof o&&(o=o.replace("/\n/mg","").trim(),r=0===o.indexOf("<")?e(o):n(o));var c=r.length;if(!c)return this;var a=void 0;for(a=0;a<c;a++)this[a]=r[a];this.length=c}}function o(e){return new i(e)}function A(e,t){var n=void 0;for(n in e)if(e.hasOwnProperty(n)&&!1===t.call(e,n,e[n]))break}function r(e,t){var n=void 0,i=void 0,o=e.length||0;for(n=0;n<o&&(i=e[n],!1!==t.call(e,i,n));n++);}function c(e){return e+Math.random().toString().slice(2)}function a(e){return null==e?"":e.replace(/</gm,"&lt;").replace(/>/gm,"&gt;").replace(/"/gm,"&quot;")}function s(e){this.editor=e,this.$elem=o('<div class="w-e-menu">\n            <i class="w-e-icon-bold"><i/>\n        </div>'),this.type="click",this._active=!1}function l(e,t){var n=this,i=e.editor;this.menu=e,this.opt=t;var A=o('<div class="w-e-droplist"></div>'),r=t.$title,c=void 0;r&&(c=r.html(),c=P(i,c),r.html(c),r.addClass("w-e-dp-title"),A.append(r));var a=t.list||[],s=t.type||"list",l=t.onClick||j,d=o('<ul class="'+("list"===s?"w-e-list":"w-e-block")+'"></ul>');A.append(d),a.forEach(function(e){var t=e.$elem,A=t.html();A=P(i,A),t.html(A);var r=e.value,c=o('<li class="w-e-item"></li>');t&&(c.append(t),d.append(c),t.on("click",function(e){l(r),n.hideTimeoutId=setTimeout(function(){n.hide()},0)}))}),A.on("mouseleave",function(e){n.hideTimeoutId=setTimeout(function(){n.hide()},0)}),this.$container=A,this._rendered=!1,this._show=!1}function d(e){var t=this;this.editor=e,this.$elem=o('<div class="w-e-menu"><i class="w-e-icon-header"><i/></div>'),this.type="droplist",this._active=!1,this.droplist=new l(this,{width:100,$title:o("<p>设置标题</p>"),type:"list",list:[{$elem:o("<h1>H1</h1>"),value:"<h1>"},{$elem:o("<h2>H2</h2>"),value:"<h2>"},{$elem:o("<h3>H3</h3>"),value:"<h3>"},{$elem:o("<h4>H4</h4>"),value:"<h4>"},{$elem:o("<h5>H5</h5>"),value:"<h5>"},{$elem:o("<p>正文</p>"),value:"<p>"}],onClick:function(e){t._command(e)}})}function u(e,t){this.menu=e,this.opt=t}function h(e){this.editor=e,this.$elem=o('<div class="w-e-menu"><i class="w-e-icon-link"><i/></div>'),this.type="panel",this._active=!1}function p(e){this.editor=e,this.$elem=o('<div class="w-e-menu">\n            <i class="w-e-icon-italic"><i/>\n        </div>'),this.type="click",this._active=!1}function f(e){this.editor=e,this.$elem=o('<div class="w-e-menu">\n            <i class="w-e-icon-redo"><i/>\n        </div>'),this.type="click",this._active=!1}function g(e){this.editor=e,this.$elem=o('<div class="w-e-menu">\n            <i class="w-e-icon-strikethrough"><i/>\n        </div>'),this.type="click",this._active=!1}function m(e){this.editor=e,this.$elem=o('<div class="w-e-menu">\n            <i class="w-e-icon-underline"><i/>\n        </div>'),this.type="click",this._active=!1}function w(e){this.editor=e,this.$elem=o('<div class="w-e-menu">\n            <i class="w-e-icon-undo"><i/>\n        </div>'),this.type="click",this._active=!1}function v(e){var t=this;this.editor=e,this.$elem=o('<div class="w-e-menu"><i class="w-e-icon-list2"><i/></div>'),this.type="droplist",this._active=!1,this.droplist=new l(this,{width:120,$title:o("<p>设置列表</p>"),type:"list",list:[{$elem:o('<span><i class="w-e-icon-list-numbered"></i> 有序列表</span>'),value:"insertOrderedList"},{$elem:o('<span><i class="w-e-icon-list2"></i> 无序列表</span>'),value:"insertUnorderedList"}],onClick:function(e){t._command(e)}})}function b(e){var t=this;this.editor=e,this.$elem=o('<div class="w-e-menu"><i class="w-e-icon-paragraph-left"><i/></div>'),this.type="droplist",this._active=!1,this.droplist=new l(this,{width:100,$title:o("<p>对齐方式</p>"),type:"list",list:[{$elem:o('<span><i class="w-e-icon-paragraph-left"></i> 靠左</span>'),value:"justifyLeft"},{$elem:o('<span><i class="w-e-icon-paragraph-center"></i> 居中</span>'),value:"justifyCenter"},{$elem:o('<span><i class="w-e-icon-paragraph-right"></i> 靠右</span>'),value:"justifyRight"}],onClick:function(e){t._command(e)}})}function E(e){var t=this;this.editor=e,this.$elem=o('<div class="w-e-menu"><i class="w-e-icon-pencil2"><i/></div>'),this.type="droplist",this._active=!1,this.droplist=new l(this,{width:120,$title:o("<p>文字颜色</p>"),type:"inline-block",list:[{$elem:o('<i style="color:#000000;" class="w-e-icon-pencil2"></i>'),value:"#000000"},{$elem:o('<i style="color:#eeece0;" class="w-e-icon-pencil2"></i>'),value:"#eeece0"},{$elem:o('<i style="color:#1c487f;" class="w-e-icon-pencil2"></i>'),value:"#1c487f"},{$elem:o('<i style="color:#4d80bf;" class="w-e-icon-pencil2"></i>'),value:"#4d80bf"},{$elem:o('<i style="color:#c24f4a;" class="w-e-icon-pencil2"></i>'),value:"#c24f4a"},{$elem:o('<i style="color:#8baa4a;" class="w-e-icon-pencil2"></i>'),value:"#8baa4a"},{$elem:o('<i style="color:#7b5ba1;" class="w-e-icon-pencil2"></i>'),value:"#7b5ba1"},{$elem:o('<i style="color:#46acc8;" class="w-e-icon-pencil2"></i>'),value:"#46acc8"},{$elem:o('<i style="color:#f9963b;" class="w-e-icon-pencil2"></i>'),value:"#f9963b"},{$elem:o('<i style="color:#ffffff;" class="w-e-icon-pencil2"></i>'),value:"#ffffff"}],onClick:function(e){t._command(e)}})}function y(e){var t=this;this.editor=e,this.$elem=o('<div class="w-e-menu"><i class="w-e-icon-paint-brush"><i/></div>'),this.type="droplist",this._active=!1,this.droplist=new l(this,{width:120,$title:o("<p>背景色</p>"),type:"inline-block",list:[{$elem:o('<i style="color:#000000;" class="w-e-icon-paint-brush"></i>'),value:"#000000"},{$elem:o('<i style="color:#eeece0;" class="w-e-icon-paint-brush"></i>'),value:"#eeece0"},{$elem:o('<i style="color:#1c487f;" class="w-e-icon-paint-brush"></i>'),value:"#1c487f"},{$elem:o('<i style="color:#4d80bf;" class="w-e-icon-paint-brush"></i>'),value:"#4d80bf"},{$elem:o('<i style="color:#c24f4a;" class="w-e-icon-paint-brush"></i>'),value:"#c24f4a"},{$elem:o('<i style="color:#8baa4a;" class="w-e-icon-paint-brush"></i>'),value:"#8baa4a"},{$elem:o('<i style="color:#7b5ba1;" class="w-e-icon-paint-brush"></i>'),value:"#7b5ba1"},{$elem:o('<i style="color:#46acc8;" class="w-e-icon-paint-brush"></i>'),value:"#46acc8"},{$elem:o('<i style="color:#f9963b;" class="w-e-icon-paint-brush"></i>'),value:"#f9963b"},{$elem:o('<i style="color:#ffffff;" class="w-e-icon-paint-brush"></i>'),value:"#ffffff"}],onClick:function(e){t._command(e)}})}function B(e){this.editor=e,this.$elem=o('<div class="w-e-menu">\n            <i class="w-e-icon-quotes-left"><i/>\n        </div>'),this.type="click",this._active=!1}function C(e){this.editor=e,this.$elem=o('<div class="w-e-menu">\n            <i class="w-e-icon-terminal"><i/>\n        </div>'),this.type="panel",this._active=!1}function x(e){this.editor=e,this.$elem=o('<div class="w-e-menu">\n            <i class="w-e-icon-happy"><i/>\n        </div>'),this.type="panel",this._active=!1}function I(e){this.editor=e,this.$elem=o('<div class="w-e-menu"><i class="w-e-icon-table2"><i/></div>'),this.type="panel",this._active=!1}function Q(e){this.editor=e,this.$elem=o('<div class="w-e-menu"><i class="w-e-icon-play"><i/></div>'),this.type="panel",this._active=!1}function D(e){this.editor=e;var t=c("w-e-img");this.$elem=o('<div class="w-e-menu" id="'+t+'"><i class="w-e-icon-image"><i/></div>'),e.imgMenuId=t,this.type="panel",this._active=!1}function k(e){this.editor=e,this.menus={}}function M(e){var t=e.clipboardData||e.originalEvent&&e.originalEvent.clipboardData,n=void 0;return n=null==t?window.clipboardData&&window.clipboardData.getData("text"):t.getData("text/plain"),a(n)}function _(e,t){var n=e.clipboardData||e.originalEvent&&e.originalEvent.clipboardData,i=void 0,o=void 0;if(null==n?i=window.clipboardData&&window.clipboardData.getData("text"):(i=n.getData("text/plain"),o=n.getData("text/html")),!o&&i&&(o="<p>"+a(i)+"</p>"),o){var A=o.split("</html>");return 2===A.length&&(o=A[0]),o=o.replace(/<(meta|script|link).+?>/gim,""),o=o.replace(/<!--.*?-->/gm,""),o=t?o.replace(/\s?(class|style)=('|").+?('|")/gim,""):o.replace(/\s?class=('|").+?('|")/gim,"")}}function U(e){var t=[];if(M(e))return t;var n=e.clipboardData||e.originalEvent&&e.originalEvent.clipboardData||{},i=n.items;return i?(A(i,function(e,n){var i=n.type;/image/i.test(i)&&t.push(n.getAsFile())}),t):t}function S(e){this.editor=e}function R(e){this.editor=e}function N(e){this.editor=e,this._currentRange=null}function F(e){this.editor=e,this._time=0,this._isShow=!1,this._isRender=!1,this._timeoutId=0,this.$textContainer=e.$textContainerElem,this.$bar=o('<div class="w-e-progress"></div>')}function T(e){this.editor=e}function H(e,t){if(null==e)throw new Error("错误：初始化编辑器时候未传入任何参数，请查阅文档");this.id="wangEditor-"+G++,this.toolbarSelector=e,this.textSelector=t,this.customConfig={}}i.prototype={constructor:i,forEach:function(e){var t=void 0;for(t=0;t<this.length;t++){var n=this[t];if(!1===e.call(n,n,t))break}return this},get:function(e){var t=this.length;return e>=t&&(e%=t),o(this[e])},first:function(){return this.get(0)},last:function(){var e=this.length;return this.get(e-1)},on:function(e,t,n){n||(n=t,t=null);var i=[];return i=e.split(/\s+/),this.forEach(function(e){i.forEach(function(i){if(i)return t?void e.addEventListener(i,function(e){var i=e.target;i.matches(t)&&n.call(i,e)},!1):void e.addEventListener(i,n,!1)})})},off:function(e,t){return this.forEach(function(n){n.removeEventListener(e,t,!1)})},attr:function(e,t){return null==t?this[0].getAttribute(e):this.forEach(function(n){n.setAttribute(e,t)})},addClass:function(e){return e?this.forEach(function(t){var n=void 0;t.className?(n=t.className.split(/\s/),n=n.filter(function(e){return!!e.trim()}),n.indexOf(e)<0&&n.push(e),t.className=n.join(" ")):t.className=e}):this},removeClass:function(e){return e?this.forEach(function(t){var n=void 0;t.className&&(n=t.className.split(/\s/),n=n.filter(function(t){return!(!(t=t.trim())||t===e)}),t.className=n.join(" "))}):this},css:function(e,t){var n=e+":"+t+";";return this.forEach(function(t){var i=(t.getAttribute("style")||"").trim(),o=void 0,A=[];i?(o=i.split(";"),o.forEach(function(e){var t=e.split(":").map(function(e){return e.trim()});2===t.length&&A.push(t[0]+":"+t[1])}),A=A.map(function(t){return 0===t.indexOf(e)?n:t}),A.indexOf(n)<0&&A.push(n),t.setAttribute("style",A.join("; "))):t.setAttribute("style",n)})},show:function(){return this.css("display","block")},hide:function(){return this.css("display","none")},children:function(){var e=this[0];return e?o(e.children):null},append:function(e){return this.forEach(function(t){e.forEach(function(e){t.appendChild(e)})})},remove:function(){return this.forEach(function(e){if(e.remove)e.remove();else{var t=e.parentElement;t&&t.removeChild(e)}})},isContain:function(e){var t=this[0],n=e[0];return t.contains(n)},getSizeData:function(){return this[0].getBoundingClientRect()},getNodeName:function(){return this[0].nodeName},find:function(e){return o(this[0].querySelectorAll(e))},text:function(e){return e?this.forEach(function(t){t.innerHTML=e}):this[0].innerHTML.replace(/<.*?>/g,function(){return""})},html:function(e){var t=this[0];return null==e?t.innerHTML:(t.innerHTML=e,this)},val:function(){return this[0].value.trim()},focus:function(){return this.forEach(function(e){e.focus()})},parent:function(){return o(this[0].parentElement)},parentUntil:function(e,t){var n=document.querySelectorAll(e),i=n.length;if(!i)return null;var A=t||this[0];if("BODY"===A.nodeName)return null;var r=A.parentElement,c=void 0;for(c=0;c<i;c++)if(r===n[c])return o(r);return this.parentUntil(e,r)},equal:function(e){return 1===e.nodeType?this[0]===e:this[0]===e[0]},insertBefore:function(e){var t=o(e),n=t[0];return n?this.forEach(function(e){n.parentNode.insertBefore(e,n)}):this},insertAfter:function(e){var t=o(e),n=t[0];return n?this.forEach(function(e){var t=n.parentNode;t.lastChild===n?t.appendChild(e):t.insertBefore(e,n.nextSibling)}):this}};var Y={menus:["head","bold","italic","underline","strikeThrough","foreColor","backColor","link","list","justify","quote","emoticon","image","table","video","code","undo","redo"],zIndex:1e4,debug:!1,linkCheck:function(e,t){return!0},pasteFilterStyle:!0,showLinkImg:!0,linkImgCallback:function(e){},uploadImgMaxSize:5242880,uploadImgShowBase64:!1,uploadFileName:"",uploadImgParams:{},uploadImgHeaders:{},withCredentials:!1,uploadImgTimeout:1e4,uploadImgHooks:{before:function(e,t,n){},success:function(e,t,n){},fail:function(e,t,n){},error:function(e,t){},timeout:function(e,t){}},qiniu:!1},L={_ua:navigator.userAgent,isWebkit:function(){return/webkit/i.test(this._ua)},isIE:function(){return"ActiveXObject"in window}};s.prototype={constructor:s,onClick:function(e){var t=this.editor,n=t.selection.isSelectionEmpty();n&&t.selection.createEmptyRange(),t.cmd.do("bold"),n&&(t.selection.collapseRange(),t.selection.restoreSelection())},tryChangeActive:function(e){var t=this.editor,n=this.$elem;t.cmd.queryCommandState("bold")?(this._active=!0,n.addClass("w-e-active")):(this._active=!1,n.removeClass("w-e-active"))}};var P=function(e,t){var n=e.config.langArgs||[],i=t;return n.forEach(function(e){var t=e.reg,n=e.val;t.test(i)&&(i=i.replace(t,function(){return n}))}),i},j=function(){};l.prototype={constructor:l,show:function(){this.hideTimeoutId&&clearTimeout(this.hideTimeoutId);var e=this.menu,t=e.$elem,n=this.$container;if(!this._show){if(this._rendered)n.show();else{var i=t.getSizeData().height||0,o=this.opt.width||100;n.css("margin-top",i+"px").css("width",o+"px"),t.append(n),this._rendered=!0}this._show=!0}},hide:function(){this.showTimeoutId&&clearTimeout(this.showTimeoutId);var e=this.$container;this._show&&(e.hide(),this._show=!1)}},d.prototype={constructor:d,_command:function(e){var t=this.editor,n=t.selection.getSelectionContainerElem();t.$textElem.equal(n)||t.cmd.do("formatBlock",e)},tryChangeActive:function(e){var t=this.editor,n=this.$elem,i=/^h/i,o=t.cmd.queryCommandValue("formatBlock");i.test(o)?(this._active=!0,n.addClass("w-e-active")):(this._active=!1,n.removeClass("w-e-active"))}};var z=function(){},$=[];u.prototype={constructor:u,show:function(){var e=this,t=this.menu;if(!($.indexOf(t)>=0)){var n=t.editor,i=o("body"),A=n.$textContainerElem,r=this.opt,c=o('<div class="w-e-panel-container"></div>'),a=r.width||300;c.css("width",a+"px").css("margin-left",(0-a)/2+"px");var s=o('<i class="w-e-icon-close w-e-panel-close"></i>');c.append(s),s.on("click",function(){e.hide()});var l=o('<ul class="w-e-panel-tab-title"></ul>'),d=o('<div class="w-e-panel-tab-content"></div>');c.append(l).append(d);var u=r.height;u&&d.css("height",u+"px").css("overflow-y","auto");var h=r.tabs||[],p=[],f=[];h.forEach(function(e,t){if(e){var i=e.title||"",A=e.tpl||"";i=P(n,i),A=P(n,A);var r=o('<li class="w-e-item">'+i+"</li>");l.append(r);var c=o(A);d.append(c),r._index=t,p.push(r),f.push(c),0===t?(r._active=!0,r.addClass("w-e-active")):c.hide(),r.on("click",function(e){r._active||(p.forEach(function(e){e._active=!1,e.removeClass("w-e-active")}),f.forEach(function(e){e.hide()}),r._active=!0,r.addClass("w-e-active"),c.show())})}}),c.on("click",function(e){e.stopPropagation()}),i.on("click",function(t){e.hide()}),A.append(c),h.forEach(function(t,n){if(t){(t.events||[]).forEach(function(t){var i=t.selector,o=t.type,A=t.fn||z;f[n].find(i).on(o,function(t){t.stopPropagation(),A(t)&&e.hide()})})}});var g=c.find("input[type=text],textarea");g.length&&g.get(0).focus(),this.$container=c,this._hideOtherPanels(),$.push(t)}},hide:function(){var e=this.menu,t=this.$container;t&&t.remove(),$=$.filter(function(t){return t!==e})},_hideOtherPanels:function(){$.length&&$.forEach(function(e){var t=e.panel||{};t.hide&&t.hide()})}},h.prototype={constructor:h,onClick:function(e){var t=this.editor,n=void 0;if(this._active){if(!(n=t.selection.getSelectionContainerElem()))return;t.selection.createRangeByElem(n),t.selection.restoreSelection(),this._createPanel(n.text(),n.attr("href"))}else t.selection.isSelectionEmpty()?this._createPanel("",""):this._createPanel(t.selection.getSelectionText(),"")},_createPanel:function(e,t){var n=this,i=c("input-link"),A=c("input-text"),r=c("btn-ok"),a=c("btn-del"),s=this._active?"inline-block":"none",l=new u(this,{width:300,tabs:[{title:"链接",tpl:'<div>\n                            <input id="'+A+'" type="text" class="block" value="'+e+'" placeholder="链接文字"/></td>\n                            <input id="'+i+'" type="text" class="block" value="'+t+'" placeholder="http://..."/></td>\n                            <div class="w-e-button-container">\n                                <button id="'+r+'" class="right">插入</button>\n                                <button id="'+a+'" class="gray right" style="display:'+s+'">删除链接</button>\n                            </div>\n                        </div>',events:[{selector:"#"+r,type:"click",fn:function(){var e=o("#"+i),t=o("#"+A),r=e.val(),c=t.val();return n._insertLink(c,r),!0}},{selector:"#"+a,type:"click",fn:function(){return n._delLink(),!0}}]}]});l.show(),this.panel=l},_delLink:function(){if(this._active){var e=this.editor;if(e.selection.getSelectionContainerElem()){var t=e.selection.getSelectionText();e.cmd.do("insertHTML","<span>"+t+"</span>")}}},_insertLink:function(e,t){if(e&&t){var n=this.editor,i=n.config,o=i.linkCheck,A=!0;o&&"function"==typeof o&&(A=o(e,t)),!0===A?n.cmd.do("insertHTML",'<a href="'+t+'" target="_blank">'+e+"</a>"):alert(A)}},tryChangeActive:function(e){var t=this.editor,n=this.$elem,i=t.selection.getSelectionContainerElem();i&&("A"===i.getNodeName()?(this._active=!0,n.addClass("w-e-active")):(this._active=!1,n.removeClass("w-e-active")))}},p.prototype={constructor:p,onClick:function(e){var t=this.editor,n=t.selection.isSelectionEmpty();n&&t.selection.createEmptyRange(),t.cmd.do("italic"),n&&(t.selection.collapseRange(),t.selection.restoreSelection())},tryChangeActive:function(e){var t=this.editor,n=this.$elem;t.cmd.queryCommandState("italic")?(this._active=!0,n.addClass("w-e-active")):(this._active=!1,n.removeClass("w-e-active"))}},f.prototype={constructor:f,onClick:function(e){this.editor.cmd.do("redo")}},g.prototype={constructor:g,onClick:function(e){var t=this.editor,n=t.selection.isSelectionEmpty();n&&t.selection.createEmptyRange(),t.cmd.do("strikeThrough"),n&&(t.selection.collapseRange(),t.selection.restoreSelection())},tryChangeActive:function(e){var t=this.editor,n=this.$elem;t.cmd.queryCommandState("strikeThrough")?(this._active=!0,n.addClass("w-e-active")):(this._active=!1,n.removeClass("w-e-active"))}},m.prototype={constructor:m,onClick:function(e){var t=this.editor,n=t.selection.isSelectionEmpty();n&&t.selection.createEmptyRange(),t.cmd.do("underline"),n&&(t.selection.collapseRange(),t.selection.restoreSelection())},tryChangeActive:function(e){var t=this.editor,n=this.$elem;t.cmd.queryCommandState("underline")?(this._active=!0,n.addClass("w-e-active")):(this._active=!1,n.removeClass("w-e-active"))}},w.prototype={constructor:w,onClick:function(e){this.editor.cmd.do("undo")}},v.prototype={constructor:v,_command:function(e){var t=this.editor,n=t.$textElem;if(t.selection.restoreSelection(),!t.cmd.queryCommandState(e)){t.cmd.do(e);var i=t.selection.getSelectionContainerElem();if("LI"===i.getNodeName()&&(i=i.parent()),!1!==/^ol|ul$/i.test(i.getNodeName())&&!i.equal(n)){var o=i.parent();o.equal(n)||(i.insertAfter(o),o.remove())}}},tryChangeActive:function(e){var t=this.editor,n=this.$elem;t.cmd.queryCommandState("insertUnOrderedList")||t.cmd.queryCommandState("insertOrderedList")?(this._active=!0,n.addClass("w-e-active")):(this._active=!1,n.removeClass("w-e-active"))}},b.prototype={constructor:b,_command:function(e){this.editor.cmd.do(e)}},E.prototype={constructor:E,_command:function(e){this.editor.cmd.do("foreColor",e)}},y.prototype={constructor:y,_command:function(e){this.editor.cmd.do("backColor",e)}},B.prototype={constructor:B,onClick:function(e){var t=this.editor;if(!L.isIE())return void t.cmd.do("formatBlock","<BLOCKQUOTE>");var n=t.selection.getSelectionContainerElem(),i=void 0,A=void 0;if("P"===n.getNodeName())return i=n.text(),A=o("<blockquote>"+i+"</blockquote>"),A.insertAfter(n),void n.remove();"BLOCKQUOTE"===n.getNodeName()&&(i=n.text(),A=o("<p>"+i+"</p>"),A.insertAfter(n),n.remove())},tryChangeActive:function(e){var t=this.editor,n=this.$elem,i=/^BLOCKQUOTE$/i,o=t.cmd.queryCommandValue("formatBlock");i.test(o)?(this._active=!0,n.addClass("w-e-active")):(this._active=!1,n.removeClass("w-e-active"))}},C.prototype={constructor:C,onClick:function(e){var t=this.editor,n=t.selection.getSelectionStartElem(),i=t.selection.getSelectionEndElem(),A=t.selection.isSelectionEmpty(),r=t.selection.getSelectionText(),c=void 0;return n.equal(i)?A?void(this._active?this._createPanel(n.html()):this._createPanel()):(c=o("<code>"+r+"</code>"),t.cmd.do("insertElem",c),t.selection.createRangeByElem(c,!1),void t.selection.restoreSelection()):void t.selection.restoreSelection()},_createPanel:function(e){var t=this;e=e||"";var n=e?"edit":"new",i=c("texxt"),A=c("btn"),r=new u(this,{width:500,tabs:[{title:"插入代码",tpl:'<div>\n                        <textarea id="'+i+'" style="height:145px;;">'+e+'</textarea>\n                        <div class="w-e-button-container">\n                            <button id="'+A+'" class="right">插入</button>\n                        </div>\n                    <div>',events:[{selector:"#"+A,type:"click",fn:function(){var e=o("#"+i),A=e.val()||e.html();return A=a(A),"new"===n?t._insertCode(A):t._updateCode(A),!0}}]}]});r.show(),this.panel=r},_insertCode:function(e){this.editor.cmd.do("insertHTML","<pre><code>"+e+"</code></pre><p><br></p>")},_updateCode:function(e){var t=this.editor,n=t.selection.getSelectionContainerElem();n&&(n.html(e),t.selection.restoreSelection())},tryChangeActive:function(e){var t=this.editor,n=this.$elem,i=t.selection.getSelectionContainerElem();if(i){var o=i.parent();"CODE"===i.getNodeName()&&"PRE"===o.getNodeName()?(this._active=!0,n.addClass("w-e-active")):(this._active=!1,n.removeClass("w-e-active"))}}},x.prototype={constructor:x,onClick:function(){this._createPanel()},_createPanel:function(){var e=this,t="";"😀 😃 😄 😁 😆 😅 😂  😊 😇 🙂 🙃 😉 😌 😍 😘 😗 😙 😚 😋 😜 😝 😛 🤑 🤗 🤓 😎 😏 😒 😞 😔 😟 😕 🙁  😣 😖 😫 😩 😤 😠 😡 😶 😐 😑 😯 😦 😧 😮 😲 😵 😳 😱 😨 😰 😢 😥 😭 😓 😪 😴 🙄 🤔 😬 🤐".split(/\s/).forEach(function(e){e&&(t+='<span class="w-e-item">'+e+"</span>")});var n="";"🙌 👏 👋 👍 👎 👊 ✊ ️👌 ✋ 👐 💪 🙏 ️👆 👇 👈 👉 🖕 🖐 🤘 🖖".split(/\s/).forEach(function(e){e&&(n+='<span class="w-e-item">'+e+"</span>")});var i=new u(this,{width:300,height:200,tabs:[{title:"表情",tpl:'<div class="w-e-emoticon-container">'+t+"</div>",events:[{selector:"span.w-e-item",type:"click",fn:function(t){var n=t.target;return e._insert(n.innerHTML),!0}}]},{title:"手势",tpl:'<div class="w-e-emoticon-container">'+n+"</div>",events:[{selector:"span.w-e-item",type:"click",fn:function(t){var n=t.target;return e._insert(n.innerHTML),!0}}]}]});i.show(),this.panel=i},_insert:function(e){this.editor.cmd.do("insertHTML","<span>"+e+"</span>")}},I.prototype={constructor:I,onClick:function(){this._active?this._createEditPanel():this._createInsertPanel()},_createInsertPanel:function(){var e=this,t=c("btn"),n=c("row"),i=c("col"),A=new u(this,{width:250,tabs:[{title:"插入表格",tpl:'<div>\n                        <p style="text-align:left; padding:5px 0;">\n                            创建\n                            <input id="'+n+'" type="text" value="5" style="width:40px;text-align:center;"/>\n                            行\n                            <input id="'+i+'" type="text" value="5" style="width:40px;text-align:center;"/>\n                            列的表格\n                        </p>\n                        <div class="w-e-button-container">\n                            <button id="'+t+'" class="right">插入</button>\n                        </div>\n                    </div>',events:[{selector:"#"+t,type:"click",fn:function(){var t=parseInt(o("#"+n).val()),A=parseInt(o("#"+i).val());return t&&A&&t>0&&A>0&&e._insert(t,A),!0}}]}]});A.show(),this.panel=A},_insert:function(e,t){var n=void 0,i=void 0,o='<table border="0" width="100%" cellpadding="0" cellspacing="0">';for(n=0;n<e;n++){if(o+="<tr>",0===n)for(i=0;i<t;i++)o+="<th>&nbsp;</th>";else for(i=0;i<t;i++)o+="<td>&nbsp;</td>";o+="</tr>"}o+="</table><p><br></p>";var A=this.editor;A.cmd.do("insertHTML",o),A.cmd.do("enableObjectResizing",!1),A.cmd.do("enableInlineTableEditing",!1)},_createEditPanel:function(){var e=this,t=c("add-row"),n=c("add-col"),i=c("del-row"),o=c("del-col"),A=c("del-table");new u(this,{width:320,tabs:[{title:"编辑表格",tpl:'<div>\n                        <div class="w-e-button-container" style="border-bottom:1px solid #f1f1f1;padding-bottom:5px;margin-bottom:5px;">\n                            <button id="'+t+'" class="left">增加行</button>\n                            <button id="'+i+'" class="red left">删除行</button>\n                            <button id="'+n+'" class="left">增加列</button>\n                            <button id="'+o+'" class="red left">删除列</button>\n                        </div>\n                        <div class="w-e-button-container">\n                            <button id="'+A+'" class="gray left">删除表格</button>\n                        </dv>\n                    </div>',events:[{selector:"#"+t,type:"click",fn:function(){return e._addRow(),!0}},{selector:"#"+n,type:"click",fn:function(){return e._addCol(),!0}},{selector:"#"+i,type:"click",fn:function(){return e._delRow(),!0}},{selector:"#"+o,type:"click",fn:function(){return e._delCol(),!0}},{selector:"#"+A,type:"click",fn:function(){return e._delTable(),!0}}]}]}).show()},_getLocationData:function(){var e={},t=this.editor,n=t.selection.getSelectionContainerElem();if(n){var i=n.getNodeName();if("TD"===i||"TH"===i){var o=n.parent(),A=o.children(),r=A.length;A.forEach(function(t,i){if(t===n[0])return e.td={index:i,elem:t,length:r},!1});var c=o.parent(),a=c.children(),s=a.length;return a.forEach(function(t,n){if(t===o[0])return e.tr={index:n,elem:t,length:s},!1}),e}}},_addRow:function(){var e=this._getLocationData();if(e){var t=e.tr,n=o(t.elem),i=e.td,A=i.length,r=document.createElement("tr"),c="",a=void 0;for(a=0;a<A;a++)c+="<td>&nbsp;</td>";r.innerHTML=c,o(r).insertAfter(n)}},_addCol:function(){var e=this._getLocationData();if(e){var t=e.tr,n=e.td,i=n.index;o(t.elem).parent().children().forEach(function(e){var t=o(e),n=t.children(),A=n.get(i),r=A.getNodeName().toLowerCase();o(document.createElement(r)).insertAfter(A)})}},_delRow:function(){var e=this._getLocationData();if(e){o(e.tr.elem).remove()}},_delCol:function(){var e=this._getLocationData();if(e){var t=e.tr,n=e.td,i=n.index;o(t.elem).parent().children().forEach(function(e){o(e).children().get(i).remove()})}},_delTable:function(){var e=this.editor,t=e.selection.getSelectionContainerElem();if(t){var n=t.parentUntil("table");n&&n.remove()}},tryChangeActive:function(e){var t=this.editor,n=this.$elem,i=t.selection.getSelectionContainerElem();if(i){var o=i.getNodeName();"TD"===o||"TH"===o?(this._active=!0,n.addClass("w-e-active")):(this._active=!1,n.removeClass("w-e-active"))}}},Q.prototype={constructor:Q,onClick:function(){this._createPanel()},_createPanel:function(){var e=this,t=c("text-val"),n=c("btn"),i=new u(this,{width:350,tabs:[{title:"插入视频",tpl:'<div>\n                        <input id="'+t+'" type="text" class="block" placeholder="格式如：<iframe src=... ></iframe>"/>\n                        <div class="w-e-button-container">\n                            <button id="'+n+'" class="right">插入</button>\n                        </div>\n                    </div>',events:[{selector:"#"+n,type:"click",fn:function(){var n=o("#"+t),i=n.val().trim();return i&&e._insert(i),!0}}]}]});i.show(),this.panel=i},_insert:function(e){this.editor.cmd.do("insertHTML",e+"<p><br></p>")}},D.prototype={constructor:D,onClick:function(){this.editor.config.qiniu||(this._active?this._createEditPanel():this._createInsertPanel())},_createEditPanel:function(){var e=this.editor,t=c("width-30"),n=c("width-50"),i=c("width-100"),o=c("del-btn"),A=[{title:"编辑图片",tpl:'<div>\n                    <div class="w-e-button-container" style="border-bottom:1px solid #f1f1f1;padding-bottom:5px;margin-bottom:5px;">\n                        <span style="float:left;font-size:14px;margin:4px 5px 0 5px;color:#333;">最大宽度：</span>\n                        <button id="'+t+'" class="left">30%</button>\n                        <button id="'+n+'" class="left">50%</button>\n                        <button id="'+i+'" class="left">100%</button>\n                    </div>\n                    <div class="w-e-button-container">\n                        <button id="'+o+'" class="gray left">删除图片</button>\n                    </dv>\n                </div>',events:[{selector:"#"+t,type:"click",fn:function(){var t=e._selectedImg;return t&&t.css("max-width","30%"),!0}},{selector:"#"+n,type:"click",fn:function(){var t=e._selectedImg;return t&&t.css("max-width","50%"),!0}},{selector:"#"+i,type:"click",fn:function(){var t=e._selectedImg;return t&&t.css("max-width","100%"),!0}},{selector:"#"+o,type:"click",fn:function(){var t=e._selectedImg;return t&&t.remove(),!0}}]}],r=new u(this,{width:300,tabs:A});r.show(),this.panel=r},_createInsertPanel:function(){var e=this.editor,t=e.uploadImg,n=e.config,i=c("up-trigger"),A=c("up-file"),r=c("link-url"),a=c("link-btn"),s=[{title:"上传图片",tpl:'<div class="w-e-up-img-container">\n                    <div id="'+i+'" class="w-e-up-btn">\n                        <i class="w-e-icon-upload2"></i>\n                    </div>\n                    <div style="display:none;">\n                        <input id="'+A+'" type="file" multiple="multiple" accept="image/jpg,image/jpeg,image/png,image/gif,image/bmp"/>\n                    </div>\n                </div>',events:[{selector:"#"+i,type:"click",fn:function(){var e=o("#"+A),t=e[0];if(!t)return!0;t.click()}},{selector:"#"+A,type:"change",fn:function(){var e=o("#"+A),n=e[0];if(!n)return!0;var i=n.files;return i.length&&t.uploadImg(i),!0}}]},{title:"网络图片",tpl:'<div>\n                    <input id="'+r+'" type="text" class="block" placeholder="图片链接"/></td>\n                    <div class="w-e-button-container">\n                        <button id="'+a+'" class="right">插入</button>\n                    </div>\n                </div>',events:[{selector:"#"+a,type:"click",fn:function(){var e=o("#"+r),n=e.val().trim();return n&&t.insertLinkImg(n),!0}}]}],l=[];(n.uploadImgShowBase64||n.uploadImgServer||n.customUploadImg)&&window.FileReader&&l.push(s[0]),n.showLinkImg&&l.push(s[1]);var d=new u(this,{width:300,tabs:l});d.show(),this.panel=d},tryChangeActive:function(e){var t=this.editor,n=this.$elem;t._selectedImg?(this._active=!0,n.addClass("w-e-active")):(this._active=!1,n.removeClass("w-e-active"))}};var J={};J.bold=s,J.head=d,J.link=h,J.italic=p,J.redo=f,J.strikeThrough=g,J.underline=m,J.undo=w,J.list=v,J.justify=b,J.foreColor=E,J.backColor=y,J.quote=B,J.code=C,J.emoticon=x,J.table=I,J.video=Q,J.image=D,k.prototype={constructor:k,init:function(){var e=this,t=this.editor;((t.config||{}).menus||[]).forEach(function(n){var i=J[n];i&&"function"==typeof i&&(e.menus[n]=new i(t))}),this._addToToolbar(),this._bindEvent()},_addToToolbar:function(){var e=this.editor,t=e.$toolbarElem,n=this.menus,i=e.config,o=i.zIndex+1;A(n,function(e,n){var i=n.$elem;i&&(i.css("z-index",o),t.append(i))})},_bindEvent:function(){var e=this.menus,t=this.editor;A(e,function(e,n){var i=n.type;if(i){var o=n.$elem,A=n.droplist;n.panel;"click"===i&&n.onClick&&o.on("click",function(e){null!=t.selection.getRange()&&n.onClick(e)}),"droplist"===i&&A&&o.on("mouseenter",function(e){
+null!=t.selection.getRange()&&(A.showTimeoutId=setTimeout(function(){A.show()},200))}).on("mouseleave",function(e){A.hideTimeoutId=setTimeout(function(){A.hide()},0)}),"panel"===i&&n.onClick&&o.on("click",function(e){e.stopPropagation(),null!=t.selection.getRange()&&n.onClick(e)})}})},changeActive:function(){A(this.menus,function(e,t){t.tryChangeActive&&setTimeout(function(){t.tryChangeActive()},100)})}},S.prototype={constructor:S,init:function(){this._bindEvent()},clear:function(){this.html("<p><br></p>")},html:function(e){var t=this.editor,n=t.$textElem;if(null==e)return n.html();n.html(e),t.initSelection()},text:function(e){var t=this.editor,n=t.$textElem;if(null==e)return n.text();n.text("<p>"+e+"</p>"),t.initSelection()},append:function(e){var t=this.editor;t.$textElem.append(o(e)),t.initSelection()},_bindEvent:function(){this._saveRangeRealTime(),this._enterKeyHandle(),this._clearHandle(),this._pasteHandle(),this._tabHandle(),this._imgHandle(),this._dragHandle()},_saveRangeRealTime:function(){function e(e){t.selection.saveRange(),t.menus.changeActive()}var t=this.editor,n=t.$textElem;n.on("keyup",e),n.on("mousedown",function(t){n.on("mouseleave",e)}),n.on("mouseup",function(t){e(),n.off("mouseleave",e)})},_enterKeyHandle:function(){function e(e){var t=n.selection.getSelectionContainerElem();if(t.parent().equal(i)&&("P"!==t.getNodeName()&&!t.text())){var A=o("<p><br></p>");A.insertBefore(t),n.selection.createRangeByElem(A,!0),n.selection.restoreSelection(),t.remove()}}function t(e){var t=n.selection.getSelectionContainerElem();if(t){var i=t.parent(),A=t.getNodeName(),r=i.getNodeName();if("CODE"===A&&"PRE"===r&&n.cmd.queryCommandSupported("insertHTML")){if(!0===n._willBreakCode){var c=o("<p><br></p>");return c.insertAfter(i),n.selection.createRangeByElem(c,!0),n.selection.restoreSelection(),n._willBreakCode=!1,void e.preventDefault()}var a=n.selection.getRange().startOffset;n.cmd.do("insertHTML","\n"),n.selection.saveRange(),n.selection.getRange().startOffset===a&&n.cmd.do("insertHTML","\n");var s=t.html().length;n.selection.getRange().startOffset+1===s&&(n._willBreakCode=!0),e.preventDefault()}}}var n=this.editor,i=n.$textElem;i.on("keyup",function(t){13===t.keyCode&&e(t)}),i.on("keydown",function(e){if(13!==e.keyCode)return void(n._willBreakCode=!1);t(e)})},_clearHandle:function(){var e=this.editor,t=e.$textElem;t.on("keydown",function(e){if(8===e.keyCode){return"<p><br></p>"===t.html().toLowerCase().trim()?void e.preventDefault():void 0}}),t.on("keyup",function(n){if(8===n.keyCode){var i=void 0,A=t.html().toLowerCase().trim();A&&"<br>"!==A||(i=o("<p><br/></p>"),t.html(""),t.append(i),e.selection.createRangeByElem(i,!1,!0),e.selection.restoreSelection())}})},_pasteHandle:function(){var e=this.editor,t=e.config.pasteFilterStyle,n=e.$textElem;n.on("paste",function(n){if(!L.isIE()){n.preventDefault();var i=_(n,t),o=M(n);o=o.replace(/\n/gm,"<br>");var A=e.selection.getSelectionContainerElem();if(A){var r=A.getNodeName();if("CODE"===r||"PRE"===r)return void e.cmd.do("insertHTML","<p>"+o+"</p>");if(i)try{e.cmd.do("insertHTML",i)}catch(t){e.cmd.do("insertHTML","<p>"+o+"</p>")}}}}),n.on("paste",function(t){if(!L.isIE()){t.preventDefault();var n=U(t);if(n&&n.length){var i=e.selection.getSelectionContainerElem();if(i){var o=i.getNodeName();if("CODE"!==o&&"PRE"!==o){e.uploadImg.uploadImg(n)}}}}})},_tabHandle:function(){var e=this.editor;e.$textElem.on("keydown",function(t){if(9===t.keyCode&&e.cmd.queryCommandSupported("insertHTML")){var n=e.selection.getSelectionContainerElem();if(n){var i=n.parent(),o=n.getNodeName(),A=i.getNodeName();"CODE"===o&&"PRE"===A?e.cmd.do("insertHTML","    "):e.cmd.do("insertHTML","&nbsp;&nbsp;&nbsp;&nbsp;"),t.preventDefault()}}})},_imgHandle:function(){var e=this.editor,t=e.$textElem;t.on("click","img",function(n){var i=this,A=o(i);t.find("img").removeClass("w-e-selected"),A.addClass("w-e-selected"),e._selectedImg=A,e.selection.createRangeByElem(A)}),t.on("click  keyup",function(n){n.target.matches("img")||(t.find("img").removeClass("w-e-selected"),e._selectedImg=null)})},_dragHandle:function(){var e=this.editor;o(document).on("dragleave drop dragenter dragover",function(e){e.preventDefault()}),e.$textElem.on("drop",function(t){t.preventDefault();var n=t.dataTransfer&&t.dataTransfer.files;n&&n.length&&e.uploadImg.uploadImg(n)})}},R.prototype={constructor:R,do:function(e,t){var n=this.editor;if(n.selection.getRange()){n.selection.restoreSelection();var i="_"+e;this[i]?this[i](t):this._execCommand(e,t),n.menus.changeActive(),n.selection.saveRange(),n.selection.restoreSelection(),n.change&&n.change()}},_insertHTML:function(e){var t=this.editor,n=t.selection.getRange();this.queryCommandSupported("insertHTML")?this._execCommand("insertHTML",e):n.insertNode?(n.deleteContents(),n.insertNode(o(e)[0])):n.pasteHTML&&n.pasteHTML(e)},_insertElem:function(e){var t=this.editor,n=t.selection.getRange();n.insertNode&&(n.deleteContents(),n.insertNode(e[0]))},_execCommand:function(e,t){document.execCommand(e,!1,t)},queryCommandValue:function(e){return document.queryCommandValue(e)},queryCommandState:function(e){return document.queryCommandState(e)},queryCommandSupported:function(e){return document.queryCommandSupported(e)}},N.prototype={constructor:N,getRange:function(){return this._currentRange},saveRange:function(e){if(e)return void(this._currentRange=e);var t=window.getSelection();if(0!==t.rangeCount){var n=t.getRangeAt(0),i=this.getSelectionContainerElem(n);if(i){this.editor.$textElem.isContain(i)&&(this._currentRange=n)}}},collapseRange:function(e){null==e&&(e=!1);var t=this._currentRange;t&&t.collapse(e)},getSelectionText:function(){return this._currentRange?this._currentRange.toString():""},getSelectionContainerElem:function(e){e=e||this._currentRange;var t=void 0;if(e)return t=e.commonAncestorContainer,o(1===t.nodeType?t:t.parentNode)},getSelectionStartElem:function(e){e=e||this._currentRange;var t=void 0;if(e)return t=e.startContainer,o(1===t.nodeType?t:t.parentNode)},getSelectionEndElem:function(e){e=e||this._currentRange;var t=void 0;if(e)return t=e.endContainer,o(1===t.nodeType?t:t.parentNode)},isSelectionEmpty:function(){var e=this._currentRange;return!(!e||!e.startContainer||e.startContainer!==e.endContainer||e.startOffset!==e.endOffset)},restoreSelection:function(){var e=window.getSelection();e.removeAllRanges(),e.addRange(this._currentRange)},createEmptyRange:function(){var e=this.editor,t=this.getRange(),n=void 0;if(t&&this.isSelectionEmpty())try{L.isWebkit()?(e.cmd.do("insertHTML","&#8203;"),t.setEnd(t.endContainer,t.endOffset+1),this.saveRange(t)):(n=o("<strong>&#8203;</strong>"),e.cmd.do("insertElem",n),this.createRangeByElem(n,!0))}catch(e){}},createRangeByElem:function(e,t,n){if(e.length){var i=e[0],o=document.createRange();n?o.selectNodeContents(i):o.selectNode(i),"boolean"==typeof t&&o.collapse(t),this.saveRange(o)}}},F.prototype={constructor:F,show:function(e){var t=this;if(!this._isShow){this._isShow=!0;var n=this.$bar;if(this._isRender)this._isRender=!0;else{this.$textContainer.append(n)}Date.now()-this._time>100&&e<=1&&(n.css("width",100*e+"%"),this._time=Date.now());var i=this._timeoutId;i&&clearTimeout(i),i=setTimeout(function(){t._hide()},500)}},_hide:function(){this.$bar.remove(),this._time=0,this._isShow=!1,this._isRender=!1}};var O="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e};T.prototype={constructor:T,_alert:function(e,t){var n=this.editor,i=n.config.debug,o=n.config.customAlert;if(i)throw new Error("wangEditor: "+(t||e));o&&"function"==typeof o?o(e):alert(e)},insertLinkImg:function(e){var t=this;if(e){var n=this.editor,i=n.config;n.cmd.do("insertHTML",'<img src="'+e+'" style="max-width:100%;"/>');var o=document.createElement("img");o.onload=function(){var t=i.linkImgCallback;t&&"function"==typeof t&&t(e),o=null},o.onerror=function(){o=null,t._alert("插入图片错误",'wangEditor: 插入图片出错，图片链接是 "'+e+'"，下载该链接失败')},o.onabort=function(){o=null},o.src=e}},uploadImg:function(e){var t=this;if(e&&e.length){var n=this.editor,i=n.config,o=i.uploadImgServer,c=i.uploadImgShowBase64;if(o||c){var a=i.uploadImgMaxSize,s=a/1e3/1e3,l=i.uploadImgMaxLength||1e4,d=i.uploadFileName||"",u=i.uploadImgParams||{},h=i.uploadImgHeaders||{},p=i.uploadImgHooks||{},f=i.uploadImgTimeout||3e3,g=i.withCredentials;null==g&&(g=!1);var m=i.customUploadImg,w=[],v=[];if(r(e,function(e){var t=e.name,n=e.size;if(t&&n)return!1===/\.(jpg|jpeg|png|bmp|gif)$/i.test(t)?void v.push("【"+t+"】不是图片"):a<n?void v.push("【"+t+"】大于 "+s+"M"):void w.push(e)}),v.length)return void this._alert("图片验证未通过: \n"+v.join("\n"));if(w.length>l)return void this._alert("一次最多上传"+l+"张图片");if(m&&"function"==typeof m)return void m(w,this.insertLinkImg.bind(this));var b=new FormData;if(r(w,function(e){var t=d||e.name;b.append(t,e)}),o&&"string"==typeof o){var E=o.split("#");o=E[0];var y=E[1]||"";A(u,function(e,t){t=encodeURIComponent(t),o.indexOf("?")>0?o+="&":o+="?",o=o+e+"="+t,b.append(e,t)}),y&&(o+="#"+y);var B=new XMLHttpRequest;if(B.open("POST",o),B.timeout=f,B.ontimeout=function(){p.timeout&&"function"==typeof p.timeout&&p.timeout(B,n),t._alert("上传图片超时")},B.upload&&(B.upload.onprogress=function(e){var t=void 0,i=new F(n);e.lengthComputable&&(t=e.loaded/e.total,i.show(t))}),B.onreadystatechange=function(){var e=void 0;if(4===B.readyState){if(B.status<200||B.status>=300)return p.error&&"function"==typeof p.error&&p.error(B,n),void t._alert("上传图片发生错误","上传图片发生错误，服务器返回状态是 "+B.status);if(e=B.responseText,"object"!==(void 0===e?"undefined":O(e)))try{e=JSON.parse(e)}catch(i){return p.fail&&"function"==typeof p.fail&&p.fail(B,n,e),void t._alert("上传图片失败","上传图片返回结果错误，返回结果是: "+e)}if(p.customInsert||"0"==e.errno){if(p.customInsert&&"function"==typeof p.customInsert)p.customInsert(t.insertLinkImg.bind(t),e,n);else{(e.data||[]).forEach(function(e){t.insertLinkImg(e)})}p.success&&"function"==typeof p.success&&p.success(B,n,e)}else p.fail&&"function"==typeof p.fail&&p.fail(B,n,e),t._alert("上传图片失败","上传图片返回结果错误，返回结果 errno="+e.errno)}},p.before&&"function"==typeof p.before){var C=p.before(B,n,w);if(C&&"object"===(void 0===C?"undefined":O(C))&&C.prevent)return void this._alert(C.msg)}return A(h,function(e,t){B.setRequestHeader(e,t)}),B.withCredentials=g,void B.send(b)}c&&r(e,function(e){var n=t,i=new FileReader;i.readAsDataURL(e),i.onload=function(){n.insertLinkImg(this.result)}})}}}};var G=1;H.prototype={constructor:H,_initConfig:function(){var e={};this.config=Object.assign(e,Y,this.customConfig);var t=this.config.lang||{},n=[];A(t,function(e,t){n.push({reg:new RegExp(e,"img"),val:t})}),this.config.langArgs=n},_initDom:function(){var e=this,t=this.toolbarSelector,n=o(t),i=this.textSelector,A=this.config,r=A.zIndex,a=void 0,s=void 0,l=void 0,d=void 0;null==i?(a=o("<div></div>"),s=o("<div></div>"),d=n.children(),n.append(a).append(s),a.css("background-color","#f1f1f1").css("border","1px solid #ccc"),s.css("border","1px solid #ccc").css("border-top","none").css("height","300px")):(a=n,s=o(i),d=s.children()),l=o("<div></div>"),l.attr("contenteditable","true").css("width","100%").css("height","100%"),d&&d.length?l.append(d):l.append(o("<p><br></p>")),s.append(l),a.addClass("w-e-toolbar"),s.addClass("w-e-text-container"),s.css("z-index",r),l.addClass("w-e-text");var u=c("toolbar-elem");a.attr("id",u);var h=c("text-elem");l.attr("id",h),this.$toolbarElem=a,this.$textContainerElem=s,this.$textElem=l,this.toolbarElemId=u,this.textElemId=h,s.on("click keyup",function(){e.change&&e.change()}),a.on("click",function(){this.change&&this.change()})},_initCommand:function(){this.cmd=new R(this)},_initSelectionAPI:function(){this.selection=new N(this)},_initUploadImg:function(){this.uploadImg=new T(this)},_initMenus:function(){this.menus=new k(this),this.menus.init()},_initText:function(){this.txt=new S(this),this.txt.init()},initSelection:function(e){var t=this.$textElem,n=t.children();if(!n.length)return t.append(o("<p><br></p>")),void this.initSelection();var i=n.last();if(e){var A=i.html().toLowerCase(),r=i.getNodeName();if("<br>"!==A&&"<br/>"!==A||"P"!==r)return t.append(o("<p><br></p>")),void this.initSelection()}this.selection.createRangeByElem(i,!1,!0),this.selection.restoreSelection()},_bindEvent:function(){var e=0,t=this.txt.html(),n=this.config,i=n.onchange;i&&"function"==typeof i&&(this.change=function(){var n=this.txt.html();n.length!==t.length&&(e&&clearTimeout(e),e=setTimeout(function(){i(n),t=n},200))})},create:function(){this._initConfig(),this._initDom(),this._initCommand(),this._initSelectionAPI(),this._initText(),this._initMenus(),this._initUploadImg(),this.initSelection(!0),this._bindEvent()}};try{document}catch(e){throw new Error("请在浏览器环境下运行")}!function(){"function"!=typeof Object.assign&&(Object.assign=function(e,t){if(null==e)throw new TypeError("Cannot convert undefined or null to object");for(var n=Object(e),i=1;i<arguments.length;i++){var o=arguments[i];if(null!=o)for(var A in o)Object.prototype.hasOwnProperty.call(o,A)&&(n[A]=o[A])}return n}),Element.prototype.matches||(Element.prototype.matches=Element.prototype.matchesSelector||Element.prototype.mozMatchesSelector||Element.prototype.msMatchesSelector||Element.prototype.oMatchesSelector||Element.prototype.webkitMatchesSelector||function(e){for(var t=(this.document||this.ownerDocument).querySelectorAll(e),n=t.length;--n>=0&&t.item(n)!==this;);return n>-1})}();var W=document.createElement("style");return W.type="text/css",W.innerHTML='.w-e-toolbar,.w-e-text-container,.w-e-menu-panel {  padding: 0;  margin: 0;  box-sizing: border-box;}.w-e-toolbar *,.w-e-text-container *,.w-e-menu-panel * {  padding: 0;  margin: 0;  box-sizing: border-box;}.w-e-clear-fix:after {  content: "";  display: table;  clear: both;}.w-e-toolbar .w-e-droplist {  position: absolute;  left: 0;  top: 0;  background-color: #fff;  border: 1px solid #f1f1f1;  border-right-color: #ccc;  border-bottom-color: #ccc;}.w-e-toolbar .w-e-droplist .w-e-dp-title {  text-align: center;  color: #999;  line-height: 2;  border-bottom: 1px solid #f1f1f1;  font-size: 13px;}.w-e-toolbar .w-e-droplist ul.w-e-list {  list-style: none;  line-height: 1;}.w-e-toolbar .w-e-droplist ul.w-e-list li.w-e-item {  color: #333;  padding: 5px 0;}.w-e-toolbar .w-e-droplist ul.w-e-list li.w-e-item:hover {  background-color: #f1f1f1;}.w-e-toolbar .w-e-droplist ul.w-e-block {  list-style: none;  text-align: left;  padding: 5px;}.w-e-toolbar .w-e-droplist ul.w-e-block li.w-e-item {  display: inline-block;  *display: inline;  *zoom: 1;  padding: 3px 5px;}.w-e-toolbar .w-e-droplist ul.w-e-block li.w-e-item:hover {  background-color: #f1f1f1;}@font-face {  font-family: \'w-e-icon\';  src: url(data:application/x-font-woff;charset=utf-8;base64,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) format(\'truetype\');  font-weight: normal;  font-style: normal;}[class^="w-e-icon-"],[class*=" w-e-icon-"] {  /* use !important to prevent issues with browser extensions that change fonts */  font-family: \'w-e-icon\' !important;  speak: none;  font-style: normal;  font-weight: normal;  font-variant: normal;  text-transform: none;  line-height: 1;  /* Better Font Rendering =========== */  -webkit-font-smoothing: antialiased;  -moz-osx-font-smoothing: grayscale;}.w-e-icon-close:before {  content: "\\f00d";}.w-e-icon-upload2:before {  content: "\\e9c6";}.w-e-icon-trash-o:before {  content: "\\f014";}.w-e-icon-header:before {  content: "\\f1dc";}.w-e-icon-pencil2:before {  content: "\\e906";}.w-e-icon-paint-brush:before {  content: "\\f1fc";}.w-e-icon-image:before {  content: "\\e90d";}.w-e-icon-play:before {  content: "\\e912";}.w-e-icon-location:before {  content: "\\e947";}.w-e-icon-undo:before {  content: "\\e965";}.w-e-icon-redo:before {  content: "\\e966";}.w-e-icon-quotes-left:before {  content: "\\e977";}.w-e-icon-list-numbered:before {  content: "\\e9b9";}.w-e-icon-list2:before {  content: "\\e9bb";}.w-e-icon-link:before {  content: "\\e9cb";}.w-e-icon-happy:before {  content: "\\e9df";}.w-e-icon-bold:before {  content: "\\ea62";}.w-e-icon-underline:before {  content: "\\ea63";}.w-e-icon-italic:before {  content: "\\ea64";}.w-e-icon-strikethrough:before {  content: "\\ea65";}.w-e-icon-table2:before {  content: "\\ea71";}.w-e-icon-paragraph-left:before {  content: "\\ea77";}.w-e-icon-paragraph-center:before {  content: "\\ea78";}.w-e-icon-paragraph-right:before {  content: "\\ea79";}.w-e-icon-terminal:before {  content: "\\f120";}.w-e-icon-page-break:before {  content: "\\ea68";}.w-e-icon-cancel-circle:before {  content: "\\ea0d";}.w-e-toolbar {  display: -webkit-box;  display: -ms-flexbox;  display: flex;  padding: 0 5px;  /* 单个菜单 */}.w-e-toolbar .w-e-menu {  position: relative;  text-align: center;  padding: 5px 10px;  cursor: pointer;}.w-e-toolbar .w-e-menu i {  color: #999;}.w-e-toolbar .w-e-menu:hover i {  color: #333;}.w-e-toolbar .w-e-active i {  color: #1e88e5;}.w-e-toolbar .w-e-active:hover i {  color: #1e88e5;}.w-e-text-container .w-e-panel-container {  position: absolute;  top: 0;  left: 50%;  border: 1px solid #ccc;  border-top: 0;  box-shadow: 1px 1px 2px #ccc;  color: #333;  background-color: #fff;  /* 为 emotion panel 定制的样式 */  /* 上传图片的 panel 定制样式 */}.w-e-text-container .w-e-panel-container .w-e-panel-close {  position: absolute;  right: 0;  top: 0;  padding: 5px;  margin: 2px 5px 0 0;  cursor: pointer;  color: #999;}.w-e-text-container .w-e-panel-container .w-e-panel-close:hover {  color: #333;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-title {  list-style: none;  display: -webkit-box;  display: -ms-flexbox;  display: flex;  font-size: 14px;  margin: 2px 10px 0 10px;  border-bottom: 1px solid #f1f1f1;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-title .w-e-item {  padding: 3px 5px;  color: #999;  cursor: pointer;  margin: 0 3px;  position: relative;  top: 1px;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-title .w-e-active {  color: #333;  border-bottom: 1px solid #333;  cursor: default;  font-weight: 700;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content {  padding: 10px 15px 10px 15px;  font-size: 16px;  /* 输入框的样式 */  /* 按钮的样式 */}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content input:focus,.w-e-text-container .w-e-panel-container .w-e-panel-tab-content textarea:focus,.w-e-text-container .w-e-panel-container .w-e-panel-tab-content button:focus {  outline: none;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content textarea {  width: 100%;  border: 1px solid #ccc;  padding: 5px;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content textarea:focus {  border-color: #1e88e5;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content input[type=text] {  border: none;  border-bottom: 1px solid #ccc;  font-size: 14px;  height: 20px;  color: #333;  text-align: left;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content input[type=text].small {  width: 30px;  text-align: center;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content input[type=text].block {  display: block;  width: 100%;  margin: 10px 0;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content input[type=text]:focus {  border-bottom: 2px solid #1e88e5;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content .w-e-button-container button {  font-size: 14px;  color: #1e88e5;  border: none;  padding: 5px 10px;  background-color: #fff;  cursor: pointer;  border-radius: 3px;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content .w-e-button-container button.left {  float: left;  margin-right: 10px;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content .w-e-button-container button.right {  float: right;  margin-left: 10px;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content .w-e-button-container button.gray {  color: #999;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content .w-e-button-container button.red {  color: #c24f4a;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content .w-e-button-container button:hover {  background-color: #f1f1f1;}.w-e-text-container .w-e-panel-container .w-e-panel-tab-content .w-e-button-container:after {  content: "";  display: table;  clear: both;}.w-e-text-container .w-e-panel-container .w-e-emoticon-container .w-e-item {  cursor: pointer;  font-size: 18px;  padding: 0 3px;  display: inline-block;  *display: inline;  *zoom: 1;}.w-e-text-container .w-e-panel-container .w-e-up-img-container {  text-align: center;}.w-e-text-container .w-e-panel-container .w-e-up-img-container .w-e-up-btn {  display: inline-block;  *display: inline;  *zoom: 1;  color: #999;  cursor: pointer;  font-size: 60px;  line-height: 1;}.w-e-text-container .w-e-panel-container .w-e-up-img-container .w-e-up-btn:hover {  color: #333;}.w-e-text-container {  position: relative;}.w-e-text-container .w-e-progress {  position: absolute;  background-color: #1e88e5;  bottom: 0;  left: 0;  height: 1px;}.w-e-text {  padding: 0 10px;  overflow-y: scroll;}.w-e-text p,.w-e-text h1,.w-e-text h2,.w-e-text h3,.w-e-text h4,.w-e-text h5,.w-e-text table,.w-e-text pre {  margin: 10px 0;  line-height: 1.5;}.w-e-text ul,.w-e-text ol {  margin: 10px 0 10px 20px;}.w-e-text blockquote {  display: block;  border-left: 8px solid #d0e5f2;  padding: 5px 10px;  margin: 10px 0;  line-height: 1.4;  font-size: 100%;  background-color: #f1f1f1;}.w-e-text code {  display: inline-block;  *display: inline;  *zoom: 1;  background-color: #f1f1f1;  border-radius: 3px;  padding: 3px 5px;  margin: 0 3px;}.w-e-text pre code {  display: block;}.w-e-text table {  border-top: 1px solid #ccc;  border-left: 1px solid #ccc;}.w-e-text table td,.w-e-text table th {  border-bottom: 1px solid #ccc;  border-right: 1px solid #ccc;  padding: 3px 5px;}.w-e-text table th {  border-bottom: 2px solid #ccc;  text-align: center;}.w-e-text:focus {  outline: none;}.w-e-text img {  cursor: pointer;}.w-e-text img:hover {  box-shadow: 0 0 5px #333;}.w-e-text img.w-e-selected {  border: 2px solid #1e88e5;}.w-e-text img.w-e-selected:hover {  box-shadow: none;}',document.getElementsByTagName("HEAD").item(0).appendChild(W),window.wangEditor||H});
 //# sourceMappingURL=wangEditor.min.js.map
+window.wangEditor.fullscreen = {
+	// editor create之后调用
+	init: function(editorSelector){
+		$(editorSelector + " .w-e-toolbar").append('<div class="w-e-menu"><a class="_wangEditor_btn_fullscreen" href="#" onclick="window.wangEditor.fullscreen.toggleFullscreen(\'' + editorSelector + '\');return false;">全屏</a></div>');
+	},
+	toggleFullscreen: function(editorSelector){
+		$(editorSelector).toggleClass('fullscreen-editor');
+		if($(editorSelector + ' ._wangEditor_btn_fullscreen').text() === '全屏'){
+			$(editorSelector + ' ._wangEditor_btn_fullscreen').text('退出全屏');
+		}else{
+			$(editorSelector + ' ._wangEditor_btn_fullscreen').text('全屏');
+		}
+	}
+};
 /**
  * [js-md5]{@link https://github.com/emn178/js-md5}
  *
@@ -2850,278 +2864,808 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
 
     "use strict";
 
-    var root = window;
+/* global Lib */
 
-    var Package = function (params) {
-        
-        var key;
-        
-        this.settings = {
-            key: 'pkgshare'
+var gvars = {
+
+    // 全局设置
+    settings: {},
+
+    // 缓存fetch中的token用于身份认证.
+    token: null,
+
+    // 缓存自动生成的id序列号，保证id的唯一性
+    cur_serial_id: 0
+};
+
+
+var root = window;
+var log = root.console.log.bind(root.console);
+//var log=function(){};
+
+var Set = function (params) {
+    if (!(Lib.type(params) === 'Object')) {
+        throw new Error('Error: CardJS.Lib.set( {key1:value1,key2:value2, ... });');
+    }
+    for (var key in params) {
+        gvars.settings[key] = params[key];
+    }
+};
+
+function inherit(SubType, SuperType) {
+    if (Object.create) {
+        var prototype = Object.create(SuperType.prototype);
+        prototype.constructor = SubType;
+        SubType.prototype = prototype;
+        return;
+    }
+    function F() {}
+    F.prototype = SuperType.prototype;
+    var prototype = new F();
+    prototype.constructor = SubType;
+    SubType.prototype = prototype;
+}
+
+// 如果对像中有相应函数就调用，没有就显示一行debug信息。
+function call_method(fn, debug) {
+    //console.log(this,fn,warn);
+    if (fn in this) {
+        return(this[fn]());
+    }
+    if (debug && this.settings.verbose) {
+        log('Call undefine method: this.f.' + fn + '()');
+    }
+    return false;
+}
+
+function bind_params(obj, params, skip) {
+
+    var s = ['cid', 'type', 'settings'];
+
+    if (Lib.isArray(skip)) {
+        for (var i = 0; i < skip.length; i++) {
+            s.push(skip[i]);
+        }
+    }
+
+    for (var key in params) {
+        if (s.indexOf(key) < 0) {
+            if (Lib.isFunction(params[key])) {
+                obj[key] = params[key].bind(obj);
+            } else {
+                obj[key] = params[key];
+            }
+        }
+    }
+}
+/* global root */
+
+var Lib = {
+    expand: function () {
+        if (arguments.length < 1) {
+            throw new Error('Error: Lib.expand(obj1, obj2, ... )');
+        }
+        var o = arguments[0];
+        if (!(Lib.isObject(o))) {
+            throw new Error('Error: Lib.expand() first param should be {} or []');
+        }
+
+        for (var i = 1; i < arguments.length; i++) {
+            var e = arguments[i];
+            if (Lib.isObject(e)) {
+                for (var key in e) {
+                    o[key] = e[key];
+                }
+            }
+        }
+        o = null;
+        e = null;
+    },
+    encode_utf8: function (text_utf8) {
+        //对应 php decode:
+        // $txt_utf8 = urldecode(base64_decode($txt_b64));
+        //return root.btoa(root.encodeURIComponent(text_utf8));
+        return root.encodeURIComponent(text_utf8);
+    },
+    decode_utf8: function (text_base64) {
+        // 对应 php encode: 
+        // $txt_b64 =base64_encode(rawurlencode($txt_utf8));
+        // **** 注意是带raw三个字母 **** 
+        // 不要问为什么！记住php是世界上最好的语言就对了！！
+        //return (root.decodeURIComponent(root.atob(text_base64)));
+        return (root.decodeURIComponent(text_base64));
+    },
+    load_html: function (id) {
+        return(root.document.getElementById(id).innerHTML);
+    },
+    get_elsbyname: function (name) {
+        return (root.document.getElementsByName(name));
+    },
+    pad: function (n, width, leading_str) {
+        var z = leading_str || '0';
+        n = n + '';
+        return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+    },
+    clamp: function (val, min, max) {
+        return root.Math.min(root.Math.max(val, min), max);
+    },
+    html_escape: function (unsafe) {
+        if (!unsafe || unsafe.length === 0) {
+            return '';
+        }
+        return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+    },
+    array_remove_all: function (arr, value) {
+        if (!Lib.isArray(arr)) {
+            throw new Error('Error: arr is not an array!');
+        }
+        for (var i = arr.length; i >= 0; --i) {
+            if (arr[i] === value) {
+                arr.splice(i, 1);
+            }
+        }
+    },
+    array_cut_tail: function (arr, len) {
+        if (!Lib.isArray(arr)) {
+            throw new Error('Error: arr is not an array!');
+        }
+        len = len || 25;
+        while (arr.length > len) {
+            arr.pop();
+        }
+    },
+    array_unshift: function (arr, el, len) {
+        if (!Lib.isArray(arr)) {
+            throw new Error('Error: arr is not an array!');
+        }
+        len = len || 25;
+        Lib.array_remove_all(el);
+        arr.unshift(el);
+        Lib.array_cut_tail(arr);
+    },
+    rand: function (len) {
+        len = len || 32;
+        var chars = 'abcdefghijklmnopqrstuvwxyz'
+                + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+                + '0123456789';
+        var maxPos = chars.length;
+        var rtv = '';
+        for (var i = 0; i < len; i++) {
+            rtv += chars.charAt(root.Math.floor(root.Math.random() * maxPos));
+        }
+        return rtv;
+    },
+    get_DOM_offset: function (el) {
+        var left, top, rect;
+        rect = el.getBoundingClientRect();
+        var sx = (root.pageXOffset !== undefined)
+                ? root.pageXOffset
+                : (root.document.documentElement || root.document.body.parentNode || root.document.body).scrollLeft;
+
+        var sy = (root.pageYOffset !== undefined)
+                ? root.pageYOffset
+                : (root.document.documentElement || root.document.body.parentNode || root.document.body).scrollTop;
+
+        left = rect.left + sx + rect.width;
+        top = rect.top + sy + rect.height;
+        //log('rect:', rect, ' root.sx/sy:', root.scrollX, root.scrollY, ' left/top:', left, top);
+        el = null;
+        rect = null;
+        return {
+            left: left,
+            top: top
         };
-        
-        for (key in gset) {
-            this.settings[key] = gset[key];
+    },
+    url_get_page: function () {
+        var url = root.document.location.href;
+        url = url.substring(0, (url.indexOf("#") === -1) ? url.length : url.indexOf("#"));
+        url = url.substring(0, (url.indexOf("?") === -1) ? url.length : url.indexOf("?"));
+        url = url.substring(url.lastIndexOf("/") + 1, url.length);
+        return url;
+    },
+    url_set_params: function (page, params) {
+        params = params || {};
+        //log('url_set_param:',page,params);
+        if (root.history.pushState) {
+            var pstr = '', dl = '?';
+            for (var key in params) {
+                pstr += dl + key + '=' + params[key];
+                dl = '&';
+            }
+            root.history.pushState({}, null, page + pstr);
+        }
+    },
+    url_get_param: function (name) {
+        var url = root.location.href;
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+        regex = null;
+        if (!results || !results[2]) {
+            return false;
+        }
+        return root.decodeURIComponent(results[2].replace(/\+/g, " "));
+    },
+    type: function (obj) {
+        return Object.prototype.toString.call(obj).slice(8, -1);
+    },
+    getYMD: function (date_str) {
+        //var date_str = "2011-08-03 09:15:11"; 
+        var d = date_str.split(" ");
+        if (d && d[0]) {
+            return d[0];
+        }
+        return 'none';
+    },
+    getTime: function (date_str) {
+        var d = date_str.split(" ");
+        if (d && d[1]) {
+            return d[1];
+        }
+        return 'none';
+    },
+    cookie_set: function (name, value, expires) {
+        //默认一年,expires默认一个月
+        expires = expires || 30 * 24 * 60 * 60;
+        expires = expires * 1000;
+        var exp = new Date(), str;  //获得当前时间  
+        exp.setTime(exp.getTime() + expires);  //换成毫秒  
+        str = name + "=" + root.escape(value) + ";expires=" + exp.toGMTString();
+        exp = null;
+        root.document.cookie = str;
+    },
+    cookie_get: function (name) {
+        var arr = root.document.cookie.match(new RegExp("(^| )" + name + "=([^;]*)(;|$)"));
+        if (arr !== null) {
+            var r = arr[2];
+            arr = null;
+            return root.unescape(r);
+        } else {
+            return "";
+        }
+    },
+    cookie_del: function (name) {
+        var exp = new Date();  //当前时间  
+        exp.setTime(exp.getTime() - 1);
+        var cval = Lib.cookie_get(name);
+        var r = name + "=" + cval + ";expires=" + exp.toGMTString();
+        exp = null;
+        if (cval !== null) {
+            root.document.cookie = r;
+        }
+    },
+    isBoolean: function (o) {
+        return (Lib.type(o) === 'Boolean');
+    },
+    isFunction: function (o) {
+        return (Lib.type(o) === 'Function');
+    },
+    isObject: function (o) {
+        return (Lib.type(o) === 'Object');
+    },
+    isString: function (v) {
+        return (typeof v === 'string' || v instanceof String);
+    },
+    isArray: function (obj) {
+        return Object.prototype.toString.call(obj) === "[object Array]";
+    }
+
+};
+
+// gen_key 只可以在 js 文件里调用,返回js文件名及调用行号。
+Lib.gen_key = (function () {
+    var e = new Error();
+    if (!e.stack)
+        try {
+            // IE requires the Error to actually be throw or else the Error's 'stack'
+            // property is undefined.
+            throw e;
+        } catch (e) {
+            if (!e.stack) {
+                log('Error: your browser do not support Error.stack!');
+                throw new Error('Error: your browser do not support Error.stack!');
+                return 0; // IE < 10, likely
+            }
+        }
+    var stack = e.stack.toString().split(/\r\n|\n/),
+            frame,
+            frameRE = /:(\d+):(?:(\d+))[^\d]*$/,
+            scriptRE = /\/(\w+)\.js/;
+
+    e = null;
+
+    do {
+        frame = stack.shift();
+    } while (!frameRE.exec(frame) && stack.length);
+
+    frame = (stack.shift());
+
+    var m = frameRE.exec(frame);
+
+    var line = m[1],
+            char = m[2],
+            script = scriptRE.exec(frame)[1];
+    frameRE = null;
+    scriptRE = null;
+    m = null;
+
+    var k = 'key_' + script + '_' + line + '_' + char;
+
+    //var k='key_' + script + '_' + line ;
+    //log(k);
+    return k;
+});/* global root, gvars, Lib */
+
+// cardjs.card.f
+
+var Funcs = {
+    trigger: function (key) {
+        //log(this);
+        if (!(key in this.cjsv.ev_handler)) {
+            throw new Error('Error: Card.cjsv.ev_handler[' + key + '] not define!');
+        }
+        this.cjsv.ev_handler[key]();
+    },
+    on: function (event, id_key, ev_key) {
+
+        // 绑定事件
+        if (ev_key === undefined) {
+            ev_key = id_key;
         }
 
-        Lib.expand(this.settings, params.settings);
-
-        this.cjsv = {
-            // 登记 this.f.event()的时候记录下事件名.close的时候销毁事件.
-            cevs: {}
-        };
-
-        this.f = {
-            fetch:funcs.fetch.bind(this)
-        };
-
-        for (var k in Database) {
-            this.f[k] = Database[k].bind(this);
+        if (!(ev_key in this.cjsv.ev_handler)) {
+            throw new Error('Error: Card.f.on: ev_handler[' + ev_key + '] not define!');
         }
 
-        this.self = true;
-    };
-
-    Package.prototype.destroy = function () {
-        call_method.bind(this)('clean_up');
-        var key;
-        for (key in this.cjsv.cevs) {
-            this.f.event(key, false);
-            delete this.cjsv.cevs[key];
+        if (this.el(id_key, true).addEventListener) {
+            this.el(id_key, true).addEventListener(event, this.cjsv.ev_handler[ev_key], false);
+        } else {
+            //ie
+            this.el(id_key, true).attachEvent("on" + event, this.cjsv.ev_handler[ev_key]);
         }
-        for (key in this.f) {
-            this.f[key] = null;
-            delete this.f[key];
+        this.cjsv.evs.push([event, id_key, ev_key]);
+    },
+    off: function (event, id_key, ev_key) {
+        // 解绑事件
+        if (ev_key === undefined) {
+            ev_key = id_key;
         }
-        for (key in this) {
-            this[key] = null;
+
+        if (this.el(id_key, true).removeEventListener) {
+            this.el(id_key, true).removeEventListener(event, this.cjsv.ev_handler[ev_key], false);
+        } else {
+            //ie
+            this.el(id_key, true).detachEvent("on" + event, this.cjsv.ev_handler[ev_key]);
         }
-        this.self = false;
-    };
-
-    var Card = function (container_id) {
-
-        var key;
-
-        this.self = root.document.getElementById(container_id);
-
-        this.settings = {
-            // 服务页面url
-            server_page: 'serv.php',
-            key: 'share',
-            // 自动生成的id以什么开头（方便调试）
-            header: 'card',
-            // 这个卡片是否需要绑定事件
-            add_event: false,
-            // 显示debug信息 
-            verbose: false
-        };
-
-        for (key in gset) {
-            this.settings[key] = gset[key];
+    },
+    merge: function (s) {
+        for (var key in s) {
+            this.settings[key] = s[key];
         }
+    },
+    clear_timer: function (num) {
+        num = num || 0;
+        if (num in this.cjsv.timer) {
+            if (this.cjsv.timer[num]) {
+                root.clearInterval(this.cjsv.timer[num]);
+            }
+            delete this.cjsv.timer[num];
+        }
+    },
+    set_timer: function (call_back, interval, num) {
+        num = num || 0;
+        interval = interval || 3000;
+        this.f.clear_timer(num);
+        call_back.bind(this)();
+        this.cjsv.timer[num] = root.setInterval(call_back, interval);
+    },
+    fetch: function () {
 
         /* 
-         * CARD内部使用的变量，设个奇怪的名包装起来不用占太多变量名。
-         * fyi. cjsv = cardjs_variables
+         * fetch( op,param,func_ok,func_fail,verbose)
+         * 
+         * 这些参数的位置可变
+         * 
+         * 第一个出现的函数为 func_ok(json_object) 操作成功时的回调函数。
+         * 第二个出再的函数为 func_fail(string) 操作失败时的回调函数。
+         * 
+         * 非函数参数以下简称参数：
+         * 第一个出现的参数必须为字符串，内容为 serv.php 中相应的函数名。
+         * 第二个出现的参数为调用 serv.php 的函数的参数。
+         * 如果最后一个参数是 Boolean 型，则作为是否显示调试信息开关：verbose。
+         * 
+         * 注意！如果只有两个参数，且最后一个为 Boolean 则此参数解释为调试信息开关。
+         *                    
          */
-        this.cjsv = {
-            timer: {},
-            evs: [], // this.f.on 绑定的事件
-            ev_handler: {}, // 事件响应函数
-            cevs: {}, // this.f.event 登记的事件
-            ids: {},
-            objs: {}, // cache
-            cid: container_id,
-            //wrapid: gen_id('card_wrap', 0, 16),
-            //wrap: null,
-            rendered: false,
-            event_flag: false
-        };
 
-        this.f = {};
 
-        for (key in funcs) {
-            this.f[key] = funcs[key].bind(this);
+
+        var i, params = [], func = [];
+
+        for (i = 0; i < arguments.length; i++) {
+            switch (Lib.type(arguments[i])) {
+                case 'Function':
+                    func.push(arguments[i]);
+                    break;
+                default:
+                    params.push(arguments[i]);
+                    break;
+            }
+        }
+        //log('param',params,'func',func);
+        //log('fetch arguments:',arguments,'params:',params,'func:',func);
+
+
+        if (params.length < 1 || Lib.type(params[0]) !== 'String') {
+            throw new Error('error: cardjs.CARD.fetch()', 'parameters not match!');
         }
 
-        for (key in Database) {
-            this.f[key] = Database[key].bind(this);
-        }
-
-        key = null;
-    };
-
-    /**
-     * 如果 key = undefine 返回当前id数量.
-     * 如果 obj = undefine 返回string类型的id.
-     * 如果 obj = true 返回 key 对应的 DOM object.
-     * 
-     * @param {null/num/string} key 
-     * @param {boolean} obj
-     * @returns {num/string/DOM object}
-     */
-    Card.prototype.el = function (key, obj) {
-        // Card.el() return current elements number;
-        if (key === undefined) {
-            return Object.keys(this.cjsv.ids).length;
-        }
-        // Card.el('name') return { id: header_name_GlobalCounter_randstr, obj: documnet.getElementById(id)};
-        if (obj === undefined) {
-            var id;
-            if (!(key in this.cjsv.ids)) {
-                this.cjsv.ids[key] = id = gen_id(this.settings.header, key);
+        var op, param = null, verbose = false;
+        op = params[0];
+        if (params.length > 1) {
+            if (Lib.isString(params[1])) {
+                param = params[1];
             } else {
-                id = this.cjsv.ids[key];
-            }
-            return id;
-        }
-
-        var dom = null;
-
-        if (key in this.cjsv.objs) {
-            dom = this.cjsv.objs[key];
-        } else if (key in this.cjsv.ids) {
-            dom = root.document.getElementById(this.cjsv.ids[key]);
-            // cache
-            if (dom !== null) {
-                this.cjsv.objs[key] = dom;
+                if (Lib.type(params[1]) === "Boolean" && params.length === 2) {
+                    param = null;
+                } else {
+                    param = root.JSON.stringify(params[1]);
+                }
             }
         }
 
-        return dom;
-    };
-
-    Card.prototype.show = function () {
-        if (!this.cjsv.rendered) {
-            return this.refresh();
-        }
-        return this;
-    };
-
-    Card.prototype.refresh = function () {
-        render.bind(this)();
-        this.cjsv.rendered = true;
-        return this;
-    };
-
-    // 关键方法，生成、绑定、解绑事件，生成、显示界面，数据处理。
-    function render() {
-        if (this.cjsv.event_flag) {
-            for (var key in this.cjsv.timer) {
-                this.f.clear_timer(key);
-            }
-
-            call_method.bind(this)('remove_event', true);
-            release_event.bind(this)();
-            this.cjsv.event_flag = false;
-        }
-
-        for (var key in this.cjsv.ids) {
-            if (this.cjsv.objs[key]) {
-                this.cjsv.objs[key] = null;
-                delete this.cjsv.objs[key];
-            }
-            delete this.cjsv.ids[key];
-        }
-
-        call_method.bind(this)('data_parser');
-        this.self.innerHTML = this.gen_html();
-        call_method.bind(this)('before_add_event');
-        if (this.el() > 0 && this.settings.add_event) {
-            var evh = call_method.bind(this)('gen_ev_handler', true);
-
-            if (!(Lib.isArray(evh) || Lib.isObject(evh))) {
-                throw new Error('Card.cjsv.ev_handler should be [func1(), ... ] or { name1:func1(), ... }');
-            }
-
-            for (var key in evh) {
-                this.cjsv.ev_handler[key] = evh[key].bind(this);
-            }
-
-            evh = null;
-
-            if (!this.cjsv.event_flag) {
-                call_method.bind(this)('add_event', true);
-                this.cjsv.event_flag = true;
+        if (params.length > 1) {
+            if (Lib.type(params[params.length - 1]) === "Boolean") {
+                verbose = params[params.length - 1];
             }
         }
-        call_method.bind(this)('after_add_event');
-        return this;
+        params = null;
+
+        if (func.length === 0) {
+            func.push(function (r) {
+                var flag = verbose;
+                if (flag) {
+                    log('Fetch:func_ok not set! \n Server response:');
+                }
+                log(r);
+            });
+        }
+        if (func.length === 1) {
+            func.push(function (r) {
+                var flag = verbose;
+                if (flag) {
+                    log('Fetch:func_fail not set! \n Server response:');
+                }
+                log(r);
+            });
+        }
+
+        var xhr = new root.XMLHttpRequest();
+        xhr.open('POST', this.settings.server_page);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        //log('fetch.this:',this);
+        xhr.onload = function () {
+            //log('fetch.onload.this:',this);
+            if (xhr.status !== 200) {
+                log('Fetch: Error code ' + xhr.status);
+                return;
+            }
+            if (!(this.self)) {
+                log('Fetch error: Object has been destroyed!');
+                return;
+            }
+            var raw_rsp = xhr.responseText;
+            if (verbose) {
+                log('Fetch.raw:\n' + raw_rsp);
+            }
+            var rsp = root.JSON.parse(raw_rsp);
+            if (rsp && rsp.tk) {
+                //log('update token, rsp:',rsp);
+                gvars.token = rsp.tk;
+                Lib.cookie_set('tk', gvars.token);
+            }
+            if (rsp && rsp.status && rsp.data) {
+                //function ok
+                func[0].bind(this)(rsp.data);
+            } else {
+                // function fial
+                func[1].bind(this)(rsp.msg);
+            }
+            func = null;
+        }.bind(this);
+
+        if (gvars.token === null) {
+            gvars.token = Lib.cookie_get('tk');
+        }
+        //log('op/data/tk',op,param,token);
+        xhr.send(encodeURI('tk=' + gvars.token + '&op=' + op + '&data=' + param));
     }
-    ;
-    /* 
-     * 销毁时进行一些清理工作。
-     * 如果还有些其他要清理的东西可以写个
-     * card.clean_up=function(){
-     *   ... 你想清理的东西 ...
-     * };
-     */
-    Card.prototype.destroy = function () {
+};/* global root, Lib */
 
-        for (var key in this.cjsv.timer) {
+var Event = (function () {
+    var f = {};  // event的神奇字符串和对应函数
+    var r = {
+        event: function (ev, func, status) {
+            /**
+             * 如果 status=false 则 delete e[ev][this.settings.key]
+             * 如果 func 是函数，添加到 f[ev].push({obj:this, func: func})
+             * 如果 func 是 false ，则清理 f[ev][this,*]
+             * @param {string} ev 事件名
+             * @param {function} func 监听函数
+             * @param {boolean} status 选项
+             * @returns {boolean} 操作成功/失败(通常用不上)
+             */
+
+            var i, flag;
+
+            f[ev] = f[ev] || [];
+            if (Lib.isFunction(func)) {
+                if (status === false) {
+                    //delete func
+                    flag = false;
+                    //log('before delete:', f);
+                    for (i = f[ev].length - 1; i >= 0; i--) {
+                        if (f[ev][i].obj === this && f[ev][i].func === func) {
+                            //log('match:', i);
+                            f[ev].splice(i, 1);
+                            flag = true;
+                        }
+                    }
+                    //log('after delete func:', f);
+                    return flag;
+                }
+
+                for (i = 0; i < f[ev].length; i++) {
+                    if (f[ev][i].obj === this && f[ev][i].func === func) {
+                        log('Function has already registed!', f);
+                        return false;
+                    }
+                }
+
+                this.cjsv.cevs[ev] = true; // 记录下事件名,在destroy时自动清理.
+                f[ev].push({obj: this, func: func});
+                //log('after regist new function:', f);
+                return true;
+            }
+
+            if (func === false) {
+                //delete ev listener
+                flag = false;
+                //log('before delete:', f);
+                for (i = f[ev].length - 1; i >= 0; i--) {
+                    if (f[ev][i].obj === this) {
+                        //log('match:', i);
+                        f[ev].splice(i, 1);
+                        flag = true;
+                    }
+                }
+                //log('after delete ev:', f);
+                return flag;
+            }
+
+            // trigger event
+            flag = true;
+            var el;
+            for (i = f[ev].length - 1; i >= 0; i--) {
+                el = f[ev][i];
+                if (el.obj && el.obj.self) {
+                    //log('call func:',el);
+                    el.func.bind(el.obj)(func);
+                } else {
+                    f[ev].splice(i, 1);
+                    log('Error: object not exist， event listener deleted.');
+                    flag = false;
+                }
+            }
+            el = null;
+            return flag;
+        }
+    };
+    return r;
+}());/* global root, Lib */
+
+var Cache = (function () {
+    var d = {};  // 缓存数据
+    var e = {};  // 清除缓存的神奇字符串
+    
+    var r = {
+
+        clear_cache: function (ev, status) {
+            /**
+             * 如果 status=undefined 触发ev定义的事件
+             * 如果 status=true 添加 e[ev][this.settings.key]=true
+             * 如果 status=false 则 delete e[ev][this.settings.key]
+             * @param {string} ev 事件名
+             * @param {boolean} status 选项
+             * @returns {boolean} 操作成功/失败(通常用不上)
+             */
+
+            e[ev] = e[ev] || {};
+
+            // delete event[key]
+            if (status === false) {
+                if ((ev in e) && (this.settings.key in e[ev])) {
+                    delete e[ev][this.settings.key];
+                    return true;
+                }
+                return false;
+            }
+            // add event[key]
+            if (status === true) {
+                //log('call: clear_cache(ev,key)', ev, key);
+                //log(e[ev]);
+                e[ev][this.settings.key] = true;
+                //log('after add key:', e);
+                return true;
+            }
+            //trigger event
+            if (status === undefined) {
+                if (ev in e) {
+                    //log('call: clear_cache(ev)', ev);
+                    for (var k in e[ev]) {
+                        if (k in d) {
+                            d[k] = null;
+                        }
+                    }
+                    //log('after delete cache:\n', ' d:', d, '\ne:', e);
+                    return true;
+                }
+            }
+            throw new Error('Error: CardJS.Card.f.cc_cache(ev,status) ev:string status:true/false/undefined');
+            return false;
+        },
+        cache: function (data, key) {
+            //log('db:',this);
+            if (key === undefined) {
+                key = this.settings.key;
+            }
+            if (!Lib.isString(key)) {
+                throw new Error('this.f.cache(data,key) key should be string.');
+            }
+            d[key] = data;
+            key = null;
+        },
+        restore: function (key) {
+
+            if (key !== undefined && (key in d)) {
+                return (d[key]);
+            }
+
+            if (this.settings.key in d) {
+                return (d[this.settings.key]);
+            }
+
+            return null;
+        }
+    };
+    return (r);
+}());/* global root, gvars, Cache, Event, Lib, call_method, Funcs, bind_params */
+
+// card对象的你对象
+
+var Paper = function (params) {
+
+    var cid = params.cid;
+
+    this.self = root.document.getElementById(cid);
+
+    this.settings = {
+
+        // 服务页面url
+        server_page: 'serv.php',
+
+        // 缓存/共亨数据时使用的神奇字符串
+        key: 'share',
+
+        // 自动生成的id首字符串（方便调试）
+        header: 'card',
+
+        // 是否需要绑定事件
+        add_event: false,
+
+        // 显示debug信息 
+        verbose: false
+    };
+
+    // CARD内部使用的变量，设个奇怪的名包装起来不用占太多变量名。
+    // fyi. cjsv = cardjs_variables
+    this.cjsv = {
+        timer: {},
+        evs: [], // this.f.on 绑定的事件
+        ev_handler: {}, // 事件响应函数
+        cevs: {}, // this.f.event 登记的事件
+        ids: {},
+        objs: {}, // cache
+        cid: cid,
+        event_flag: false
+    };
+
+    Lib.expand(this.settings, gvars.settings, params.settings);
+
+    this.f = {};
+
+    var d = [Funcs, Cache, Event];
+    for (var i = 0; i < d.length; i++) {
+        for (var k in d[i]) {
+            this.f[k] = d[i][k].bind(this);
+        }
+    }
+
+};
+
+// 我真的不知道为什么我喜欢给他设个根本用不上的名字 ...
+Paper.prototype.name = 'Paper';
+
+/**
+ * 如果 key = undefine 返回当前id数量.
+ * 如果 obj = undefine 返回string类型的id.
+ * 如果 obj = true 返回 key 对应的 DOM object.
+ * 
+ * @param {null/num/string} key 
+ * @param {boolean} obj
+ * @returns {num/string/DOM object}
+ */
+Paper.prototype.el = function (key, obj) {
+
+    if (key === undefined) {
+        return Object.keys(this.cjsv.ids).length;
+    }
+
+    if (obj === undefined) {
+
+        if (key in this.cjsv.ids) {
+            return (this.cjsv.ids[key]);
+        }
+
+        var id = [
+            this.settings.header,
+            key,
+            (gvars.cur_serial_id)++,
+            Lib.rand(8)
+        ].join('_');
+
+        this.cjsv.ids[key] = id;
+
+        return id;
+    }
+
+    var dom = null;
+
+    if (key in this.cjsv.objs) {
+        dom = this.cjsv.objs[key];
+    } else if (key in this.cjsv.ids) {
+        dom = root.document.getElementById(this.cjsv.ids[key]);
+        // cache
+        if (dom !== null) {
+            this.cjsv.objs[key] = dom;
+        }
+    }
+
+    return dom;
+};
+
+Paper.prototype.__clean = function (everything) {
+    var key;
+    if (this.cjsv.event_flag) {
+        call_method.bind(this)('remove_event', true);
+
+        for (key in this.cjsv.timer) {
             this.f.clear_timer(key);
         }
 
-        if (this.cjsv.event_flag) {
-            call_method.bind(this)('remove_event', true);
-            release_event.bind(this)();
-            this.cjsv.event_flag = false;
-        }
-
-        for (var key in this.cjsv.cevs) {
-            this.f.event(key, false);
-            delete this.cjsv.cevs[key];
-        }
-
-        call_method.bind(this)('clean_up');
-        //this.cjsv.timer={};
-        for (var key in this.cjsv.ids) {
-            if (this.cjsv.objs[key]) {
-                //this.cjsv.objs[key] = null;
-                delete this.cjsv.objs[key];
-            }
-            delete this.cjsv.ids[key];
-        }
-
-        for (var key in this.f) {
-            delete this.f[key];
-        }
-        for (var key in this) {
-            this[key] = null;
-        }
-    };
-
-    var gen_id = (function () {
-        var id_counter = 0;
-        return (
-                function (header, key, len) {
-                    len = len || 8;
-                    return  header + '_' + key + '_' + (id_counter++) + '_' + Lib.rand(len);
-                });
-    }());
-
-
-
-    // 我真的不知道为什么我喜欢给他设个根本用不上的名字 ...
-    Card.prototype.name = 'CARD';
-
-    Card.prototype.gen_html = function () {
-        throw new Error('Card.prototype.gen_html(): Please rewrite this function.');
-        return '';
-    };
-
-    // 自动释放通过 card.f.on 绑定的事件。后面的 remove_event 是手动。
-    function release_event() {
-        var key;
         if (this.cjsv.evs.length > 0) {
-            //console.log('before release_event:', this.cjsv.evs);
+            //log('before release_event:', this.cjsv.evs);
             var e = this.cjsv.evs;
             for (key in e) {
                 e[key] && this.f.off(e[key][0], e[key][1], e[key][2]);
                 delete e[key];
             }
-            //console.log('after release_event:', this.cjsv.evs);
+            //log('after release_event:', this.cjsv.evs);
             e = null;
 
         }
@@ -3129,61 +3673,210 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
         for (key in this.cjsv.ev_handler) {
             delete this.cjsv.ev_handler[key];
         }
-        key = null;
+
+        this.cjsv.event_flag = false;
     }
 
-    // 如果card中有就调用，没有就显示一行debug信息。
-    function call_method(fn, warn) {
-        //console.log(this,fn,warn);
-        if (fn in this) {
-            return(this[fn]());
-        }
-        if (warn && this.settings.verbose) {
-            console.log('Call undefine method: Card.prototype.funcs.' + fn + '()');
-        }
-        return false;
+    for (key in this.cjsv.cevs) {
+        this.f.event(key, false);
+        delete this.cjsv.cevs[key];
     }
 
-    var Page = function (cid, cards, style) {
-        // style={'cards':css_name,'card':css_name};
-        if (!(Lib.isString(cid) && Lib.isArray(cards))) {
-            console.log('cid:', cid, ' cards:', cards);
-            throw new Error('Error: new Page(cid,[ card1, card2, ...] )');
+    if (everything) {
+        call_method.bind(this)('clean_up');
+    }
+
+    //this.cjsv.timer={};
+    for (key in this.cjsv.ids) {
+        if (this.cjsv.objs[key]) {
+            //this.cjsv.objs[key] = null;
+            delete this.cjsv.objs[key];
+        }
+        delete this.cjsv.ids[key];
+    }
+};
+
+Paper.prototype.show = function () {
+
+    this.__clean(false);
+
+    call_method.bind(this)('data_parser');
+    this.self.innerHTML = this.gen_html();
+    call_method.bind(this)('before_add_event');
+    if (this.el() > 0 && this.settings.add_event) {
+        var evh = call_method.bind(this)('gen_ev_handler', true);
+
+        if (!(Lib.isArray(evh) || Lib.isObject(evh))) {
+            throw new Error('gen_ev_handler should return func_arr or func_dict.');
         }
 
-        Card.call(this, cid);
-        this.style = style || null;
-        this.cards = cards;
-        this.settings.header = 'page';
-        this.children = [];
-    };
-
-    inherit(Page, Card);
-
-    Page.prototype.name = 'PAGE';
-
-    Page.prototype.clean_up = function () {
-        for (var key in this.children) {
-            //console.log('page destroy:',this.children[key]);
-            this.children[key] && this.children[key].destroy();
+        for (var key in evh) {
+            this.cjsv.ev_handler[key] = evh[key].bind(this);
         }
-        this.children = [];
-    };
 
-    Page.prototype.gen_html = function () {
-        var html = '';
+        evh = null;
 
-        for (var i = 0; i < this.cards.length; i++) {
-            html += '<div id="' + this.el(i) + '" ';
-            if (this.style && this.style['card']) {
-                html += ' class="' + this.style['card'] + '" ';
-            }
-            html += '></div>';
+        if (!this.cjsv.event_flag) {
+            call_method.bind(this)('add_event', true);
+            this.cjsv.event_flag = true;
         }
-        return html;
+    }
+    call_method.bind(this)('after_add_event');
+
+    return this;
+};
+
+
+/* 
+ * 销毁时进行一些清理工作。
+ * 如果还有些其他要清理的东西可以写个
+ * card.clean_up=function(){
+ *   ... 你想清理的东西 ...
+ * };
+ */
+Paper.prototype.destroy = function () {
+
+    this.__clean(true);
+
+    for (var key in this.f) {
+        delete this.f[key];
+    }
+    for (var key in this) {
+        this[key] = null;
+    }
+};
+
+Paper.prototype.gen_html = function () {
+    throw new Error('gen_html() must be redefined!');
+    return '';
+};
+
+
+/* global gvars, Lib, Funcs, Cache, call_method, Event */
+
+var Package = function (params) {
+
+    // 配合this.f.fetch()
+    this.self = true;
+
+    this.settings = {
+        key: 'pkgshare'
     };
 
-    function get_obj(str) {
+    Lib.expand(this.settings, gvars.settings, params.settings);
+
+    this.cjsv = {
+        // 登记 this.f.event()的时候记录下事件名.close的时候销毁事件.
+        cevs: {}
+    };
+
+    this.f = {
+        fetch: Funcs.fetch.bind(this)
+    };
+
+    var d = [Cache, Event];
+    for (var i = 0; i < d.length; i++) {
+        for (var k in d[i]) {
+            this.f[k] = d[i][k].bind(this);
+        }
+    }
+
+    bind_params(this, params, ['type']);
+
+    this.init();
+
+};
+
+Package.prototype.init = function () {
+    // please redefine this function
+};
+
+Package.prototype.destroy = function () {
+    call_method.bind(this)('clean_up');
+    var key;
+    for (key in this.cjsv.cevs) {
+        this.f.event(key, false);
+        delete this.cjsv.cevs[key];
+    }
+    for (key in this.f) {
+        this.f[key] = null;
+        delete this.f[key];
+    }
+    for (key in this) {
+        this[key] = null;
+    }
+    this.self = false;
+};/* global root, gvars, Cache, Lib, call_method, bind_params, Paper */
+
+// card对象
+
+var Card = function (params) {
+
+    Paper.call(this,params);
+    bind_params(this, params);
+ 
+};
+
+inherit(Card, Paper);
+
+Card.prototype.name = 'CARD';
+
+
+
+/* global Lib, root, Paper */
+
+//var Page = function (cid, cards, style) {
+var Page = function (params) {
+    // style={'cards':css_name,'card':css_name};
+    var cid = params.cid,
+            cards = params.cards;
+
+    if (!(Lib.isString(cid) && Lib.isArray(cards))) {
+        log('cid:', cid, ' cards:', cards);
+        throw new Error('Please check params!');
+    }
+
+    Paper.call(this, params);
+
+    this.style = params.style || null;
+    this.cards = params.cards;
+    this.settings.header = 'page';
+    this.children = [];
+    bind_params(this, params, ['style', 'cards']);
+
+};
+
+inherit(Page, Paper);
+
+Page.prototype.name = 'PAGE';
+
+Page.prototype.clean_up = function () {
+    for (var key in this.children) {
+        //log('page destroy:',this.children[key]);
+        this.children[key] && this.children[key].destroy();
+    }
+    this.children = [];
+};
+
+Page.prototype.gen_html = function () {
+    var html = '';
+
+    for (var i = 0; i < this.cards.length; i++) {
+        html += '<div id="' + this.el(i) + '" ';
+        if (this.style && this.style.card) {
+            html += ' class="' + this.style.card + '" ';
+        }
+        html += '></div>';
+    }
+    return html;
+};
+
+Page.prototype.after_add_event = function () {
+    
+    this.clean_up();
+    //log('page.this', this);
+
+    function get_obj_from_string(str) {
         var obj = root;
         var s = str.split('.');
         for (var i = 0; i < s.length && obj !== undefined; i++) {
@@ -3192,820 +3885,176 @@ header:o[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:o[2].replace(/^ *|\
         return obj;
     }
 
-    Page.prototype.after_add_event = function () {
-        this.clean_up();
-        //console.log('page.this', this);
+    for (var i = 0; i < this.cards.length; i++) {
+        var c = get_obj_from_string(this.cards[i]);
+        var o = c(this.el(i));
+        this.children.push(o.show());
+    }
+};/* global Paper, Lib */
 
-        for (var i = 0; i < this.cards.length; i++) {
-            this.children.push(get_obj(this.cards[i])(this.el(i)).show());
-        }
-    };
+var Panel = function (params) {
 
-    var Panel = function (cid, pages, style) {
-        //console.log('pages.type:', Lib.type(pages));
-        if (!(Lib.isString(cid) && Lib.type(pages) === 'Object')) {
-            console.log('cid:', cid, ' pages:', pages, ' style:', style);
-            throw new Error('Error: new Panel(cid,{name1:[card1, card2, ...],name2:[card, ...], ... )');
-        }
-        Card.call(this, cid);
-        // style={'tags':css,'tag_active':css,'tag_normal':css,'page':css,'card':css};
-        this.style = style || null;
-        this.tags = Object.keys(pages);
-        this.pages = pages;
-        this.child = null;
-        this.settings.header = 'panel';
-        this.settings.add_event = true;
-    };
+    var cid = params.cid,
+            pages = params.pages,
+            style = params.style;
 
-    inherit(Panel, Card);
+    if (!(Lib.isString(cid) && Lib.type(pages) === 'Object')) {
+        log('cid:', cid, ' pages:', pages, ' style:', style);
+        throw new Error('Please check params!');
+    }
 
-    // I really don't know why I like to set a name.
-    Panel.prototype.name = 'PANEL';
+    Paper.call(this, params);
 
-    Panel.prototype.clean_up = function () {
-        this.child && this.child.destroy();
-        this.child = null;
-    };
+    var pages = params.pages;
 
-    Panel.prototype.gen_html = function () {
-        var html = '<div ';
-        if (this.style && this.style['tags']) {
-            html += ' class="' + this.style['tags'] + '"';
-        }
-        html += '>';
-        for (var i = 0; i < this.tags.length; i++) {
-            html += '<input type="button" id="' + this.el(i) + '" value="' + this.tags[i] + '" >';
-        }
-        html += '</div><div id="' + this.el(i) + '" ';
-        if (this.style && this.style['page']) {
-            html += ' class="' + this.style['page'] + '"';
-        }
-        html += '></div>';
-        return html;
-    };
+//    style={
+//        'tags':css,
+//        'tag_active':css,
+//        'tag_normal':css,
+//        'page':css,
+//        'card':css
+//    };
 
-    Panel.prototype.gen_ev_handler = function () {
-        var evs = [];
-        //console.log('gen_ev_handler.this:',this);
-        for (var i = 0; i < this.tags.length; i++) {
-            (function () {
-                var id = i;
-                evs.push(function () {
-                    //console.log('panel_switch:',this);
-                    this.clean_up();
-                    if (this.style && this.style['tag_active'] && this.style['tag_normal']) {
-                        for (var j = 0; j < this.tags.length; j++) {
-                            //pn.objs[i].setAttribute('class',
-                            this.el(j, true).setAttribute('class', this.style['tag_normal']);
-                        }
-                        this.el(id, true).setAttribute('class', this.style['tag_active']);
-                    }
-                    var page;
-                    if (this.style && this.style['card']) {
-                        page = new Page(this.el(this.tags.length), this.pages[this.tags[id]], {'card': this.style['card']});
-                    } else {
-                        page = new Page(this.el(this.tags.length), this.pages[this.tags[id]]);
-                    }
-                    this.child = page.show();
-                    page = null;
-                });
-            }());
-        }
-        //console.log('panel.gen_ev_handler:',evs);
-        return evs;
-    };
+    this.style = params.style || null;
+    this.tags = Object.keys(pages);
+    this.pages = pages;
+    this.child = null;
+    this.settings.header = 'panel';
+    this.settings.add_event = true;
 
-    Panel.prototype.add_event = function () {
-        for (var i = 0; i < this.tags.length; i++) {
-            this.f.on('click', i);
-        }
-    };
+    bind_params(this, params, ['style', 'pages']);
 
-    Panel.prototype.after_add_event = function () {
-        this.f.trigger(0);
-    };
-    
-    var token=null;
+};
 
-    var funcs = {
-        trigger: function (key) {
-            //console.log(this);
-            if (!(key in this.cjsv.ev_handler)) {
-                throw new Error('Error: Card.cjsv.ev_handler[' + key + '] not define!');
-            }
-            this.cjsv.ev_handler[key]();
-        },
-        on: function (event, id_key, ev_key) {
+inherit(Panel, Paper);
 
-            // 绑定事件
-            if (ev_key === undefined) {
-                ev_key = id_key;
-            }
+Panel.prototype.name = 'PANEL';
 
-            if (!(ev_key in this.cjsv.ev_handler)) {
-                throw new Error('Error: Card.f.on: ev_handler[' + ev_key + '] not define!');
-            }
+Panel.prototype.clean_up = function () {
+    this.child && this.child.destroy();
+    this.child = null;
+};
 
-            if (this.el(id_key, true).addEventListener) {
-                this.el(id_key, true).addEventListener(event, this.cjsv.ev_handler[ev_key], false);
-            } else {
-                //ie
-                this.el(id_key, true).attachEvent("on" + event, this.cjsv.ev_handler[ev_key]);
-            }
-            this.cjsv.evs.push([event, id_key, ev_key]);
-        },
-        off: function (event, id_key, ev_key) {
-            // 解绑事件
-            if (ev_key === undefined) {
-                ev_key = id_key;
-            }
+Panel.prototype.gen_html = function () {
+    var html = '<div ';
+    if (this.style && this.style.tags) {
+        html += ' class="' + this.style.tags + '"';
+    }
+    html += '>';
+    for (var i = 0; i < this.tags.length; i++) {
+        html += '<input type="button" id="' + this.el(i)
+                + '" value="' + this.tags[i] + '" >';
+    }
+    html += '</div><div id="' + this.el(i) + '" ';
+    if (this.style && this.style.page) {
+        html += ' class="' + this.style.page + '"';
+    }
+    html += '></div>';
+    return html;
+};
 
-            if (this.el(id_key, true).removeEventListener) {
-                this.el(id_key, true).removeEventListener(event, this.cjsv.ev_handler[ev_key], false);
-            } else {
-                //ie
-                this.el(id_key, true).detachEvent("on" + event, this.cjsv.ev_handler[ev_key]);
-            }
-        },
-        merge: function (s) {
-            for (var key in s) {
-                this.settings[key] = s[key];
-            }
-        },
-        clear_timer: function (num) {
-            num = num || 0;
-            if (num in this.cjsv.timer) {
-                if (this.cjsv.timer[num]) {
-                    root.clearInterval(this.cjsv.timer[num]);
-                }
-                delete this.cjsv.timer[num];
-            }
-        },
-        set_timer: function (call_back, interval, num) {
-            num = num || 0;
-            interval = interval || 3000;
-            this.f.clear_timer(num);
-            call_back.bind(this)();
-            this.cjsv.timer[num] = root.setInterval(call_back, interval);
-        },
-        fetch: function () {
+Panel.prototype.gen_ev_handler = function () {
 
-            /* 
-             * fetch( op,param,func_ok,func_fail,verbose)
-             * 
-             * 这些参数的位置可变
-             * 
-             * 第一个出现的函数为 func_ok(json_object) 操作成功时的回调函数。
-             * 第二个出再的函数为 func_fail(string) 操作失败时的回调函数。
-             * 
-             * 非函数参数以下简称参数：
-             * 第一个出现的参数必须为字符串，内容为 serv.php 中相应的函数名。
-             * 第二个出现的参数为调用 serv.php 的函数的参数。
-             * 如果最后一个参数是 Boolean 型，则作为是否显示调试信息开关：verbose。
-             * 
-             * 注意！如果只有两个参数，且最后一个为 Boolean 则此参数解释为调试信息开关。
-             *                    
-             */
+    var evs = [];
 
+    function change_style(id) {
 
-
-            var i, params = [], func = [];
-
-            for (i = 0; i < arguments.length; i++) {
-                switch (Lib.type(arguments[i])) {
-                    case 'Function':
-                        func.push(arguments[i]);
-                        break;
-                    default:
-                        params.push(arguments[i]);
-                        break;
-                }
-            }
-            //console.log('param',params,'func',func);
-            //console.log('fetch arguments:',arguments,'params:',params,'func:',func);
-
-
-            if (params.length < 1 || Lib.type(params[0]) !== 'String') {
-                throw new Error('error: cardjs.CARD.fetch()', 'parameters not match!');
-            }
-
-            var op, param = null, verbose = false;
-            op = params[0];
-            if (params.length > 1) {
-                if (Lib.isString(params[1])) {
-                    param = params[1];
-                } else {
-                    if (Lib.type(params[1]) === "Boolean" && params.length === 2) {
-                        param = null;
-                    } else {
-                        param = root.JSON.stringify(params[1]);
-                    }
-                }
-            }
-
-            if (params.length > 1) {
-                if (Lib.type(params[params.length - 1]) === "Boolean") {
-                    verbose = params[params.length - 1];
-                }
-            }
-            params = null;
-
-            if (func.length === 0) {
-                func.push(function (r) {
-                    var flag = verbose;
-                    if (flag) {
-                        console.log('Fetch:func_ok not set! \n Server response:');
-                    }
-                    console.log(r);
-                });
-            }
-            if (func.length === 1) {
-                func.push(function (r) {
-                    var flag = verbose;
-                    if (flag) {
-                        console.log('Fetch:func_fail not set! \n Server response:');
-                    }
-                    console.log(r);
-                });
-            }
-
-            var xhr = new root.XMLHttpRequest();
-            xhr.open('POST', this.settings.server_page);
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            //console.log('fetch.this:',this);
-            xhr.onload = function () {
-                //console.log('fetch.onload.this:',this);
-                if (xhr.status !== 200) {
-                    console.log('Fetch: Error code ' + xhr.status);
-                    return;
-                }
-                if (!(this.self)) {
-                    console.log('Fetch error: Object has been destroyed!');
-                    return;
-                }
-                var raw_rsp = xhr.responseText;
-                if (verbose) {
-                    console.log('Fetch.raw:\n' + raw_rsp);
-                }
-                var rsp = root.JSON.parse(raw_rsp);
-                if (rsp && rsp.tk) {
-                    //console.log('update token, rsp:',rsp);
-                    token=rsp.tk;
-                    Lib.cookie_set('tk', token);
-                }
-                if (rsp && rsp.status && rsp.data) {
-                    //function ok
-                    func[0].bind(this)(rsp.data);
-                } else {
-                    // function fial
-                    func[1].bind(this)(rsp.msg);
-                }
-                func = null;
-            }.bind(this);
-            
-            if (token===null){
-                token=Lib.cookie_get('tk');
-            }
-            //console.log('op/data/tk',op,param,token);
-            xhr.send(encodeURI('tk=' + token + '&op=' + op + '&data=' + param));
-        }
-    };
-
-    var Set = function (params) {
-        if (!(Lib.type(params) === 'Object')) {
-            throw new Error('Error: CardJS.Lib.set( {key1:value1,key2:value2, ... });');
-        }
-        for (var key in params) {
-            gset[key] = params[key];
-        }
-    };
-
-    var Lib = {
-        expand: function () {
-            if (arguments.length < 1) {
-                throw new Error('Error: Lib.expand(obj1, obj2, ... )');
-            }
-            var o = arguments[0];
-            if (!(Lib.isObject(arguments[0]) || Lib.isArray(arguments[0]))) {
-                throw new Error('Error: Lib.expand() first param should be {} or []');
-            }
-            for (var i = 1; i < arguments.length; i++) {
-                for (var key in arguments[i]) {
-                    o[key] = arguments[i][key];
-                }
-            }
-            o = null;
-        },
-        encode_utf8: function (text_utf8) {
-            //对应 php decode:
-            // $txt_utf8 = urldecode(base64_decode($txt_b64));
-            //return root.btoa(root.encodeURIComponent(text_utf8));
-            return root.encodeURIComponent(text_utf8);
-        },
-        decode_utf8: function (text_base64) {
-            // 对应 php encode: 
-            // $txt_b64 =base64_encode(rawurlencode($txt_utf8));
-            // **** 注意是带raw三个字母 **** 
-            // 不要问为什么！记住php是世界上最好的语言就对了！！
-            //return (root.decodeURIComponent(root.atob(text_base64)));
-            return (root.decodeURIComponent(text_base64));
-        },
-        load_html: function (id) {
-            return(root.document.getElementById(id).innerHTML);
-        },
-        get_elsbyname: function (name) {
-            return (root.document.getElementsByName(name));
-        },
-        pad: function (n, width, leading_str) {
-            var z = leading_str || '0';
-            n = n + '';
-            return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
-        },
-        clamp: function (val, min, max) {
-            return root.Math.min(root.Math.max(val, min), max);
-        },
-        html_escape: function (unsafe) {
-            if (!unsafe || unsafe.length === 0) {
-                return '';
-            }
-            return unsafe
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#039;");
-        },
-        array_remove_all: function (arr, value) {
-            if (!Lib.isArray(arr)) {
-                throw new Error('Error: arr is not an array!');
-            }
-            for (var i = arr.length; i >= 0; --i) {
-                if (arr[i] === value) {
-                    arr.splice(i, 1);
-                }
-            }
-        },
-        array_cut_tail: function (arr, len) {
-            if (!Lib.isArray(arr)) {
-                throw new Error('Error: arr is not an array!');
-            }
-            len = len || 25;
-            while (arr.length > len) {
-                arr.pop();
-            }
-        },
-        array_unshift: function (arr, el, len) {
-            if (!Lib.isArray(arr)) {
-                throw new Error('Error: arr is not an array!');
-            }
-            len = len || 25;
-            Lib.array_remove_all(el);
-            arr.unshift(el);
-            Lib.array_cut_tail(arr);
-        },
-        rand: function (len) {
-            len = len || 32;
-            var chars = 'abcdefghijklmnopqrstuvwxyz'
-                    + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-                    + '0123456789';
-            var maxPos = chars.length;
-            var rtv = '';
-            for (var i = 0; i < len; i++) {
-                rtv += chars.charAt(root.Math.floor(root.Math.random() * maxPos));
-            }
-            return rtv;
-        },
-        get_DOM_offset: function (el) {
-            var left, top, rect;
-            rect = el.getBoundingClientRect();
-            var sx = (root.pageXOffset !== undefined)
-                    ? root.pageXOffset
-                    : (root.document.documentElement || root.document.body.parentNode || root.document.body).scrollLeft;
-
-            var sy = (root.pageYOffset !== undefined)
-                    ? root.pageYOffset
-                    : (root.document.documentElement || root.document.body.parentNode || root.document.body).scrollTop;
-
-            left = rect.left + sx + rect.width;
-            top = rect.top + sy + rect.height;
-            //console.log('rect:', rect, ' root.sx/sy:', root.scrollX, root.scrollY, ' left/top:', left, top);
-            el = null;
-            rect = null;
-            return {
-                left: left,
-                top: top
-            };
-        },
-        url_get_page: function () {
-            var url = root.document.location.href;
-            url = url.substring(0, (url.indexOf("#") === -1) ? url.length : url.indexOf("#"));
-            url = url.substring(0, (url.indexOf("?") === -1) ? url.length : url.indexOf("?"));
-            url = url.substring(url.lastIndexOf("/") + 1, url.length);
-            return url;
-        },
-        url_set_params: function (page, params) {
-            params = params || {};
-            //console.log('url_set_param:',page,params);
-            if (root.history.pushState) {
-                var pstr = '', dl = '?';
-                for (var key in params) {
-                    pstr += dl + key + '=' + params[key];
-                    dl = '&';
-                }
-                root.history.pushState({}, null, page + pstr);
-            }
-        },
-        url_get_param: function (name) {
-            var url = root.location.href;
-            name = name.replace(/[\[\]]/g, "\\$&");
-            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-                    results = regex.exec(url);
-            regex = null;
-            if (!results || !results[2]) {
-                return false;
-            }
-            return root.decodeURIComponent(results[2].replace(/\+/g, " "));
-        },
-        type: function (obj) {
-            return Object.prototype.toString.call(obj).slice(8, -1);
-        },
-        getYMD: function (date_str) {
-            //var date_str = "2011-08-03 09:15:11"; 
-            var d = date_str.split(" ");
-            if (d && d[0]) {
-                return d[0];
-            }
-            return 'none';
-        },
-        getTime: function (date_str) {
-            var d = date_str.split(" ");
-            if (d && d[1]) {
-                return d[1];
-            }
-            return 'none';
-        },
-        cookie_set: function (name, value, expires) {
-            //默认一年,expires默认一个月
-            expires = expires || 30 * 24 * 60 * 60;
-            expires = expires * 1000;
-            var exp = new Date(), str;  //获得当前时间  
-            exp.setTime(exp.getTime() + expires);  //换成毫秒  
-            str = name + "=" + root.escape(value) + ";expires=" + exp.toGMTString();
-            exp = null;
-            root.document.cookie = str;
-        },
-        cookie_get: function (name) {
-            var arr = root.document.cookie.match(new RegExp("(^| )" + name + "=([^;]*)(;|$)"));
-            if (arr !== null) {
-                var r = arr[2];
-                arr = null;
-                return root.unescape(r);
-            } else {
-                return "";
-            }
-        },
-        cookie_del: function (name) {
-            var exp = new Date();  //当前时间  
-            exp.setTime(exp.getTime() - 1);
-            var cval = Lib.cookie_get(name);
-            var r = name + "=" + cval + ";expires=" + exp.toGMTString();
-            exp = null;
-            if (cval !== null) {
-                root.document.cookie = r;
-            }
-        },
-        isBoolean: function (o) {
-            return (Lib.type(o) === 'Boolean');
-        },
-        isFunction: function (o) {
-            return (Lib.type(o) === 'Function');
-        },
-        isObject: function (o) {
-            return (Lib.type(o) === 'Object');
-        },
-        isString: function (v) {
-            return (typeof v === 'string' || v instanceof String);
-        },
-        isArray: function (obj) {
-            return Object.prototype.toString.call(obj) === "[object Array]";
-        }
-
-    };
-
-    // gen_key 只可以在 js 文件里调用,返回js文件名及调用行号。
-    Lib.gen_key = (function () {
-        var e = new Error();
-        if (!e.stack)
-            try {
-                // IE requires the Error to actually be throw or else the Error's 'stack'
-                // property is undefined.
-                throw e;
-            } catch (e) {
-                if (!e.stack) {
-                    console.log('Error: your browser do not support Error.stack!');
-                    throw new Error('Error: your browser do not support Error.stack!');
-                    return 0; // IE < 10, likely
-                }
-            }
-        var stack = e.stack.toString().split(/\r\n|\n/),
-                frame,
-                frameRE = /:(\d+):(?:(\d+))[^\d]*$/,
-                scriptRE = /\/(\w+)\.js/;
-
-        e = null;
-
-        do {
-            frame = stack.shift();
-        } while (!frameRE.exec(frame) && stack.length);
-
-        frame = (stack.shift());
-
-        var m = frameRE.exec(frame);
-
-        var line = m[1],
-                char = m[2],
-                script = scriptRE.exec(frame)[1];
-        frameRE = null;
-        scriptRE = null;
-        m = null;
-
-        var k = 'key_' + script + '_' + line + '_' + char;
-
-        //var k='key_' + script + '_' + line ;
-        //console.log(k);
-        return k;
-    });
-
-    var gset = {};
-
-    var console = root.console || {log: function () {}};
-
-    function inherit(SubType, SuperType) {
-        if (Object.create) {
-            var prototype = Object.create(SuperType.prototype);
-            prototype.constructor = SubType;
-            SubType.prototype = prototype;
+        if (!this.style || !this.style.tag_active || !this.style.tag_normal) {
             return;
         }
-        function F() {}
-        F.prototype = SuperType.prototype;
-        var prototype = new F();
-        prototype.constructor = SubType;
-        SubType.prototype = prototype;
-    }
 
-    function bind_params(o, p) {
-        var skip = {'cards': null, 'type': null, 'settings': null, 'pages': null, 'style': null};
-
-        for (var key in p) {
-            if (!(key in skip)) {
-                if (Lib.isFunction(p[key])) {
-                    o[key] = p[key].bind(o);
-                } else {
-                    o[key] = p[key];
-                }
-            }
-        }
-    }
-
-
-    function Create(params) {
-
-        if (!Lib.isObject(params)) {
-            throw new Error('CardJS.Create({type:\'Card/Page/Panel\', settings:{header:\'card\', gen_html:function(){}, ...} });');
+        for (var i = 0; i < this.tags.length; i++) {
+            this.el(i, true).setAttribute('class', this.style.tag_normal);
         }
 
-        if (!('cid' in params)) {
-            //throw new Error('CardJS.Create(params): params must have key cid');
-            if (params.type === 'package') {
-                var o = new Package(params);
-                bind_params(o, params);
-                if (Lib.isFunction(o.init)) {
-                    o.init.bind(o)();
-                }
-                return o;
-            }
-            return function (cid) {
-                params.cid = cid;
-                //console.log('params:', p);
-                return Create(params);
+        this.el(id, true).setAttribute('class', this.style.tag_active);
+    }
+
+    function clicked(id) {
+        var f = function () {
+            //log('panel_switch:',this);
+            this.clean_up();
+
+            change_style.bind(this)(id);
+
+            var p = {
+                cid: this.el(this.tags.length),
+                cards: this.pages[this.tags[id]]
             };
-        }
 
-        var o = null;
-        var style = undefined;
-        var cid = params['cid'];
+            if (this.style && this.style.card) {
+                p.style = {'card': this.style.card};
+            }
 
-        switch (params['type']) {
-            case('page'):
-                if (!('cards' in params)) {
-                    throw new Error('CardJS.Create(): page must contain cards.');
-                }
-                if ('style' in params) {
-                    style = params['style'];
-                }
-                o = new Page(cid, params['cards'], style);
-                break;
-            case('panel'):
-                if (!('pages' in params)) {
-                    throw new Error('CardJS.Create(): page must contain pages.');
-                }
-                if ('style' in params) {
-                    style = params['style'];
-                }
-                o = new Panel(cid, params['pages'], style);
-                break;
-            default:
-                o = new Card(cid);
-                break;
-        }
-
-        if ('settings' in params) {
-            Lib.expand(o.settings, params['settings']);
-        }
-
-        bind_params(o, params);
-
-        style = null;
-        params = null;
-
-        return o;
+            this.child = (new Page(p)).show();
+        };
+        return f;
     }
 
+    for (var i = 0; i < this.tags.length; i++) {
+        evs.push(clicked(i));
+    }
 
-    var Database = (function () {
-        var d = {};
-        var e = {};
-        var f = {};
-        return ({
-            event: function (ev, func, status) {
-                /**
-                 * 如果 status=false 则 delete e[ev][this.settings.key]
-                 * 如果 func 是函数，添加到 f[ev].push({obj:this, func: func})
-                 * 如果 func 是 false ，则清理 f[ev][this,*]
-                 * @param {string} ev 事件名
-                 * @param {function} func 监听函数
-                 * @param {boolean} status 选项
-                 * @returns {boolean} 操作成功/失败(通常用不上)
-                 */
+    return evs;
+};
 
-                var i, flag;
+Panel.prototype.add_event = function () {
+    for (var i = 0; i < this.tags.length; i++) {
+        this.f.on('click', i);
+    }
+};
 
-                f[ev] = f[ev] || [];
-                if (Lib.isFunction(func)) {
-                    if (status === false) {
-                        //delete func
-                        flag = false;
-                        //root.console.log('before delete:', f);
-                        for (i = f[ev].length - 1; i >= 0; i--) {
-                            if (f[ev][i].obj === this && f[ev][i].func === func) {
-                                //console.log('match:', i);
-                                f[ev].splice(i, 1);
-                                flag = true;
-                            }
-                        }
-                        //root.console.log('after delete func:', f);
-                        return flag;
-                    }
+Panel.prototype.after_add_event = function () {
+    this.f.trigger(0);
+};
+/* global Lib */
 
-                    for (i = 0; i < f[ev].length; i++) {
-                        if (f[ev][i].obj === this && f[ev][i].func === func) {
-                            root.console.log('Function has already registed!', f);
-                            return false;
-                        }
-                    }
+function Create(params) {
 
-                    this.cjsv.cevs[ev] = true; // 记录下事件名,在destroy时自动清理.
-                    f[ev].push({obj: this, func: func});
-                    //root.console.log('after regist new function:', f);
-                    return true;
-                }
+    if (!Lib.isObject(params)) {
+        throw new Error('CardJS.Create({type:\'Card/Page/Panel\', settings:{header:\'card\', gen_html:function(){}, ...} });');
+    }
 
-                if (func === false) {
-                    //delete ev listener
-                    flag = false;
-                    //root.console.log('before delete:', f);
-                    for (i = f[ev].length - 1; i >= 0; i--) {
-                        if (f[ev][i].obj === this) {
-                            //console.log('match:', i);
-                            f[ev].splice(i, 1);
-                            flag = true;
-                        }
-                    }
-                    //root.console.log('after delete ev:', f);
-                    return flag;
-                }
+    if (!('cid' in params) && (params.type !== 'package')) {
+        var f = function (container_id) {
+            params['cid'] = container_id;
+            return Create(params);
+        };
+        return f;
+    }
 
-                // trigger event
-                flag = true;
-                var el;
-                for (i = f[ev].length - 1; i >= 0; i--) {
-                    el = f[ev][i];
-                    if (el.obj && el.obj.self) {
-                        //root.console.log('call func:',el);
-                        el.func.bind(el.obj)(func);
-                    } else {
-                        f[ev].splice(i, 1);
-                        console.log('Error: object not exist， event listener deleted.');
-                        flag = false;
-                    }
-                }
-                el = null;
-                return flag;
-            },
-            cc_debug: function () {
-                root.console.log('d:', d, ' e:', e);
-            },
-            clear_cache: function (ev, status) {
-                /**
-                 * 如果 status=undefined 触发ev定义的事件
-                 * 如果 status=true 添加 e[ev][this.settings.key]=true
-                 * 如果 status=false 则 delete e[ev][this.settings.key]
-                 * @param {string} ev 事件名
-                 * @param {boolean} status 选项
-                 * @returns {boolean} 操作成功/失败(通常用不上)
-                 */
+    var o = null;
 
-                e[ev] = e[ev] || {};
+    switch (params['type']) {
+        case('package'):
+            o = new Package(params);
+            break;
+        case('page'):
+            o = new Page(params);
+            break;
+        case('panel'):
+            o = new Panel(params);
+            break;
+        default:
+            o = new Card(params);
+    }
 
-                // delete event[key]
-                if (status === false) {
-                    if ((ev in e) && (this.settings.key in e[ev])) {
-                        delete e[ev][this.settings.key];
-                        return true;
-                    }
-                    return false;
-                }
-                // add event[key]
-                if (status === true) {
-                    //console.log('call: clear_cache(ev,key)', ev, key);
-                    //console.log(e[ev]);
-                    e[ev][this.settings.key] = true;
-                    //root.console.log('after add key:', e);
-                    return true;
-                }
-                //trigger event
-                if (status === undefined) {
-                    if (ev in e) {
-                        //console.log('call: clear_cache(ev)', ev);
-                        for (var k in e[ev]) {
-                            if (k in d) {
-                                d[k] = null;
-                            }
-                        }
-                        //console.log('after delete cache:\n', ' d:', d, '\ne:', e);
-                        return true;
-                    }
-                }
-                throw new Error('Error: CardJS.Card.f.cc_cache(ev,status) ev:string status:true/false/undefined');
-                return false;
-            },
-            cache: function (data, key) {
-                //console.log('db:',this);
-                if (key === undefined) {
-                    key = this.settings.key;
-                }
-                if (!Lib.isString(key)) {
-                    throw new Error('CardJS.Database.save(data,key) key must be string.');
-                }
-                d[key] = data;
-                key = null;
-            },
-            restore: function (key) {
+    return o;
+}
 
-                if (key !== undefined && (key in d)) {
-                    return (d[key]);
-                }
+/* global Card, Set, Create, Lib */
 
-                if (this.settings.key in d) {
-                    return (d[this.settings.key]);
-                }
-
-                return null;
-            }
-        });
-    }());
-
-    var exports = {
-        card: Card,
-        //page: Page,
-        //panel: Panel,
-        //db: Database,
-        lib: Lib,
-        set: Set,
-        create: Create
-    };
-
-    //root[module_name] = exports;
-
+var exports = {
+    card: function(cid){
+        var o=new Card({cid:cid});
+        return o;
+    },
+    lib: Lib,
+    set: Set,
+    create: Create
+};
     return (exports);
-});/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* global  Mustache,cardjs */
+});/* global  cardjs */
 
 cardjs.set({server_page: 'web/php/serv.php'});
 //cardjs.set({verbose: true});
@@ -4013,6 +4062,7 @@ cardjs.set({server_page: 'web/php/serv.php'});
 /*
  * cache share keys:
  * event('main_article_board_update'): 主窗口文章框提供的 update 函数 
+ * event('main_article_board_show_front_page'): 主窗口文章框显示首页
  * event('main_show_pager');
  * event('main_clear_pager');
  * event('main_update_banner'); 更新bannery
@@ -4062,8 +4112,11 @@ var sip = {
 
         msg_keep: 5
     },
-    del: {}
+    del: {
+        // for debug
+    }
 };
+/* global sip, cardjs, Mustache */
 
 sip.f.merge_uset = function (settings) {
     for (var key in settings) {
@@ -4128,32 +4181,14 @@ sip.f.filter_json = function (e) {
     }
 
     return d;
-};
+};/* global cardjs, sip */
 
 sip.db = cardjs.create({
     type: 'package',
     settings: {
         key: cardjs.lib.gen_key()
     },
-    d: {
-        data: {},
-        files: [],
-        search: {
-            kw_cache: null,
-            kw_cur: '',
-            result: []
-        },
-        page: {
-            key: null,
-            filter: '',
-            size: 5,
-            cur_page: 0,
-            cur_key: 0,
-            id_loaded: 0
-        },
-        file_key: [],
-        total_article: 0
-    },
+    d: {},
     set: function (key, value) {
         //this[key] = value;
         //console.log('set :',key,value);
@@ -4206,7 +4241,9 @@ sip.db = cardjs.create({
 
     },
 
-    search: function (raw_keywords) {
+    search: function (user_keywords) {
+
+        var raw_keywords = user_keywords.toLowerCase();
 
         if (this.d.search.kw_cache === raw_keywords) {
             //console.log('using cache!');
@@ -4223,6 +4260,7 @@ sip.db = cardjs.create({
         this.d.search.result = [];
         this.search_recursive.bind(this)(keywords, 0);
     },
+
     search_recursive: function (keywords, index) {
         if (index >= this.d.file_key.length) {
             this.f.event('show_main_search_result');
@@ -4258,8 +4296,7 @@ sip.db = cardjs.create({
             mark = 0;
             e = this.d.data[key][idx[i]];
             for (kw_idx in keywords) {
-                if (e.title.indexOf(keywords[kw_idx]) >= 0
-                        || e.text.indexOf(keywords[kw_idx]) >= 0) {
+                if (e.text.indexOf(keywords[kw_idx]) >= 0) {
                     mark++;
                 }
                 //console.log('mark:',mark,' kw:',keywords[kw_idx],'e:',e);
@@ -4277,6 +4314,7 @@ sip.db = cardjs.create({
             if (this.d.search.result.length > 15) {
                 break;
             }
+
         }
 
     },
@@ -4303,14 +4341,16 @@ sip.db = cardjs.create({
 
         console.log('Load data:' + key + '.json');
 
-        $.getJSON(path , this.got_json.bind(this, callback, key));
+        $.getJSON(path, this.got_json.bind(this, callback, key));
 
     },
 
     get: function (key) {
-        if (key === 'files') {
-            return this.d.files;
+        var pub = ['files'];
+        if (pub.indexOf(key) >= 0) {
+            return this.d[key];
         }
+        return undefined;
     },
 
     got_json: function (callback, key, data) {
@@ -4327,11 +4367,13 @@ sip.db = cardjs.create({
          * }
          */
 
-        var d = {}, e, i, div = document.createElement("div");
+        var d = {}, e, content, i, div = document.createElement("div");
         for (i = 0; i < data.length; i++) {
             e = sip.f.filter_json(data[i]);
             div.innerHTML = e.content;
-            e.text = div.textContent || div.innerText || "";
+            content = div.textContent || div.innerText || "";
+            e.text = e.title.toLowerCase() + ' ' + content.toLowerCase();
+            // e.key = key;
             d[e.id] = e;
         }
         div = null;
@@ -4344,20 +4386,29 @@ sip.db = cardjs.create({
 
     load_files: function () {
 
-        this.d.files = [];
-        this.d.search.kw_cache = null;
-        this.d.search.kw_cur = null;
-        this.d.result = [];
-        this.d.page.key = null;
-        this.d.page.filter = '';
-        this.d.page.cur_page = 0;
-        this.d.page.cur_key = 0;
-        this.d.page.id_loaded = 0;
-        this.d.file_key = [];
-        this.d.total_article = 0;
+        this.d = {
+            data: {},
+            files: undefined,
+            search: {
+                kw_cache: null,
+                kw_cur: null,
+                result: []
+            },
+            page: {
+                key: null,
+                filter: '',
+                size: 5,
+                cur_page: 0,
+                cur_key: 0,
+                id_loaded: 0
+            },
+            file_key: [],
+            total_article: 0
+        };
 
-        $.getJSON(sip.s.files_path , function (data) {
-            // console.log('files.json:', data);
+        $.getJSON(sip.s.files_path, function (data) {
+            //console.log('files.json:', data);
+            this.d.files = [];
             if ('files' in data) {
                 this.d.files = data.files;
                 //console.log('files', this.d.files);
@@ -4385,230 +4436,7 @@ sip.db = cardjs.create({
 
         this.load_files();
     }
-});
-
-sip.o.art.art_wrap = cardjs.create({
-    type: 'panel',
-    pages: {
-        '编辑': ['sip.o.art.editor'],
-        '搜索': ['sip.o.art.search_box'],
-        '图片': ['sip.o.art.list_orphan_img'],
-        '设置': ['sip.o.art.set_wrap'],
-        '备份': ['sip.o.art.backup'],
-        'MDE': ['sip.o.art.simplemde'],
-        '说明': ['sip.o.art.help']
-    },
-    style: {
-        'tags': ' ',
-        'tag_active': 'tag-active',
-        'tag_normal': 'tag-normal',
-        'page': 'page',
-        'card': ' '
-    }
-});
-
-sip.o.main.pager = cardjs.create({
-    settings: {
-        header: 'pager',
-        add_event: true
-    },
-    btn_num: 5,
-    d: {},
-    data_parser: function () {
-        var cur = sip.db.d.page.cur_page;
-        var size = sip.db.d.page.size;
-        var max = Math.ceil(sip.db.d.total_article / size);
-        var first = Math.max(0, (cur - Math.floor(this.btn_num / 2)));
-        var last = Math.min(first + this.btn_num, max);
-        first = Math.min(first, last - this.btn_num);
-        first = Math.max(first, 0);
-        if (cur > last) {
-            cur = last;
-        }
-        if (cur < first) {
-            cur = first;
-        }
-        sip.db.d.page.cur_page = cur;
-        this.d.first = first;
-        this.d.last = last;
-        this.d.cur = cur;
-        //console.log('data parser:', this.d);
-    },
-    gen_html: function () {
-        var v = [];
-        for (var i = this.d.first; i < this.d.last; i++) {
-            v.push({id: this.el(i - this.d.first + 1), value: i + 1});
-        }
-        var first = {id: this.el(0), value: '首页'};
-        return (Mustache.render(cardjs.lib.load_html('tp-main-pager'), {first: first, v: v}));
-    },
-    show_page: function (num) {
-        //console.log('show page ' + num);
-        //sip.db.d.page.cur_page = num;
-        var min = Math.max(num * sip.db.d.page.size, 0);
-        var first = 0, sum = 0, key = 0, skip = 0, per_sum = 0;
-        var d = sip.db.d;
-
-        while (sum <= min && key < d.file_key.length) {
-            first = key;
-            per_sum = sum;
-            sum += d.files[d.file_key[key]];
-            key++;
-        }
-
-        skip = Math.max(min - per_sum, 0);
-        //var k = d.file_key[first];
-        //console.log('show page: num/min/first/key/skip', num, min, first, k, skip);
-        d = null;
-        this.d.data = [];
-        this.get_data.bind(this)(first, skip);
-    },
-
-    get_data: function (key_index, skip) {
-        if (key_index >= sip.db.d.file_key.length) {
-            console.log('Last page!');
-            this.f.event('main_article_board_update', this.d.data);
-            return;
-        }
-        var size = sip.db.d.page.size;
-        var key = sip.db.d.file_key[key_index];
-        //console.log('call get data:key/idx/skip', key, key_index, skip);
-        if (key in sip.db.d.data) {
-            var ids = Object.keys(sip.db.d.data[key]).sort(function (a, b) {
-                return (a - b);
-            }).reverse();
-            //console.log(ids);
-            for (var i = skip; i < ids.length && this.d.data.length < size; i++) {
-                //console.log('push(key,idx)', key, i);
-                this.d.data.push(sip.db.d.data[key][ids[i]]);
-            }
-            if (this.d.data.length < size) {
-                this.get_data.bind(this, key_index + 1, 0)();
-                return;
-            }
-            this.f.event('main_article_board_update', this.d.data);
-        } else {
-            //console.log('load json:', key);
-            sip.db.load_json(key, this.get_data.bind(this, key_index, skip));
-        }
-    },
-
-    gen_ev_handler: function () {
-        var evs = [];
-        evs.push(function () {
-            sip.db.d.page.cur_page = 0;
-            this.refresh();
-            //this.show_page(0);
-        });
-
-        for (var i = this.d.first; i < this.d.last; i++) {
-            evs.push((function () {
-                var num = i;
-                return(function () {
-                    sip.db.d.page.cur_page = num;
-                    this.refresh();
-                    //this.show_page(num);
-                }.bind(this));
-            }.bind(this)()));
-        }
-
-        return evs;
-    },
-
-    add_event: function () {
-        for (var i = 0; i < this.el(); i++) {
-            this.f.on('click', i);
-        }
-    },
-
-    after_add_event: function () {
-        //this.f.trigger(0);
-        this.el(this.d.cur - this.d.first + 1, true).style.backgroundColor = 'skyblue';
-        this.show_page(sip.db.d.page.cur_page);
-    }
-});
-
-sip.o.main.msg = cardjs.create({
-    settings: {
-        key: cardjs.lib.gen_key(),
-        header: 'main_mbox',
-        add_event: true
-    },
-    gen_html: function () {
-        var content = Mustache.render(cardjs.lib.load_html('tp-mp-msg'), {ids: [this.el(0), this.el(1), this.el(2)]});
-        return sip.f.add_frame('tp-frame-tag-card', content, "", 'margin-bottom:8px;margin-top:0px;');
-    },
-    gen_ev_handler: function () {
-        return [
-            //enter
-            function (e) {
-                //console.log('enter key!');
-                var k = e || window.event;
-                if (k.keyCode !== 13) {
-                    return;
-                }
-                this.f.trigger(1);
-            },
-            //click
-            function () {
-                //console.log('click');
-                var d = this.el(0, true).value;
-                //console.log('msg:', d);
-                if (d.length > 0) {
-                    this.f.fetch('post_msg', d, function () {
-                        var msg = this.f.restore();
-                        if (!msg) {
-                            msg = [];
-                        }
-                        msg.unshift({
-                            ctime: new Date().toJSON().slice(0, 10),
-                            name: 'me',
-                            text: filterXSS(d)
-                        });
-                        while (msg.length > sip.uset.msg_keep) {
-                            msg.pop();
-                        }
-                        this.f.cache(msg);
-                        this.refresh();
-                    }, function (r) {
-                        alert(r);
-                    });
-                }
-            }
-        ];
-    },
-    add_event: function () {
-        this.f.on('click', 1);
-        this.f.on('keyup', 0);
-    },
-    after_add_event: function () {
-        this.el(0, true).focus();
-        var msg = this.f.restore();
-        if (msg && msg.length > 0) {
-            //console.log('using cache.');
-            this.el(2, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-mp-msg-list'), {msg: msg});
-            return;
-        }
-        $.getJSON(sip.s.msg_path , function (data) {
-            var msg = [];
-            data.forEach(function (e) {
-                msg.push({
-                    text: filterXSS(e.text),
-                    ctime: cardjs.lib.getYMD(e.ctime),
-                    name: filterXSS(e.name)
-                });
-            });
-            this.f.cache(msg);
-        }.bind(this)).fail(function () {
-            console.log('留言文件加载失败！');
-        }).always(function () {
-            if (sip.uset.show_mbox) {
-                var msg = this.f.restore();
-                this.el(2, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-mp-msg-list'), {msg: msg});
-            }
-        }.bind(this));
-    }
-});
+});/* global cardjs, sip, Mustache */
 
 sip.o.Main_wrap = cardjs.create({
 
@@ -4616,8 +4444,8 @@ sip.o.Main_wrap = cardjs.create({
         header: 'main_wrap',
         add_event: true
     },
-    
-    contents:[],
+
+    contents: [],
 
     pager: null,
 
@@ -4648,7 +4476,7 @@ sip.o.Main_wrap = cardjs.create({
             this.contents.push(sip.o.main.msg(this.el(cnum++)).show());
         }
     },
-    
+
     show_mgr_page: function () {
         //console.log('show_mgr_page developing');
         //return;
@@ -4656,7 +4484,7 @@ sip.o.Main_wrap = cardjs.create({
         this.contents.push(sip.o.art.art_wrap(this.el(4)).show());
         this.contents.push(sip.o.mgr.user_panel(this.el(6)).show());
     },
-    
+
     add_event: function () {
         this.f.on('click', 0);
         this.f.on('click', 1);
@@ -4683,7 +4511,7 @@ sip.o.Main_wrap = cardjs.create({
     clear_contents: function () {
 
         this.clear_pager();
-        
+
         //console.log('clear_contents:',this.contents);
 
         if (this.contents && this.contents.length > 0) {
@@ -4693,16 +4521,16 @@ sip.o.Main_wrap = cardjs.create({
                 e.destroy();
             });
         }
-        
+
         this.contents = [];
-        
+
         for (var i = 4; i < 10; i++) {
             this.el(i, true).innerHTML = '';
         }
     },
-    
+
     reload: function () {
-        //console.log('call main_page.refresh()');
+        //console.log('call main_page.show()');
         this.f.cache(null, 'um_cur_user_info');
         this.f.cache(null, 'um_all_user_info');
         this.clear_contents();
@@ -4740,12 +4568,88 @@ sip.o.Main_wrap = cardjs.create({
     after_add_event: function () {
         this.clear_contents();
         this.show_main_page();
-        
+
         this.f.event('main_update_banner', this.update_banner);
         this.f.event('main_clear_pager', this.clear_pager);
         this.f.event('main_show_pager', this.show_pager);
 
         this.f.event('main_update_banner');
+    }
+});/* global sip, cardjs */
+
+sip.o.AATest = function (cid) {
+    var key = cardjs.lib.gen_key();
+
+    var o = new cardjs.card(cid);
+    o.f.merge({
+        key: key,
+        header: 'test',
+        add_event: true
+    });
+
+    o.func1 = function () {
+        console.log('click t1');
+    };
+
+    o.child = null;
+    o.gen_ev_handler = function () {
+        return {
+            't1': function () {
+                console.log('click t1');
+                var salt = this.el('input1', true).value;
+                var psw = this.el('input2', true).value;
+                console.log('salt:', salt, ' psw:', psw, ' enc_psw:', md5(salt + md5(sip.s.rainbow + md5(psw))));
+            },
+            't2': function () {
+                console.log('click t2');
+
+            }
+        };
+    };
+
+    o.add_event = function () {
+        o.f.on('click', 't1');
+        o.f.on('click', 't2');
+    };
+
+    o.gen_html = function () {
+        var html = '<div style="margin:10px;">' +
+                '<input type="text" id="' + this.el('input1') + '" ><br>' +
+                '<input type="text" id="' + this.el('input2') + '" ><br>' +
+                '<input type="button" id="' + this.el('t1') + '" class="btn btn-info" value="t1">' +
+                '<input type="button" id="' + this.el('t2') + '" class="btn btn-info" value="t2">' +
+                '<div id="' + this.el('child') + '"></div>' +
+                '</div>';
+        return html;
+    };
+
+    o.clean_up = function () {
+        o.child && o.child.destroy();
+        o.child = null;
+    };
+
+
+    return o;
+
+};/* global cardjs, sip, Mustache */
+
+sip.o.art.art_wrap = cardjs.create({
+    type: 'panel',
+    pages: {
+        '编辑': ['sip.o.art.editor'],
+        '搜索': ['sip.o.art.search_box'],
+        '图片': ['sip.o.art.list_orphan_img'],
+        '设置': ['sip.o.art.set_wrap'],
+        '备份': ['sip.o.art.backup'],
+        'MDE': ['sip.o.art.simplemde'],
+        '说明': ['sip.o.art.help']
+    },
+    style: {
+        'tags': ' ',
+        'tag_active': 'tag-active',
+        'tag_normal': 'tag-normal',
+        'page': 'page',
+        'card': ' '
     }
 });
 
@@ -4794,7 +4698,7 @@ sip.o.art.search_result = function (cid, key) {
                 function (data) {
                     var cache = this.f.restore();
                     cache.content = data.data;
-                    this.refresh();
+                    this.show();
                 });
     };
 
@@ -4825,13 +4729,17 @@ sip.o.art.search_result = function (cid, key) {
         for (i = start; i < end; i++) {
             evs[i] = (function () {
                 var s = start, e = end, idx = i;
-                //console.log(sip.cache.search.content);
-                var id = (cache.content[i - s].id);
+                //console.log(cache.content[i -s]);
+                var c = cache.content[i - s];
+                var id = (c.id);
+                var key = c.ctime.substr(0, 4) + parseInt(c.ctime.substr(5, 2));
                 return(function () {
                     for (var i = s; i < e; i++) {
                         this.el(i, true).style.backgroundColor = '';
                     }
                     this.f.cache(id, 'art_select_id');
+                    cardjs.lib.url_set_params('index.html', {id: id, key: key});
+                    this.f.clear_cache('clear_art_board');
                     //sip.cache.article.selected_id = id;
                     //console.log('select id=' + id);
                     this.el(idx, true).style.backgroundColor = 'lightsalmon';
@@ -4919,7 +4827,7 @@ sip.o.art.list_orphan_img = function (cid) {
                             'path': e.path && e.path.substr(3, e.path.length)
                         });
                     }.bind(this));
-                    this.refresh();
+                    this.show();
                     if (this.data.length === 0) {
                         alert('没有孤儿图片');
                     }
@@ -4977,10 +4885,10 @@ sip.o.art.editor = function (cid) {
         });
     }
 
-    o.data_parser = function () {
-        this.editor && this.editor.destroy();
-        this.editor = null;
-    };
+//    o.data_parser = function () {
+//        this.editor && this.editor.destroy();
+//        this.editor = null;
+//    };
 
     o.gen_ev_handler = function () {
         return {
@@ -5002,17 +4910,24 @@ sip.o.art.editor = function (cid) {
 
                 this.f.clear_cache('update_article');
 
-                cardjs.lib.url_set_params('index.html');
+                //cardjs.lib.url_set_params('index.html');
 
                 this.el(5, true).innerHTML = '正在提交数据 ...';
-                this.f.fetch('post_article', data, function () {
-                    alert('提交成功!');
-                    this.f.trigger('new');
+                this.f.fetch('post_article', data, function (d) {
+                    //this.f.trigger('new');
                     sip.db.load_files();
-                }, function (r) {
+                    this.el(5, true).innerHTML = '文章: #' + d.id;
+                    this.save_cache();
+                    this.f.cache(d.id, 'art_select_id');
+                    var cache = this.f.restore();
+                    cache.cache_id = d.id;
+                    this.f.cache(cache);
+                    //console.log(cache);
+                    alert('提交成功!');
+                }.bind(this), function () {
                     this.el(5, true).innerHTML = '提交失败！';
-                    alert(r + '\n提交失败！');
-                });
+                    alert('\n提交失败！');
+                }.bind(this));
             },
             'new': function () {
                 var cache = this.f.restore() || {};
@@ -5062,7 +4977,8 @@ sip.o.art.editor = function (cid) {
                     this.el(8, true).style.display = 'none';
                 } else {
                     var pos = cardjs.lib.get_DOM_offset(this.el(7, true));
-                    this.el(8, true).style.left = (pos.left - window.Math.floor(this.el(8, true).style.width)) + "px";
+                    // style.width= "123px"
+                    this.el(8, true).style.left = (pos.left - window.parseInt(this.el(8, true).style.width)) + "px";
                     this.el(8, true).style.top = (pos.top + 8) + "px";
                     this.el(8, true).style.display = 'block';
                 }
@@ -5087,33 +5003,41 @@ sip.o.art.editor = function (cid) {
         return Mustache.render(cardjs.lib.load_html('tp-uma-editor'), {ids: ids, atype: atype});
     };
 
-    o.after_add_event = function () {
-        //this.editor && this.editor.destroy();
+    function create_editor(eid, status_bar, upload_support) {
+        
+        var e = new wangEditor('#' + eid);
 
-        this.editor = new wangEditor('#' + this.el(1));
-        //this.editor = new wangEditor(o.ids[1]);
-        if (sip.uset.upload) {
-            this.editor.customConfig.uploadImgServer = './web/php/upload.php';
-            this.editor.customConfig.uploadImgMaxSize = 4 * 1024 * 1024;
-            this.editor.customConfig.uploadImgMaxLength = 1;
+        if (upload_support) {
+            e.customConfig.uploadImgServer = './web/php/upload.php';
+            e.customConfig.uploadImgMaxSize = 4 * 1024 * 1024;
+            e.customConfig.uploadImgMaxLength = 1;
             var param = {tk: cardjs.lib.cookie_get('tk')};
 
-            this.editor.customConfig.uploadImgParams = param;
+            e.customConfig.uploadImgParams = param;
             var func = {
                 fail: function (xhr, editor, result) {
                     console.log(result.errno, result.msg);
                 }
             };
-            this.editor.customConfig.uploadImgHooks = func;
-            this.editor.customConfig.uploadFileName = 'upload';
-//            this.editor.customConfig.debug = true;
-//            this.editor.customConfig.uploadImgHeaders = {
-//                'Accept': 'text/x-json'
-//            };
+            e.customConfig.uploadImgHooks = func;
+            e.customConfig.uploadFileName = 'upload';
         }
-        this.editor.create();
 
-        //console.log(sip.cache.article);
+        e.customConfig.onchange = function () {
+            status_bar.innerHTML = "已修改，未保存";
+        };
+
+        e.create();
+
+        // plugin full screen
+        window.wangEditor.fullscreen.init('#'+eid);
+
+        return e;
+    }
+
+    o.after_add_event = function () {
+
+        this.editor = create_editor(this.el(1), this.el(5, true), sip.uset.upload);
 
         //读取缓存
         var sid, cid, uid, cache;
@@ -5197,7 +5121,7 @@ sip.o.art.editor = function (cid) {
             this.el(10, true).checked = cache.top;
             var cid = cache.cache_id;
             if (cid) {
-                this.el(5, true).innerHTML = "修改文章： #" + cid;
+                this.el(5, true).innerHTML = "文章： #" + cid;
             } else {
                 this.el(5, true).innerHTML = "新文章";
             }
@@ -5244,7 +5168,7 @@ sip.o.art.types = function (cid) {
 
                 o.f.fetch('update_uset', sip.uset, function () {
                     alert('分类信息修改成功！');
-                    this.refresh();
+                    this.show();
                 });
             },
             //key  up enter
@@ -5266,7 +5190,7 @@ sip.o.art.types = function (cid) {
                 //console.log(types);
                 sip.uset.atypes = types;
                 types = null;
-                this.refresh();
+                this.show();
             }
         ];
     };
@@ -5301,268 +5225,6 @@ sip.o.art.types = function (cid) {
     };
     return o;
 
-};
-
-sip.o.mgr.logout = function (cid, parent_update, key) {
-    return(cardjs.create({
-        cid: cid,
-        update: parent_update,
-        child: null,
-        settings: {
-            key: key,
-            header: 'mgr_logout',
-            add_event: true
-        },
-        gen_html: function () {
-            var info = this.f.restore();
-            var content = Mustache.render(cardjs.lib.load_html('tp-um-logout'), {
-                ids: [this.el(0), this.el(1), this.el(2)],
-                name: info.name
-            });
-            return sip.f.add_frame('tp-frame-tag-card', content, '', 'margin-bottom:8px;');
-        },
-        clean_up: function () {
-            this.child && this.child.destroy();
-        },
-        add_event: function () {
-            this.f.on('click', 0);
-            this.f.on('click', 1);
-        },
-        gen_ev_handler: function () {
-            return [
-                //change password
-                function () {
-                    this.child = sip.o.mgr.change_psw(this.el(2), this.update).show();
-                },
-                // logout
-                function () {
-                    this.f.clear_cache('clear_all_user_data');
-                    this.f.fetch('logout', function (r) {
-                        console.log(r);
-                        this.update();
-                    });
-                }
-            ];
-        }
-    }));
-};
-
-sip.o.mgr.change_psw = function (cid, parent_update) {
-
-    var o = new cardjs.card(cid);
-
-    o.f.merge({
-        header: 'mgr_chpsw',
-        add_event: true
-    });
-
-    o.update = parent_update;
-
-    o.gen_html = function () {
-        var id = [];
-        for (var i = 0; i < 6; i++) {
-            id.push(this.el(i));
-        }
-        return Mustache.render(cardjs.lib.load_html('tp-um-change-password'), {ids: id});
-        //return sip.f.add_frame('tp-frame-tag-card', content, '修改信息', 'margin-top:8px;');
-    };
-
-    o.gen_ev_handler = function () {
-        return [
-            function () {
-                //console.log('hello');
-                var name = "" + this.el(0, true).value;
-                var org_psw = "" + this.el(1, true).value;
-                var new_psw = "" + this.el(2, true).value;
-                var re_psw = "" + this.el(3, true).value;
-
-                if (new_psw !== re_psw) {
-                    this.el(5, true).innerHTML = '两次输出密码不同！';
-                    return;
-                }
-
-                if (new_psw.length <= 0 || org_psw.length <= 0) {
-                    this.el(5, true).innerHTML = '内容过短！';
-                    return;
-                }
-                // console.log(new_psw, org_psw, name);
-                var data = {'name': name, 'opsw': md5(sip.s.rainbow + md5(org_psw)), 'npsw': md5(sip.s.rainbow + md5(new_psw))};
-                this.f.fetch('user_modify', data, function (r) {
-                    this.el(5, true).innerHTML = cardjs.lib.html_escape(r);
-                    o.update();
-                }, false, function (r) {
-                    this.el(5, true).innerHTML = cardjs.lib.html_escape(r);
-                });
-            }
-        ];
-    };
-
-    o.add_event = function () {
-        //console.log(o.ids[4]);
-        this.f.on('click', 4, 0);
-        //o.f.on('click',1,0);
-    };
-
-    return o;
-
-};
-
-sip.o.mgr.user_mgr_wrap = cardjs.create({
-    child: null,
-    settings: {
-        header: 'mgr_umgr_wrap',
-        key: cardjs.lib.gen_key()
-    },
-    gen_html: function () {
-        var html = '<div id="' + this.el(0) + '">正在读取数据 ...</div>';
-        return sip.f.add_frame('tp-frame-tag-card', html, '账号管理');
-    },
-    update: function () {
-        this.el(0, true).innerHTML = '更新数据中 ... ';
-        this.f.cache(null);
-        this.after_add_event();
-    },
-    after_add_event: function () {
-        this.f.clear_cache('clear_all_user_data', true);
-        this.clean_up();
-        var cache = this.f.restore();
-        if (cache) {
-            this.child = sip.o.mgr.user_mgr(this.el(0), this.settings.key, this.update.bind(this)).show();
-            return;
-        }
-        this.f.fetch('fetch_all_user_info', function (data) {
-            this.f.cache(data);
-            this.child = sip.o.mgr.user_mgr(this.el(0), this.settings.key, this.update.bind(this)).show();
-        });
-    },
-    clean_up: function () {
-        this.child && this.child.destroy();
-        //this.f.cache(null);
-    }
-});
-
-sip.o.mgr.user_mgr = function (cid, key, parent_update) {
-
-    var o = new cardjs.card(cid);
-
-    o.f.merge({
-        key: key,
-        header: "um_manage",
-        add_event: true
-    });
-
-    o.update = parent_update;
-
-    o.after_add_event = function () {
-        o.f.trigger(0);
-    };
-
-    o.gen_ev_handler = function () {
-        return [
-            // select change
-            function () {
-                var id = this.el(0, true).value,
-                        uinfo = this.f.restore();
-
-                this.el(1, true).value = cardjs.lib.html_escape(uinfo.name_list[id]);
-                this.el(8, true).value = cardjs.lib.html_escape(uinfo.user_list[id]);
-                if (uinfo.ban_list[id]) {
-                    this.el(8, true).style.backgroundColor = 'lightgray';
-                } else {
-                    this.el(8, true).style.backgroundColor = 'transparent';
-                }
-                var pv = cardjs.lib.get_elsbyname(this.el(3));
-                for (var i = 0; i < pv.length; i++) {
-                    pv[i].checked = uinfo.user_prv[id][uinfo.prv_list[i]];
-                }
-            },
-            // reset psw
-            function () {
-                var id = this.el(0, true).value;
-                o.f.fetch('user_reset', id, function (d) {
-                    //console.log(d);
-                    alert(d);
-                    this.update();
-                }, function (r) {
-                    alert(r);
-                });
-            },
-            //ban
-            function () {
-                var id = this.el(0, true).value;
-                o.f.fetch('user_ban', id, function (d) {
-                    alert(d);
-
-                    this.update();
-                }, function (r) {
-                    alert(r);
-                });
-            },
-            //modify user
-            function () {
-                var cache = this.f.restore();
-                var id = this.el(0, true).value,
-                        name = this.el(1, true).value,
-                        user = this.el(8, true).value,
-                        pv = cardjs.lib.get_elsbyname(this.el(3)),
-                        p = [];
-                for (var i = 0; i < pv.length; i++) {
-                    if (pv[i].checked) {
-                        p.push(cache.prv_list[i]);
-                    }
-                }
-                o.f.fetch('user_management', {'id': id, 'name': name, 'user': user, 'prv_list': p},
-                        function (r) {
-                            alert(r);
-                            this.update();
-                        }, function (r) {
-                    alert(r);
-                });
-                //console.log(p);
-            },
-            // add user
-            function () {
-                var param = {
-                    user: this.el(8, true).value,
-                    name: this.el(1, true).value,
-                    prv: []
-                };
-                var cache = this.f.restore();
-                var pv = cardjs.lib.get_elsbyname(this.el(3));
-                for (var i = 0; i < pv.length; i++) {
-                    if (pv[i].checked) {
-                        param.prv.push(cache.prv_list[i]);
-                    }
-                }
-                //console.log(param);
-                this.f.fetch('user_add', param, function (r) {
-                    alert(r);
-                    this.update();
-                }, function (r) {
-                    alert(r);
-                });
-            }
-        ];
-    };
-
-    o.add_event = function () {
-        o.f.on('change', 0);
-        o.f.on('click', 5, 1);
-        o.f.on('click', 6, 2);
-        o.f.on('click', 4, 3);
-        o.f.on('click', 7, 4);
-    };
-
-    o.gen_html = function () {
-        var cache = this.f.restore();
-        cache.ids = [];
-        for (var i = 0; i < 9; i++) {
-            cache.ids.push(this.el(i));
-        }
-        return Mustache.render(cardjs.lib.load_html("tp-um-modify"), cache);
-    };
-
-    return o;
 };
 
 sip.o.art.set_wrap = function (cid) {
@@ -5859,60 +5521,985 @@ sip.o.art.simplemde = function (cid) {
     return o;
 };
 
-sip.o.AATest = function (cid) {
-    var key = cardjs.lib.gen_key();
-
+sip.o.art.backup = function (cid) {
     var o = new cardjs.card(cid);
     o.f.merge({
-        key: key,
-        header: 'test',
+        header: 'art_backup',
         add_event: true
     });
 
-    o.func1 = function () {
-        console.log('click t1');
+    o.gen_html = function () {
+        return Mustache.render(cardjs.lib.load_html('tp-uma-backup'), {ids: [this.el(0), this.el(1)]});
     };
 
-    o.child = null;
     o.gen_ev_handler = function () {
-        return {
-            't1': function () {
-                console.log('click t1');
-                var salt = this.el('input1',true).value;
-                var psw = this.el('input2',true).value;
-                console.log('salt:',salt,' psw:',psw,' enc_psw:',md5(salt + md5(sip.s.rainbow + md5(psw))));
+        return [
+            function () {
+                o.f.fetch('export_picdb', function (r) {
+                    alert(r);
+                }, function (r) {
+                    alert(r);
+                });
             },
-            't2': function () {
-                console.log('click t2');
-
+            function () {
+                if (confirm('现有数据将被清除，确定要导入数据？')) {
+                    o.f.fetch('import_from_json', function (r) {
+                        alert(r);
+                        cardjs.lib.url_set_params('index.html', {});
+                        window.location.reload(true);
+                    }, function (r) {
+                        alert(r);
+                        cardjs.lib.url_set_params('index.html', {});
+                        window.location.reload(true);
+                    });
+                }
             }
-        };
+        ];
     };
 
     o.add_event = function () {
-        o.f.on('click', 't1');
-        o.f.on('click', 't2');
+        o.f.on('click', 0);
+        o.f.on('click', 1);
+    };
+
+    return o;
+
+};/* global cardjs, Mustache, sip */
+
+sip.o.main.pager = cardjs.create({
+    settings: {
+        header: 'pager',
+        add_event: true
+    },
+    btn_num: 5,
+    d: {},
+    data_parser: function () {
+        var cur = sip.db.d.page.cur_page;
+        var size = sip.db.d.page.size;
+        var max = Math.ceil(sip.db.d.total_article / size);
+        var first = Math.max(0, (cur - Math.floor(this.btn_num / 2)));
+        var last = Math.min(first + this.btn_num, max);
+        first = Math.min(first, last - this.btn_num);
+        first = Math.max(first, 0);
+        if (cur > last) {
+            cur = last;
+        }
+        if (cur < first) {
+            cur = first;
+        }
+        sip.db.d.page.cur_page = cur;
+        this.d.first = first;
+        this.d.last = last;
+        this.d.cur = cur;
+        //console.log('data parser:', this.d);
+    },
+    gen_html: function () {
+        var v = [];
+        for (var i = this.d.first; i < this.d.last; i++) {
+            v.push({id: this.el(i - this.d.first + 1), value: i + 1});
+        }
+        var first = {id: this.el(0), value: '首页'};
+        return (Mustache.render(cardjs.lib.load_html('tp-main-pager'), {first: first, v: v}));
+    },
+    show_page: function (num) {
+        //console.log('show page ' + num);
+        //sip.db.d.page.cur_page = num;
+        var min = Math.max(num * sip.db.d.page.size, 0);
+        var first = 0, sum = 0, key = 0, skip = 0, per_sum = 0;
+        var d = sip.db.d;
+
+        while (sum <= min && key < d.file_key.length) {
+            first = key;
+            per_sum = sum;
+            sum += d.files[d.file_key[key]];
+            key++;
+        }
+
+        skip = Math.max(min - per_sum, 0);
+        //var k = d.file_key[first];
+        //console.log('show page: num/min/first/key/skip', num, min, first, k, skip);
+        d = null;
+        this.d.data = [];
+        this.get_data.bind(this)(first, skip);
+    },
+
+    get_data: function (key_index, skip) {
+        if (key_index >= sip.db.d.file_key.length) {
+            console.log('Last page!');
+            this.f.event('main_article_board_update', this.d.data);
+            return;
+        }
+        var size = sip.db.d.page.size;
+        var key = sip.db.d.file_key[key_index];
+        //console.log('call get data:key/idx/skip', key, key_index, skip);
+        if (key in sip.db.d.data) {
+            var ids = Object.keys(sip.db.d.data[key]).sort(function (a, b) {
+                return (a - b);
+            }).reverse();
+            //console.log(ids);
+            for (var i = skip; i < ids.length && this.d.data.length < size; i++) {
+                //console.log('push(key,idx)', key, i);
+                this.d.data.push(sip.db.d.data[key][ids[i]]);
+            }
+            if (this.d.data.length < size) {
+                this.get_data.bind(this, key_index + 1, 0)();
+                return;
+            }
+            this.f.event('main_article_board_update', this.d.data);
+        } else {
+            //console.log('load json:', key);
+            sip.db.load_json(key, this.get_data.bind(this, key_index, skip));
+        }
+    },
+
+    gen_ev_handler: function () {
+        var evs = [];
+        evs.push(function () {
+            sip.db.d.page.cur_page = 0;
+            this.show();
+            //this.show_page(0);
+        });
+
+        for (var i = this.d.first; i < this.d.last; i++) {
+            evs.push((function () {
+                var num = i;
+                return(function () {
+                    sip.db.d.page.cur_page = num;
+                    this.show();
+                    //this.show_page(num);
+                }.bind(this));
+            }.bind(this)()));
+        }
+
+        return evs;
+    },
+
+    add_event: function () {
+        for (var i = 0; i < this.el(); i++) {
+            this.f.on('click', i);
+        }
+    },
+
+    after_add_event: function () {
+        //this.f.trigger(0);
+        this.el(this.d.cur - this.d.first + 1, true).style.backgroundColor = 'skyblue';
+        this.show_page(sip.db.d.page.cur_page);
+    }
+});
+
+sip.o.main.msg = cardjs.create({
+    settings: {
+        key: cardjs.lib.gen_key(),
+        header: 'main_mbox',
+        add_event: true
+    },
+    gen_html: function () {
+        var content = Mustache.render(cardjs.lib.load_html('tp-mp-msg'), {ids: [this.el(0), this.el(1), this.el(2)]});
+        return sip.f.add_frame('tp-frame-tag-card', content, "", 'margin-bottom:8px;margin-top:0px;');
+    },
+    gen_ev_handler: function () {
+        return [
+            //enter
+            function (e) {
+                //console.log('enter key!');
+                var k = e || window.event;
+                if (k.keyCode !== 13) {
+                    return;
+                }
+                this.f.trigger(1);
+            },
+            //click
+            function () {
+                //console.log('click');
+                var d = this.el(0, true).value;
+                //console.log('msg:', d);
+                if (d.length > 0) {
+                    this.f.fetch('post_msg', d, function () {
+                        var msg = this.f.restore();
+                        if (!msg) {
+                            msg = [];
+                        }
+                        msg.unshift({
+                            ctime: new Date().toJSON().slice(0, 10),
+                            name: 'me',
+                            text: filterXSS(d)
+                        });
+                        while (msg.length > sip.uset.msg_keep) {
+                            msg.pop();
+                        }
+                        this.f.cache(msg);
+                        this.show();
+                    }, function (r) {
+                        alert(r);
+                    });
+                }
+            }
+        ];
+    },
+    add_event: function () {
+        this.f.on('click', 1);
+        this.f.on('keyup', 0);
+    },
+    after_add_event: function () {
+        this.el(0, true).focus();
+        var msg = this.f.restore();
+        if (msg && msg.length > 0) {
+            //console.log('using cache.');
+            this.el(2, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-mp-msg-list'), {msg: msg});
+            return;
+        }
+        $.getJSON(sip.s.msg_path, function (data) {
+            var msg = [];
+            data.forEach(function (e) {
+                msg.push({
+                    text: filterXSS(e.text),
+                    ctime: cardjs.lib.getYMD(e.ctime),
+                    name: filterXSS(e.name)
+                });
+            });
+            this.f.cache(msg);
+        }.bind(this)).fail(function () {
+            console.log('留言文件加载失败！');
+        }).always(function () {
+            if (sip.uset.show_mbox) {
+                var msg = this.f.restore();
+                this.el(2, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-mp-msg-list'), {msg: msg});
+            }
+        }.bind(this));
+    }
+});
+
+sip.o.main.match_list = function (cid) {
+
+    var o = new cardjs.card(cid);
+
+    o.f.merge({
+        header: 'match_list'
+    });
+
+    o.data_parser = function () {
+        o.count = 0;
+        o.settings.add_event = false;
+        if (sip.db.d.search.result.length > 0) {
+            o.count = sip.db.d.search.result.length;
+            if (o.count > 0) {
+                o.settings.add_event = true;
+            }
+        }
+    };
+
+    o.show_article = function (idx) {
+        if (idx < 0 || idx >= sip.db.d.search.result.length) {
+            console.log('Error: index out of range!');
+            return;
+        }
+        var cache = sip.db.d.search.result;
+        // console.log('cache[id]:', cache[idx]);
+        this.f.event('main_article_board_update', cache[idx].data);
+        cardjs.lib.url_set_params('index.html', {key: cache[idx].key, id: cache[idx].id});
+        this.f.cache(cache[idx].id, 'art_select_id');
+        cache = null;
+    };
+
+    o.gen_ev_handler = function () {
+        var cache = sip.db.d.search.result;
+        if (cache.length <= 0) {
+            cache = null;
+            return [];
+        }
+        var evs = [];
+        for (var i = 0; i < cache.length; i++) {
+            evs.push((function () {
+                var idx = i;
+                return(function () {
+                    //console.log('idx:', idx, ' fire!');
+                    this.show_article(idx);
+                }.bind(o));
+            })());
+        }
+        return evs;
+    };
+
+    o.add_event = function () {
+        for (var i = 0; i < sip.db.d.search.result.length; i++) {
+            this.f.on('click', i);
+        }
     };
 
     o.gen_html = function () {
-        var html = '<div style="margin:10px;">' +
-                '<input type="text" id="'+this.el('input1')+'" ><br>'+
-                '<input type="text" id="'+this.el('input2')+'" ><br>'+
-                '<input type="button" id="' + this.el('t1') + '" class="btn btn-info" value="t1">' +
-                '<input type="button" id="' + this.el('t2') + '" class="btn btn-info" value="t2">' +
-                '<div id="' + this.el('child') + '"></div>' +
-                '</div>';
-        return html;
+
+        var cache = sip.db.d.search.result;
+        if (cache.length <= 0) {
+            cache = null;
+            return('<font color="red">没有找到相应数据</font>');
+        }
+        var data = [];
+        for (var i = 0; i < cache.length; i++) {
+            data.push({
+                id: this.el(i),
+                title: cache[i].title
+            });
+        }
+        //console.log(data);
+        cache = null;
+        return Mustache.render(cardjs.lib.load_html('tp-art-list'), {d: data});
+    };
+
+    return o;
+
+};
+
+sip.o.main.group_view = function (cid) {
+
+    var key = cardjs.lib.gen_key();
+
+    var o = new cardjs.card(cid);
+
+    o.f.merge({
+        header: 'gview',
+        key: key
+    });
+
+    o.data = null;
+
+    o.data_parser = function () {
+        this.settings.add_event = false;
+
+        if (this.data && this.data.length > 0) {
+            this.settings.add_event = true;
+        }
+
+    };
+
+    o.gen_html = function () {
+        var content = '<div style="color:red;">获取数据中</div>';
+        if (this.data && this.data.length <= 0) {
+            content = '<div style="color:red;">无数据</div>';
+        }
+        if (this.data && this.data.length > 0) {
+            var i, tag = [], cat = [], j, types;
+            for (i = 0; i < this.data.length; i++) {
+                tag.unshift({v: this.data[i], id: this.el(i)});
+            }
+            types = sip.uset.atypes;
+            cat.push({v: '全部', id: this.el(i)});
+            for (j = 0; j < types.length; j++) {
+                cat.push({v: types[j], id: this.el(j + i + 1)});
+            }
+            types = null;
+            content = Mustache.render(cardjs.lib.load_html('tp-group-view'), {
+                tag: tag,
+                cat: cat,
+                all: this.el(j + i + 1),
+                front: this.el(j + i + 2)
+            });
+            tag = null;
+        }
+        return(sip.f.add_frame('tp-frame-tag-card', content, '分类浏览', 'margin-bottom:8px;'));
+    };
+
+    o.set_btn_bgcolor = function () {
+        var i;
+        for (i = 0; i < this.el(); i++) {
+            this.el(i, true).style.backgroundColor = 'white';
+        }
+        for (i = 0; i < this.data.length; i++) {
+            if (this.el(i, true).value === sip.db.d.page.key) {
+                this.el(i, true).style.backgroundColor = 'skyblue';
+            }
+        }
+        for (; i < this.el() - 2; i++) {
+            if (this.el(i, true).value === sip.db.d.page.filter) {
+                this.el(i, true).style.backgroundColor = 'skyblue';
+            }
+        }
+    };
+
+    o.gen_ev_handler = function () {
+        var evs = [], i, j;
+
+        // key 20179 201710 ...
+        for (i = 0; i < this.data.length; i++) {
+            evs.push((function (v) {
+                return (function () {
+                    sip.db.set('page_key', v);
+                    this.set_btn_bgcolor();
+                    cardjs.lib.url_set_params('index.html');
+                }.bind(this));
+            }.bind(this)(this.data[i])));
+        }
+
+        // 全部
+        evs.push((function (v) {
+            //var v = '全部';
+            return(function () {
+                //console.log('clicked:', v);
+                sip.db.set('filter', v);
+                this.set_btn_bgcolor();
+                cardjs.lib.url_set_params('index.html');
+            }.bind(this));
+        }.bind(this)('全部')));
+
+        // 分类 vue js net prog ...
+        for (j = 0; j < sip.uset.atypes.length; j++) {
+            evs.push((function (v) {
+                return(function () {
+                    sip.db.set('filter', v);
+                    this.set_btn_bgcolor();
+                    cardjs.lib.url_set_params('index.html');
+                });
+            }.bind(this)(sip.uset.atypes[j])));
+        }
+
+        // 所有文章
+        evs.push((function () {
+            //console.log('clicked: all article');
+            for (var k = 0; k < this.el(); k++) {
+                this.el(k, true).style.backgroundColor = 'white';
+            }
+            this.el(this.el() - 2, true).style.backgroundColor = 'skyblue';
+            this.f.event('main_show_pager');
+            cardjs.lib.url_set_params('index.html');
+        }.bind(this)));
+
+        // 首页
+        evs.push((function () {
+            //console.log('clicked: all article');
+            for (var k = 0; k < this.el(); k++) {
+                this.el(k, true).style.backgroundColor = 'white';
+            }
+            this.el(this.el() - 1, true).style.backgroundColor = 'skyblue';
+            this.f.event('main_clear_pager');
+            this.f.event('main_article_board_show_front_page');
+            cardjs.lib.url_set_params('index.html');
+        }.bind(this)));
+
+        return evs;
+    };
+
+    o.add_event = function () {
+        for (var i = 0; i < this.el(); i++) {
+            this.f.on('click', i);
+        }
+    };
+
+    o.after_add_event = function () {
+        if (this.data) {
+            return;
+        }
+        var files = sip.db.get('files');
+        // console.log('gv:files:',files);
+        if (files === undefined) {
+            // console.log('group view: reload in 3 seconds');
+            setTimeout(this.show.bind(this), 5000);
+            return;
+        }
+        this.data = Object.keys(files);
+        this.f.cache(this.data);
+        this.show();
+    };
+
+    return o;
+};
+
+sip.o.main.article = function (cid, data, show_all) {
+    var init_style = 0;
+    if (show_all) {
+        init_style = 1;
+    }
+    return(cardjs.create({
+        cid: cid,
+        style: init_style,
+        styles: ['article-summary', 'article-all-content'],
+        data: data,
+        settings: {
+            header: 'single_art',
+            add_event: true
+        },
+        gen_html: function () {
+            this.data.els = [this.el('title'), this.el('content')];
+            this.data.style = this.styles[this.style];
+            return Mustache.render(cardjs.lib.load_html('tp-article-summary-container'), this.data);
+        },
+        gen_ev_handler: function () {
+            return {'title': function () {
+                    var id = this.data.id;
+                    var key = this.data.ctime.substr(0, 4) +
+                            parseInt(this.data.ctime.substr(5, 2));
+                    cardjs.lib.url_set_params('index.html', {id: id, key: key});
+                    this.f.cache(id, 'art_select_id');
+                    this.style = (this.style + 1) % 2;
+                    this.el('content', true).className = this.styles[this.style];
+                }
+            };
+        },
+        add_event: function () {
+            this.f.on('click', 'title');
+        }
+    }));
+};
+
+sip.o.main.article_board = function (cid) {
+
+    var key = cardjs.lib.gen_key();
+    /* cache={
+     *      data: [{id: 1, content: string, ... }, ... ]
+     * };
+     */
+
+    function get_url_keyid() {
+        var y = null, m = null,
+                key = cardjs.lib.url_get_param('key'),
+                id = window.Math.floor(cardjs.lib.url_get_param('id'));
+        if (key.length > 4) {
+            y = key.substr(0, 4);
+            m = key.substr(4);
+        }
+        return({y: y, m: m, id: id});
+    }
+
+    return (cardjs.create({
+        cid: cid,
+        settings: {
+            key: key,
+            header: 'main_art_brd'
+        },
+        children: [],
+        gen_html: function () {
+            return '<div id="' + this.el(0) + '"></div>';
+        },
+        update: function (data) {
+
+            // data 可能会有这几种情况 undefine [] {key:value, ... } [{...},{...}, ... ] 
+
+            //console.log('call main_art_board_update:', data);
+
+            if (!data || (data && data.length === 0)) {
+                data = null;
+            }
+
+            this.f.cache(data);
+            if (!data) {
+                this.el(0, true).innerHTML =
+                        '<div style="width: 100%;text-align: center;padding-top: 10px;">' +
+                        '<font color="red">没有相应数据</font>' +
+                        '</div>';
+                return;
+            }
+
+            var datas = data, show_all = 0;
+
+            if (!cardjs.lib.isArray(data)) {
+                this.f.event('main_clear_pager');
+                show_all = 1;
+                datas = [data];
+            }
+
+            var html = '', i;
+
+            for (i = 0; i < this.children.length; i++) {
+                this.children[i].destroy();
+            }
+            this.children = [];
+
+            for (i = 0; i < datas.length; i++) {
+                html += '<div id="' + this.el(i + 1) + '"></div>';
+            }
+
+            this.el(0, true).innerHTML = html;
+
+            for (i = 0; i < datas.length; i++) {
+                this.children.push(
+                        sip.o.main.article(
+                                this.el(i + 1),
+                                datas[i],
+                                show_all
+                                ).show()
+                        );
+            }
+
+        },
+        show_front_page: function () {
+            $.getJSON(sip.s.top_art_path, function (data) {
+                //console.log('show_front_page');
+                var d = [];
+                data.forEach(function (e) {
+                    d.push(sip.f.filter_json(e));
+                });
+                if (!this.self) {
+                    console.log('sip.o.main.article_board: Object 已经销毁,取消更新操作');
+                    return;
+                }
+                if (d.length > 0) {
+                    this.update(d);
+                } else {
+                    this.update(null);
+                }
+            }.bind(this)).fail(function () {
+                this.el(0, true).innerHTML = "<font color=red>获取数据失败</font>";
+            }.bind(this));
+        },
+        after_add_event: function () {
+            // regist a clear_cache event for other module clear this cache;
+            this.f.clear_cache('update_article', true);
+            this.f.clear_cache('clear_art_board', true);
+
+            //export a function for other module
+            this.f.event('main_article_board_update', this.update, true);
+            this.f.event('main_article_board_show_front_page', this.show_front_page, true);
+
+            var cache = this.f.restore();
+            if (cache) {
+                this.update(cache);
+                return;
+            }
+            var param = get_url_keyid();
+            var err = function () {
+                console.log('没有相应数据，转至首页');
+                cardjs.lib.url_set_params('index.html');
+                this.show_front_page();
+            }.bind(this);
+            if (param.y && param.m && param.id) {
+                var path = sip.s.json_path + param.y + '/' + param.m + '.json';
+                var success = function (data) {
+                    //console.log(data,tid);
+                    for (var i = 0; i < data.length; i++) {
+                        if (data[i].id === param.id) {
+                            this.update(sip.f.filter_json(data[i]));
+                            return;
+                        }
+                    }
+                    err();
+                }.bind(this);
+                $.getJSON(path, success).fail(err);
+                return;
+            }
+            // no cache, no url params 
+            err();
+        }
+    }));
+};
+
+sip.o.main.search_box = function (cid) {
+
+    var o = new cardjs.card(cid);
+
+    o.f.merge({
+        header: 'main_sbox',
+        add_event: true
+    });
+
+    o.child = null;
+
+    o.gen_ev_handler = function () {
+        return [
+            //keyup
+            function (e) {
+                var k = e || window.event;
+                if (k.keyCode !== 13) {
+                    return;
+                }
+                this.f.trigger(1);
+                //this.el(1,true).click();
+            },
+            // click
+            function () {
+                var kw = this.el(0, true).value;
+                sip.db.search(kw);
+            }
+        ];
+    };
+
+    o.show_search_result = function () {
+        this.clean_up();
+        this.child = sip.o.main.match_list(this.el(2)).show();
+    };
+
+    o.after_add_event = function () {
+        this.f.event('show_main_search_result', this.show_search_result);
     };
 
     o.clean_up = function () {
         o.child && o.child.destroy();
-        o.child = null;
     };
 
+    o.gen_html = function () {
+        var id = [];
+        for (var i = 0; i < 3; i++) {
+            id.push(this.el(i));
+        }
+        var content = Mustache.render(cardjs.lib.load_html('tp-art-search-box'), {ids: id});
+        return sip.f.add_frame('tp-frame-tag-card', content, '', 'margin-bottom:8px;margin-top:0px;');
+    };
+
+    o.add_event = function () {
+        this.f.on('keyup', 0);
+        this.f.on('click', 1);
+    };
+
+    return o;
+};/* global cardjs, Mustache, sip */
+
+sip.o.mgr.logout = function (cid, parent_update, key) {
+    return(cardjs.create({
+        cid: cid,
+        update: parent_update,
+        child: null,
+        settings: {
+            key: key,
+            header: 'mgr_logout',
+            add_event: true
+        },
+        gen_html: function () {
+            var info = this.f.restore();
+            var content = Mustache.render(cardjs.lib.load_html('tp-um-logout'), {
+                ids: [this.el(0), this.el(1), this.el(2)],
+                name: info.name
+            });
+            return sip.f.add_frame('tp-frame-tag-card', content, '', 'margin-bottom:8px;');
+        },
+        clean_up: function () {
+            this.child && this.child.destroy();
+        },
+        add_event: function () {
+            this.f.on('click', 0);
+            this.f.on('click', 1);
+        },
+        gen_ev_handler: function () {
+            return [
+                //change password
+                function () {
+                    this.child = sip.o.mgr.change_psw(this.el(2), this.update).show();
+                },
+                // logout
+                function () {
+                    this.f.clear_cache('clear_all_user_data');
+                    this.f.fetch('logout', function (r) {
+                        console.log(r);
+                        this.update();
+                    });
+                }
+            ];
+        }
+    }));
+};
+
+sip.o.mgr.change_psw = function (cid, parent_update) {
+
+    var o = new cardjs.card(cid);
+
+    o.f.merge({
+        header: 'mgr_chpsw',
+        add_event: true
+    });
+
+    o.update = parent_update;
+
+    o.gen_html = function () {
+        var id = [];
+        for (var i = 0; i < 6; i++) {
+            id.push(this.el(i));
+        }
+        return Mustache.render(cardjs.lib.load_html('tp-um-change-password'), {ids: id});
+        //return sip.f.add_frame('tp-frame-tag-card', content, '修改信息', 'margin-top:8px;');
+    };
+
+    o.gen_ev_handler = function () {
+        return [
+            function () {
+                //console.log('hello');
+                var name = "" + this.el(0, true).value;
+                var org_psw = "" + this.el(1, true).value;
+                var new_psw = "" + this.el(2, true).value;
+                var re_psw = "" + this.el(3, true).value;
+
+                if (new_psw !== re_psw) {
+                    this.el(5, true).innerHTML = '两次输出密码不同！';
+                    return;
+                }
+
+                if (new_psw.length <= 0 || org_psw.length <= 0) {
+                    this.el(5, true).innerHTML = '内容过短！';
+                    return;
+                }
+                // console.log(new_psw, org_psw, name);
+                var data = {'name': name, 'opsw': md5(sip.s.rainbow + md5(org_psw)), 'npsw': md5(sip.s.rainbow + md5(new_psw))};
+                this.f.fetch('user_modify', data, function (r) {
+                    this.el(5, true).innerHTML = cardjs.lib.html_escape(r);
+                    o.update();
+                }, false, function (r) {
+                    this.el(5, true).innerHTML = cardjs.lib.html_escape(r);
+                });
+            }
+        ];
+    };
+
+    o.add_event = function () {
+        //console.log(o.ids[4]);
+        this.f.on('click', 4, 0);
+        //o.f.on('click',1,0);
+    };
 
     return o;
 
+};
+
+sip.o.mgr.user_mgr_wrap = cardjs.create({
+    child: null,
+    settings: {
+        header: 'mgr_umgr_wrap',
+        key: cardjs.lib.gen_key()
+    },
+    gen_html: function () {
+        var html = '<div id="' + this.el(0) + '">正在读取数据 ...</div>';
+        return sip.f.add_frame('tp-frame-tag-card', html, '账号管理');
+    },
+    update: function () {
+        this.el(0, true).innerHTML = '更新数据中 ... ';
+        this.f.cache(null);
+        this.after_add_event();
+    },
+    after_add_event: function () {
+        this.f.clear_cache('clear_all_user_data', true);
+        this.clean_up();
+        var cache = this.f.restore();
+        if (cache) {
+            this.child = sip.o.mgr.user_mgr(this.el(0), this.settings.key, this.update.bind(this)).show();
+            return;
+        }
+        this.f.fetch('fetch_all_user_info', function (data) {
+            this.f.cache(data);
+            this.child = sip.o.mgr.user_mgr(this.el(0), this.settings.key, this.update.bind(this)).show();
+        });
+    },
+    clean_up: function () {
+        this.child && this.child.destroy();
+        //this.f.cache(null);
+    }
+});
+
+sip.o.mgr.user_mgr = function (cid, key, parent_update) {
+
+    var o = new cardjs.card(cid);
+
+    o.f.merge({
+        key: key,
+        header: "um_manage",
+        add_event: true
+    });
+
+    o.update = parent_update;
+
+    o.after_add_event = function () {
+        o.f.trigger(0);
+    };
+
+    o.gen_ev_handler = function () {
+        return [
+            // select change
+            function () {
+                var id = this.el(0, true).value,
+                        uinfo = this.f.restore();
+
+                this.el(1, true).value = cardjs.lib.html_escape(uinfo.name_list[id]);
+                this.el(8, true).value = cardjs.lib.html_escape(uinfo.user_list[id]);
+                if (uinfo.ban_list[id]) {
+                    this.el(8, true).style.backgroundColor = 'lightgray';
+                } else {
+                    this.el(8, true).style.backgroundColor = 'transparent';
+                }
+                var pv = cardjs.lib.get_elsbyname(this.el(3));
+                for (var i = 0; i < pv.length; i++) {
+                    pv[i].checked = uinfo.user_prv[id][uinfo.prv_list[i]];
+                }
+            },
+            // reset psw
+            function () {
+                var id = this.el(0, true).value;
+                o.f.fetch('user_reset', id, function (d) {
+                    //console.log(d);
+                    alert(d);
+                    this.update();
+                }, function (r) {
+                    alert(r);
+                });
+            },
+            //ban
+            function () {
+                var id = this.el(0, true).value;
+                o.f.fetch('user_ban', id, function (d) {
+                    alert(d);
+
+                    this.update();
+                }, function (r) {
+                    alert(r);
+                });
+            },
+            //modify user
+            function () {
+                var cache = this.f.restore();
+                var id = this.el(0, true).value,
+                        name = this.el(1, true).value,
+                        user = this.el(8, true).value,
+                        pv = cardjs.lib.get_elsbyname(this.el(3)),
+                        p = [];
+                for (var i = 0; i < pv.length; i++) {
+                    if (pv[i].checked) {
+                        p.push(cache.prv_list[i]);
+                    }
+                }
+                o.f.fetch('user_management', {'id': id, 'name': name, 'user': user, 'prv_list': p},
+                        function (r) {
+                            alert(r);
+                            this.update();
+                        }, function (r) {
+                    alert(r);
+                });
+                //console.log(p);
+            },
+            // add user
+            function () {
+                var param = {
+                    user: this.el(8, true).value,
+                    name: this.el(1, true).value,
+                    prv: []
+                };
+                var cache = this.f.restore();
+                var pv = cardjs.lib.get_elsbyname(this.el(3));
+                for (var i = 0; i < pv.length; i++) {
+                    if (pv[i].checked) {
+                        param.prv.push(cache.prv_list[i]);
+                    }
+                }
+                //console.log(param);
+                this.f.fetch('user_add', param, function (r) {
+                    alert(r);
+                    this.update();
+                }, function (r) {
+                    alert(r);
+                });
+            }
+        ];
+    };
+
+    o.add_event = function () {
+        o.f.on('change', 0);
+        o.f.on('click', 5, 1);
+        o.f.on('click', 6, 2);
+        o.f.on('click', 4, 3);
+        o.f.on('click', 7, 4);
+    };
+
+    o.gen_html = function () {
+        var cache = this.f.restore();
+        cache.ids = [];
+        for (var i = 0; i < 9; i++) {
+            cache.ids.push(this.el(i));
+        }
+        return Mustache.render(cardjs.lib.load_html("tp-um-modify"), cache);
+    };
+
+    return o;
 };
 
 sip.o.mgr.login = function (cid, parent_update) {
@@ -5966,86 +6553,6 @@ sip.o.mgr.login = function (cid, parent_update) {
             ];
         }
     }));
-};
-
-sip.o.main.match_list = function (cid) {
-
-    var o = new cardjs.card(cid);
-
-    o.f.merge({
-        header: 'match_list'
-    });
-
-    o.data_parser = function () {
-        o.count = 0;
-        o.settings.add_event = false;
-        if (sip.db.d.search.result.length > 0) {
-            o.count = sip.db.d.search.result.length;
-            if (o.count > 0) {
-                o.settings.add_event = true;
-            }
-        }
-    };
-
-
-    o.show_article = function (idx) {
-        if (idx < 0 || idx >= sip.db.d.search.result.length) {
-            console.log('Error: index out of range!');
-            return;
-        }
-        var cache = sip.db.d.search.result;
-        this.f.event('main_article_board_update', cache[idx].data);
-        cardjs.lib.url_set_params('index.html', {key: cache[idx].key, id: cache[idx].id});
-        this.f.cache(cache[idx].id, 'art_select_id');
-        cache = null;
-    };
-
-    o.gen_ev_handler = function () {
-        var cache = sip.db.d.search.result;
-        if (cache.length <= 0) {
-            cache = null;
-            return [];
-        }
-        var evs = [];
-        for (var i = 0; i < cache.length; i++) {
-            evs.push((function () {
-                var idx = i;
-                return(function () {
-                    //console.log('idx:', idx, ' fire!');
-                    this.show_article(idx);
-                }.bind(o));
-            })());
-        }
-        return evs;
-    };
-
-    o.add_event = function () {
-        for (var i = 0; i < sip.db.d.search.result.length; i++) {
-            this.f.on('click', i);
-        }
-    };
-
-    o.gen_html = function () {
-
-        var cache = sip.db.d.search.result;
-        if (cache.length <= 0) {
-            cache = null;
-            return('<font color="red">没有找到相应数据</font>');
-        }
-        var data = [];
-        for (var i = 0; i < cache.length; i++) {
-            data.push({
-                id: this.el(i),
-                title: cache[i].title
-            });
-        }
-        //console.log(data);
-        cache = null;
-        return Mustache.render(cardjs.lib.load_html('tp-art-list'), {d: data});
-    };
-
-    return o;
-
 };
 
 sip.o.mgr.user_panel = function (cid) {
@@ -6127,339 +6634,3 @@ sip.o.mgr.user_panel = function (cid) {
 
     return o;
 };
-
-sip.o.main.group_view = function (cid) {
-
-    var key = cardjs.lib.gen_key();
-
-    var o = new cardjs.card(cid);
-
-    o.f.merge({
-        header: 'gview',
-        key: key
-    });
-
-    o.data = null;
-
-    o.data_parser = function () {
-        this.settings.add_event = false;
-
-        if (this.data && this.data.length > 0) {
-            this.settings.add_event = true;
-        }
-
-    };
-
-    o.gen_html = function () {
-        var content = '<div style="color:red;">无数据</div>';
-        if (this.data && this.data.length > 0) {
-            var i, tag = [], cat = [], j, types;
-            for (i = 0; i < this.data.length; i++) {
-                tag.unshift({v: this.data[i], id: this.el(i)});
-            }
-            types = sip.uset.atypes;
-            cat.push({v: '全部', id: this.el(i)});
-            for (j = 0; j < types.length; j++) {
-                cat.push({v: types[j], id: this.el(j + i + 1)});
-            }
-            types = null;
-            content = Mustache.render(cardjs.lib.load_html('tp-group-view'), {tag: tag, cat: cat, all: this.el(j + i + 1)});
-            tag = null;
-        }
-        return(sip.f.add_frame('tp-frame-tag-card', content, '分类浏览', 'margin-bottom:8px;'));
-    };
-
-    o.set_btn_bgcolor = function () {
-        var i;
-        for (i = 0; i < this.el(); i++) {
-            this.el(i, true).style.backgroundColor = 'white';
-        }
-        for (i = 0; i < this.data.length; i++) {
-            if (this.el(i, true).value === sip.db.d.page.key) {
-                this.el(i, true).style.backgroundColor = 'skyblue';
-            }
-        }
-        for (; i < this.el() - 1; i++) {
-            if (this.el(i, true).value === sip.db.d.page.filter) {
-                this.el(i, true).style.backgroundColor = 'skyblue';
-            }
-        }
-    };
-
-    o.gen_ev_handler = function () {
-        var evs = [], i, j, id, last = this.el();
-
-        for (i = 0; i < this.data.length; i++) {
-            var value = this.data[i];
-            evs.push((function () {
-                var v = value;
-                return (function () {
-                    //console.log(this);
-                    sip.db.set('page_key', v);
-                    this.set_btn_bgcolor();
-                }.bind(this));
-            }.bind(this)()));
-        }
-        evs.push((function () {
-            var v = '全部';
-            return(function () {
-                //console.log('clicked:', v);
-                sip.db.set('filter', v);
-                this.set_btn_bgcolor();
-            }.bind(this));
-        }.bind(this)()));
-
-        for (j = 0; j < sip.uset.atypes.length; j++) {
-            var value = sip.uset.atypes[j];
-            evs.push((function () {
-                var v = value;
-                return(function () {
-                    //console.log('clicked:', v);
-                    sip.db.set('filter', v);
-                    this.set_btn_bgcolor();
-                });
-            }.bind(this)()));
-        }
-        evs.push((function () {
-            //console.log('clicked: all article');
-            for (var k = 0; k < this.el(); k++) {
-                this.el(k, true).style.backgroundColor = 'white';
-            }
-            this.el(this.el() - 1, true).style.backgroundColor = 'skyblue';
-            this.f.event('main_show_pager');
-        }.bind(this)));
-
-        return evs;
-    };
-
-    o.add_event = function () {
-        for (var i = 0; i < this.el(); i++) {
-            this.f.on('click', i);
-        }
-    };
-
-    o.after_add_event = function () {
-        if (this.data) {
-            return;
-        }
-        this.data = Object.keys(sip.db.get('files'));
-        this.f.cache(this.data);
-        this.refresh();
-    };
-
-    return o;
-};
-
-sip.o.main.article_board = function (cid) {
-
-    var key = cardjs.lib.gen_key();
-    /* cache={
-     *      data: [{id: 1, content: string, ... }, ... ]
-     * };
-     */
-
-    function get_url_keyid() {
-        var y = null, m = null,
-                key = cardjs.lib.url_get_param('key'),
-                id = window.Math.floor(cardjs.lib.url_get_param('id'));
-        if (key.length > 4) {
-            y = key.substr(0, 4);
-            m = key.substr(4);
-        }
-        return({y: y, m: m, id: id});
-    }
-
-    return (cardjs.create({
-        cid: cid,
-        settings: {
-            key: key,
-            header: 'main_art_brd'
-        },
-        gen_html: function () {
-            return '<div id="' + this.el(0) + '"></div>';
-        },
-        update: function (data) {
-            
-            if (data === undefined){
-                data = null;
-            }
-            
-            if(data !== null && data.length && data.length === 0) {
-                data = null;
-            }
-
-            //console.log('call main_art_board_update:', data);
-            this.f.cache(data);
-            if (!data) {
-                this.el(0, true).innerHTML = "<font color=red>查无此“文”</font>";
-                return;
-            }
-            if (cardjs.lib.isArray(data)) {
-                this.el(0, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-article-summary-container'), {
-                    recent: data,
-                    style: 'article-summary'
-                });
-            } else {
-                this.f.event('main_clear_pager');
-                this.el(0, true).innerHTML = Mustache.render(cardjs.lib.load_html('tp-article-summary-container'), {
-                    recent: data,
-                    style: 'article-all-content'
-                });
-            }
-        },
-        after_add_event: function () {
-            // regist a clear_cache event for other module clear this cache;
-            this.f.clear_cache('update_article', true);
-            this.f.clear_cache('clear_art_board', true);
-
-            //export a function for other module
-            this.f.event('main_article_board_update', this.update, true);
-
-            var cache = this.f.restore();
-            if (cache) {
-                this.update(cache);
-                return;
-            }
-            var param = get_url_keyid();
-            if (param.y && param.m && param.id) {
-                var path=sip.s.json_path + param.y + '/' + param.m + '.json';
-                $.getJSON(path, function (data) {
-                    //console.log(data,tid);
-                    for (var i = 0; i < data.length; i++) {
-                        if (data[i].id === param.id) {
-                            this.update(sip.f.filter_json(data[i]));
-                            return;
-                        }
-                    }
-                    this.update(null);
-                }.bind(this));
-                return;
-            }
-            // no cache, no url params 
-            $.getJSON(sip.s.top_art_path , function (data) {
-                var d = [];
-                data.forEach(function (e) {
-                    d.push(sip.f.filter_json(e));
-                });
-                if (!this.self) {
-                    console.log('sip.o.main.article_board: Object 已经销毁,取消更新操作');
-                    return;
-                }
-                if (d.length > 0) {
-                    this.update(d);
-                } else {
-                    this.update(null);
-                }
-            }.bind(this)).fail(function () {
-                this.el(0, true).innerHTML = "<font color=red>获取数据失败</font>";
-            }.bind(this));
-        }
-    }));
-};
-
-sip.o.main.search_box = function (cid) {
-
-    var o = new cardjs.card(cid);
-
-    o.f.merge({
-        header: 'main_sbox',
-        add_event: true
-    });
-
-    o.child = null;
-
-    o.gen_ev_handler = function () {
-        return [
-            //keyup
-            function (e) {
-                var k = e || window.event;
-                if (k.keyCode !== 13) {
-                    return;
-                }
-                this.f.trigger(1);
-                //this.el(1,true).click();
-            },
-            // click
-            function () {
-                var kw = this.el(0, true).value;
-                sip.db.search(kw);
-            }
-        ];
-    };
-
-    o.show_search_result = function () {
-        this.clean_up();
-        this.child = sip.o.main.match_list(this.el(2)).show();
-    };
-
-    o.after_add_event = function () {
-        this.f.event('show_main_search_result', this.show_search_result);
-    };
-
-    o.clean_up = function () {
-        o.child && o.child.destroy();
-    };
-
-    o.gen_html = function () {
-        var id = [];
-        for (var i = 0; i < 3; i++) {
-            id.push(this.el(i));
-        }
-        var content = Mustache.render(cardjs.lib.load_html('tp-art-search-box'), {ids: id});
-        return sip.f.add_frame('tp-frame-tag-card', content, '', 'margin-bottom:8px;margin-top:0px;');
-    };
-
-    o.add_event = function () {
-        this.f.on('keyup', 0);
-        this.f.on('click', 1);
-    };
-
-    return o;
-};
-
-sip.o.art.backup = function (cid) {
-    var o = new cardjs.card(cid);
-    o.f.merge({
-        header: 'art_backup',
-        add_event: true
-    });
-
-    o.gen_html = function () {
-        return Mustache.render(cardjs.lib.load_html('tp-uma-backup'), {ids: [this.el(0), this.el(1)]});
-    };
-
-    o.gen_ev_handler = function () {
-        return [
-            function () {
-                o.f.fetch('export_picdb', function (r) {
-                    alert(r);
-                }, function (r) {
-                    alert(r);
-                });
-            },
-            function () {
-                if (confirm('现有数据将被清除，确定要导入数据？')) {
-                    o.f.fetch('import_from_json', function (r) {
-                        alert(r);
-                        cardjs.lib.url_set_params('index.html', {});
-                        window.location.reload(true);
-                    }, function (r) {
-                        alert(r);
-                        cardjs.lib.url_set_params('index.html', {});
-                        window.location.reload(true);
-                    });
-                }
-            }
-        ];
-    };
-
-    o.add_event = function () {
-        o.f.on('click', 0);
-        o.f.on('click', 1);
-    };
-
-    return o;
-
-};
-
-

@@ -464,7 +464,7 @@ class Serv extends UserMgr {
 
         $content = CommLib::decode_utf8($data['content']);
         $title = CommLib::decode_utf8($data['title']);
-        
+
         //error_log(print_r($data,true));
         //error_log(print_r($content,true));
 
@@ -532,7 +532,13 @@ class Serv extends UserMgr {
             CommLib::query('update pics set atid=? where url=?', 'is', [$id, $url]);
         }
 
-        $this->haste($r !== false);
+        //$this->haste($r !== false);
+        
+        if ($r !== false) {
+            $this->ok(['id' => $id]);
+        } else {
+            $this->fail('fail');
+        }
 
         if ($id > 0) {
             $t = CommLib::query('select month(ctime) as m,year(ctime) as y from article where id=?', 'i', [$id]);
