@@ -371,7 +371,7 @@ sip.o.art.editor = function (cid) {
     };
 
     function create_editor(eid, status_bar, upload_support) {
-        
+
         var e = new wangEditor('#' + eid);
 
         if (upload_support) {
@@ -397,7 +397,7 @@ sip.o.art.editor = function (cid) {
         e.create();
 
         // plugin full screen
-        window.wangEditor.fullscreen.init('#'+eid);
+        window.wangEditor.fullscreen.init('#' + eid);
 
         return e;
     }
@@ -458,16 +458,43 @@ sip.o.art.editor = function (cid) {
 
     o.save_cache = function () {
         //console.log('save_cache');
-        var cache = this.f.restore();
-        cache.title = this.el(0, true).value;
-        cache.type = this.el(2, true).selectedIndex;
-        if (this.editor) {
-            cache.html = this.editor.txt.html();
+        var cache = this.f.restore() ||
+                {
+                    title: '',
+                    type: 0,
+                    html: '',
+                    lock: false,
+                    top: false
+                };
+
+
+        var title = this.el(0, true);
+        if (title) {
+            cache.title = title.value;
         }
-        cache.lock = this.el(9, true).checked;
-        cache.top = this.el(10, true).checked;
+
+        var type = this.el(2, true);
+        if (type) {
+            cache.type = type.selectedIndex;
+        }
+
+        var e = this.editor;
+        if (e && e.txt && e.txt.html) {
+            cache.html = e.txt.html();
+        }
+
+        var lock = this.el(9, true);
+        if (lock) {
+            cache.lock = lock.checked;
+        }
+
+        var top = this.el(10, true);
+        if (top) {
+            cache.top = top.checked;
+        }
+        // console.log('save cache: ', cache);
+        
         this.f.cache(cache);
-        // console.log(sip.cache.article);
     };
 
     o.load_cache = function () {
