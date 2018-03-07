@@ -229,3 +229,28 @@ body {
     box-shadow: 3px 2px 5px #999;
 }
 
+.main-pg-btn{
+    text-align: left;
+}
+
+.main-pg-art{
+    float:right;
+}
+.main-pg-panel{
+    float:left;
+}
+
+@media screen and (min-width: 980px){
+    .main-pg-btn{
+        text-align:right;
+    }
+    .main-pg-art{
+        float:left;
+    }
+    .main-pg-panel{
+        float:right;
+    }
+};
+
+
+
