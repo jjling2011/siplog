@@ -313,7 +313,7 @@ sip.o.main.group_view = function (cid) {
         if (this.data && this.data.length > 0) {
             var i, tag = [], cat = [], j, types;
             for (i = 0; i < this.data.length; i++) {
-                tag.unshift({v: this.data[i], id: this.el(i)});
+                tag.push({v: sip.f.patch_date(this.data[i]), id: this.el(i)});
             }
             types = sip.uset.atypes;
             cat.push({v: '全部', id: this.el(i)});
@@ -338,7 +338,7 @@ sip.o.main.group_view = function (cid) {
             this.el(i, true).style.backgroundColor = 'white';
         }
         for (i = 0; i < this.data.length; i++) {
-            if (this.el(i, true).value === sip.db.d.page.key) {
+            if (this.el(i, true).value === sip.f.patch_date(sip.db.d.page.key)) {
                 this.el(i, true).style.backgroundColor = 'skyblue';
             }
         }
@@ -428,7 +428,7 @@ sip.o.main.group_view = function (cid) {
             setTimeout(this.show.bind(this), 5000);
             return;
         }
-        this.data = Object.keys(files);
+        this.data = Object.keys(files).sort(sip.f.sort_filekeys);
         this.f.cache(this.data);
         this.show();
     };

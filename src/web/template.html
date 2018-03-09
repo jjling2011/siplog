@@ -338,6 +338,15 @@
 			<input type="button" value="首页" id="{{front}}" class="btn btn-xs btn-default" style="margin-bottom:5px;">
 		</td>
     </tr>
+	<!-- tag -->
+	<tr><td style="text-align:left;color:#ccc;">日期</td></tr>
+    <tr>
+        <td>
+            {{#tag}}
+            <input type="button" value="{{v}}" id="{{id}}" class="btn btn-xs btn-default" style="margin-bottom:5px;">
+            {{/tag}}
+        </td>
+    </tr>
     <!-- type -->
 	<tr><td style="text-align:left;color:#ccc;">类别</td></tr>
     <tr>
@@ -346,15 +355,6 @@
 			<input type="button" value="{{v}}" id="{{id}}" class="btn btn-xs btn-default" style="margin-bottom:5px;">
 			{{/cat}}
 		</td>
-    </tr>
-	<tr><td style="text-align:left;color:#ccc;">日期</td></tr>
-    <!-- tag -->
-    <tr>
-        <td>
-            {{#tag}}
-            <input type="button" value="{{v}}" id="{{id}}" class="btn btn-xs btn-default" style="margin-bottom:5px;">
-            {{/tag}}
-        </td>
     </tr>
 </table>
 </script>

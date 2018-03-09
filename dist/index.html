@@ -304,7 +304,7 @@ body {
 
 
         </style>    
-        <script type="text/javascript" src="web/bundle.js?md5=4213e32c8ea4895f3556e098710ab86a"></script> 
+        <script type="text/javascript" src="web/bundle.js?md5=49ef3c87f4f9cf27b2aee81969a51044"></script> 
     </head>
     <body >
         <div style="width:100%;" id="main-page-container"></div>
@@ -653,6 +653,15 @@ body {
 			<input type="button" value="首页" id="{{front}}" class="btn btn-xs btn-default" style="margin-bottom:5px;">
 		</td>
     </tr>
+	<!-- tag -->
+	<tr><td style="text-align:left;color:#ccc;">日期</td></tr>
+    <tr>
+        <td>
+            {{#tag}}
+            <input type="button" value="{{v}}" id="{{id}}" class="btn btn-xs btn-default" style="margin-bottom:5px;">
+            {{/tag}}
+        </td>
+    </tr>
     <!-- type -->
 	<tr><td style="text-align:left;color:#ccc;">类别</td></tr>
     <tr>
@@ -661,15 +670,6 @@ body {
 			<input type="button" value="{{v}}" id="{{id}}" class="btn btn-xs btn-default" style="margin-bottom:5px;">
 			{{/cat}}
 		</td>
-    </tr>
-	<tr><td style="text-align:left;color:#ccc;">日期</td></tr>
-    <!-- tag -->
-    <tr>
-        <td>
-            {{#tag}}
-            <input type="button" value="{{v}}" id="{{id}}" class="btn btn-xs btn-default" style="margin-bottom:5px;">
-            {{/tag}}
-        </td>
     </tr>
 </table>
 </script>

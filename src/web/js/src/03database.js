@@ -229,15 +229,7 @@ sip.db = cardjs.create({
             if ('files' in data) {
                 this.d.files = data.files;
                 //console.log('files', this.d.files);
-                this.d.file_key = Object.keys(data.files).sort(function (a, b) {
-                    if (a.length <= 5) {
-                        a = a.substr(0, 4) + '0' + a.substr(-1, 1);
-                    }
-                    if (b.length <= 5) {
-                        b = b.substr(0, 4) + '0' + b.substr(-1, 1);
-                    }
-                    return (b - a);
-                });
+                this.d.file_key = Object.keys(data.files).sort(sip.f.sort_filekeys);
                 if (this.d.file_key.length > 0) {
                     this.d.page.key = this.d.file_key[0];
                     var sum = 0;

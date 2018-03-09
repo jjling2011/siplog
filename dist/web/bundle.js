@@ -4134,7 +4134,21 @@ sip.f.add_frame = function (frame_id, content, tag, style) {
     }
     return Mustache.render(cardjs.lib.load_html(frame_id), d);
 };
-
+sip.f.sort_filekeys = function (a, b) {
+    if (a.length <= 5) {
+        a = a.substr(0, 4) + '0' + a.substr(-1, 1);
+    }
+    if (b.length <= 5) {
+        b = b.substr(0, 4) + '0' + b.substr(-1, 1);
+    }
+    return (b - a);
+};
+sip.f.patch_date = function (d) {
+    if (d.length <= 5) {
+        return d.substr(0, 4) + '0' + d.substr(-1, 1);
+    }
+    return d;
+};
 sip.f.filter_json = function (e) {
 
     //id userid type title content tag ctime mtime name lock top
@@ -4412,15 +4426,7 @@ sip.db = cardjs.create({
             if ('files' in data) {
                 this.d.files = data.files;
                 //console.log('files', this.d.files);
-                this.d.file_key = Object.keys(data.files).sort(function (a, b) {
-                    if (a.length <= 5) {
-                        a = a.substr(0, 4) + '0' + a.substr(-1, 1);
-                    }
-                    if (b.length <= 5) {
-                        b = b.substr(0, 4) + '0' + b.substr(-1, 1);
-                    }
-                    return (b - a);
-                });
+                this.d.file_key = Object.keys(data.files).sort(sip.f.sort_filekeys);
                 if (this.d.file_key.length > 0) {
                     this.d.page.key = this.d.file_key[0];
                     var sum = 0;
@@ -5912,7 +5918,7 @@ sip.o.main.group_view = function (cid) {
         if (this.data && this.data.length > 0) {
             var i, tag = [], cat = [], j, types;
             for (i = 0; i < this.data.length; i++) {
-                tag.unshift({v: this.data[i], id: this.el(i)});
+                tag.push({v: sip.f.patch_date(this.data[i]), id: this.el(i)});
             }
             types = sip.uset.atypes;
             cat.push({v: '全部', id: this.el(i)});
@@ -5937,7 +5943,7 @@ sip.o.main.group_view = function (cid) {
             this.el(i, true).style.backgroundColor = 'white';
         }
         for (i = 0; i < this.data.length; i++) {
-            if (this.el(i, true).value === sip.db.d.page.key) {
+            if (this.el(i, true).value === sip.f.patch_date(sip.db.d.page.key)) {
                 this.el(i, true).style.backgroundColor = 'skyblue';
             }
         }
@@ -6027,7 +6033,7 @@ sip.o.main.group_view = function (cid) {
             setTimeout(this.show.bind(this), 5000);
             return;
         }
-        this.data = Object.keys(files);
+        this.data = Object.keys(files).sort(sip.f.sort_filekeys);
         this.f.cache(this.data);
         this.show();
     };
